@@ -1,0 +1,90 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
+import { MdEmail, MdLock, MdMedicalServices, MdInventory, MdPeople, MdBarChart } from 'react-icons/md';
+import API from '../utils/api';
+
+export default function Login() {
+  const [form, setForm] = useState({});
+  const [loading, setLoading] = useState(false);
+  const { setUser } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { data } = await API.post('/auth/login', { email: form.email, password: form.password });
+      if (data.success) {
+        localStorage.setItem('medistore_token', data.token);
+        localStorage.setItem('medistore_user', JSON.stringify(data.user));
+        setUser(data.user);
+        toast.success('Welcome back!');
+        navigate('/');
+      }
+
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Login failed');
+    } finally { setLoading(false); }
+  };
+
+  const features = [
+    { icon: <MdMedicalServices />, text: 'Complete Medicine Inventory Management' },
+    { icon: <MdInventory />, text: 'Expiry Date Tracking & Alerts' },
+    { icon: <MdPeople />, text: 'Patient Records & Balance Tracking' },
+    { icon: <MdBarChart />, text: 'Sales Reports & Analytics' },
+  ];
+
+  return (
+    <div className="auth-page">
+      <div className="auth-left">
+        <div style={{ maxWidth: 380, width: '100%' }}>
+          <div className="auth-logo">Medi<span>Store</span></div>
+          <div className="auth-tagline">Professional Medicine Store Management System</div>
+          {features.map((f, i) => (
+            <div key={i} className="auth-feature">
+              <div className="auth-feature-icon">{f.icon}</div>
+              <span>{f.text}</span>
+            </div>
+          ))}
+          <div style={{ marginTop: 40, padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: 12, color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
+            <strong style={{ color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 6 }}>Demo Credentials</strong>
+            Admin: admin@medistore.com / admin123<br />
+            Doctor: doctor@medistore.com / doctor123
+          </div>
+        </div>
+      </div>
+      <div className="auth-right">
+        <div className="auth-card">
+          <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 6 }}>Sign In</h2>
+          <p className="text-muted text-sm" style={{ marginBottom: 28 }}>Enter your credentials to access the system</p>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label required">Email Address</label>
+              <div className="input-group">
+                <MdEmail className="input-icon" />
+                <input className="form-control" type="email" placeholder="doctor@medistore.com"
+                  value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} required />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label required">Password</label>
+              <div className="input-group">
+                <MdLock className="input-icon" />
+                <input className="form-control" type="password" placeholder="••••••••"
+                  value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} required />
+              </div>
+            </div>
+            <button className="btn btn-primary btn-lg w-full" type="submit" disabled={loading} style={{ marginTop: 8 }}>
+              {loading ? 'Signing in...' : 'Sign In to MediStore'}
+            </button>
+          </form>
+          <p className="text-muted text-sm" style={{ textAlign: 'center', marginTop: 20 }}>
+            New user? <Link to="/register" style={{ color: 'var(--accent)', fontWeight: 600 }}>Create an account</Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

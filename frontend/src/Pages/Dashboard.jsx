@@ -1,0 +1,141 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { MdMedicalServices, MdPeople, MdWarning, MdTrendingUp, MdAccountBalance, MdInventory, MdReceipt, MdArrowForward } from 'react-icons/md';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import API from '../utils/api';
+
+const COLORS = ['#0ea5e9','#10b981','#f59e0b','#ef4444','#6366f1','#ec4899','#14b8a6'];
+
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+export default function Dashboard() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    API.get('/dashboard').then(({ data }) => { setData(data); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="flex-center" style={{ height: 300 }}><div className="text-muted">Loading dashboard...</div></div>;
+  if (!data) return null;
+
+  const { stats, monthlyRevenue = [], topMedicines = [], categoryDist = [] } = data;
+
+  const chartData = monthlyRevenue.map(m => ({
+    name: months[(m._id.month - 1)],
+    revenue: m.revenue,
+    count: m.count,
+  }));
+
+  const fmtPKR = (n) => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;
+
+  const statCards = [
+    { label: 'Total Medicines', value: stats.totalMedicines, icon: <MdMedicalServices />, cls: 'blue', sub: `${stats.lowStockMedicines} low stock`, link: '/medicines' },
+    { label: 'Total Patients', value: stats.totalPatients, icon: <MdPeople />, cls: 'green', sub: 'Registered patients', link: '/patients' },
+    { label: 'Expired Medicines', value: stats.expiredMedicines, icon: <MdWarning />, cls: 'red', sub: `${stats.expiringSoon} expiring soon`, link: '/expiry-alerts' },
+    { label: "Today's Revenue", value: fmtPKR(stats.todaySales?.total), icon: <MdTrendingUp />, cls: 'blue', sub: `${stats.todaySales?.count || 0} bills today`, link: '/billing' },
+    { label: 'Monthly Revenue', value: fmtPKR(stats.monthlySales?.total), icon: <MdBarChart2 />, cls: 'green', sub: `${stats.monthlySales?.count || 0} bills this month`, link: '/reports' },
+    { label: 'Pending Balance', value: fmtPKR(stats.totalOutstanding), icon: <MdAccountBalance />, cls: 'yellow', sub: `${stats.pendingBills} pending bills`, link: '/patient-balance' },
+    { label: 'Low Stock Items', value: stats.lowStockMedicines, icon: <MdInventory />, cls: 'red', sub: 'Need restocking', link: '/medicines?status=lowstock' },
+    { label: 'Pending Bills', value: stats.pendingBills, icon: <MdReceipt />, cls: 'yellow', sub: 'Awaiting payment', link: '/billing?status=Pending' },
+  ];
+
+  return (
+    <div>
+      <div className="page-header">
+        <div className="page-header-left">
+          <h1>Dashboard</h1>
+          <p>Overview of your medicine store operations</p>
+        </div>
+        <button className="btn btn-primary" onClick={() => navigate('/billing/create')}>
+          <MdReceipt /> New Invoice
+        </button>
+      </div>
+
+      {(stats.expiredMedicines > 0 || stats.expiringSoon > 0) && (
+        <div className={`alert ${stats.expiredMedicines > 0 ? 'alert-danger' : 'alert-warning'}`} style={{ cursor: 'pointer' }} onClick={() => navigate('/expiry-alerts')}>
+          <MdWarning size={20} />
+          <div className="alert-text">
+            <strong>{stats.expiredMedicines > 0 ? `${stats.expiredMedicines} expired medicines!` : `${stats.expiringSoon} medicines expiring soon!`}</strong>
+            Click to review and take action immediately.
+          </div>
+          <MdArrowForward />
+        </div>
+      )}
+
+      <div className="stat-grid">
+        {statCards.map((s, i) => (
+          <div key={i} className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate(s.link)}>
+            <div className={`stat-icon ${s.cls}`}>{s.icon}</div>
+            <div>
+              <div className="stat-value">{s.value}</div>
+              <div className="stat-label">{s.label}</div>
+              <div className="stat-sub">{s.sub}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="charts-grid">
+        <div className="card">
+          <div className="card-header">
+            <div><div className="card-title">Monthly Revenue</div><div className="text-muted text-sm">Last 6 months</div></div>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} tickFormatter={v => `₨${(v/1000).toFixed(0)}k`} />
+              <Tooltip formatter={(v) => [`₨ ${v.toLocaleString()}`, 'Revenue']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }} />
+              <Bar dataKey="revenue" fill="var(--accent)" radius={[6,6,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <div><div className="card-title">Medicine Categories</div><div className="text-muted text-sm">Distribution by type</div></div>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <PieChart>
+              <Pie data={categoryDist.map(c => ({ name: c._id, value: c.count }))} cx="50%" cy="50%" outerRadius={75} dataKey="value" label={({ name, percent }) => `${name} ${(percent*100).toFixed(0)}%`} labelLine={false} fontSize={11}>
+                {categoryDist.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+              </Pie>
+              <Tooltip contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 20 }}>
+        <div className="card-header">
+          <div className="card-title">Top Selling Medicines</div>
+        </div>
+        {topMedicines.length === 0 ? (
+          <div className="empty-state"><p>No sales data yet</p></div>
+        ) : (
+          <div className="table-container">
+            <table>
+              <thead><tr><th>#</th><th>Medicine</th><th>Qty Sold</th><th>Revenue</th></tr></thead>
+              <tbody>
+                {topMedicines.map((m, i) => (
+                  <tr key={i}>
+                    <td><span className="badge badge-accent">#{i+1}</span></td>
+                    <td><strong>{m._id}</strong></td>
+                    <td>{m.totalQty} units</td>
+                    <td className="text-success fw-bold">₨ {m.totalRevenue.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MdBarChart2({ size = 20 }) {
+  return <MdTrendingUp size={size} />;
+}

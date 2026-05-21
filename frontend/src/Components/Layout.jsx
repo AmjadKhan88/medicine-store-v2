@@ -1,0 +1,117 @@
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { useState, useEffect } from 'react';
+import { MdDashboard, MdMedicalServices, MdPeople, MdReceipt, MdWarning, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdNotifications, MdMenu, MdClose } from 'react-icons/md';
+import API from '../utils/api';
+
+export default function Layout() {
+  const { user, logout } = useAuth();
+  const { theme, setSpecificTheme } = useTheme();
+  const navigate = useNavigate();
+  const [alerts, setAlerts] = useState({ expired: 0, expiring: 0 });
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  useEffect(() => {
+    API.get('/medicines/expiry-alerts').then(({ data }) => {
+      setAlerts({ expired: data.expired.length, expiring: data.expiringSoon.length });
+    }).catch(() => {});
+  }, []);
+
+  const handleLogout = () => { logout(); navigate('/login'); };
+
+  const themes = [
+    { id: 'light', color: '#e2e8f0' },
+    { id: 'dark', color: '#111827' },
+    { id: 'teal', color: '#0d9488' },
+    { id: 'purple', color: '#7c3aed' },
+  ];
+
+  const navItems = [
+    { to: '/', icon: <MdDashboard />, label: 'Dashboard', exact: true },
+    { to: '/medicines', icon: <MdMedicalServices />, label: 'Medicines' },
+    { to: '/patients', icon: <MdPeople />, label: 'Patients' },
+    { to: '/billing', icon: <MdReceipt />, label: 'Billing & Invoices' },
+  ];
+  const alertItems = [
+    { to: '/expiry-alerts', icon: <MdWarning />, label: 'Expiry Alerts', badge: alerts.expired > 0 ? alerts.expired : alerts.expiring > 0 ? alerts.expiring : null, badgeClass: alerts.expired > 0 ? '' : 'warn' },
+    { to: '/patient-balance', icon: <MdAccountBalance />, label: 'Patient Balances' },
+    { to: '/reports', icon: <MdBarChart />, label: 'Reports & Analytics' },
+    { to: '/settings', icon: <MdSettings />, label: 'Settings' },
+  ];
+
+  const initials = user?.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U';
+
+  return (
+    <div className="app-layout">
+      <aside className="sidebar" style={{ width: sidebarOpen ? '260px' : '0', overflow: 'hidden' }}>
+        <div className="sidebar-logo">
+          <h1>Medi<span>Store</span></h1>
+          <p>Medicine Management System</p>
+        </div>
+        <nav style={{ flex: 1 }}>
+          <div className="nav-section">
+            <div className="nav-section-title">Main Menu</div>
+            {navItems.map(item => (
+              <NavLink key={item.to} to={item.to} end={item.exact} className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+                {item.icon}{item.label}
+              </NavLink>
+            ))}
+          </div>
+          <div className="nav-section">
+            <div className="nav-section-title">Management</div>
+            {alertItems.map(item => (
+              <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+                {item.icon}{item.label}
+                {item.badge ? <span className={`nav-badge ${item.badgeClass || ''}`}>{item.badge}</span> : null}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
+        <div className="sidebar-footer">
+          <div style={{ display: 'flex', gap: 8, padding: '0 8px', marginBottom: 12 }}>
+            {themes.map(t => (
+              <div key={t.id} className={`theme-dot${theme === t.id ? ' active' : ''}`}
+                style={{ background: t.color }} onClick={() => setSpecificTheme(t.id)} title={t.id} />
+            ))}
+          </div>
+          <div className="sidebar-user">
+            <div className="avatar">{initials}</div>
+            <div className="sidebar-user-info" style={{ flex: 1, minWidth: 0 }}>
+              <div className="name">{user?.name}</div>
+              <div className="role">{user?.role}</div>
+            </div>
+            <button className="btn btn-ghost btn-icon" onClick={handleLogout} style={{ color: 'var(--sidebar-text)' }}><MdLogout /></button>
+          </div>
+        </div>
+      </aside>
+      <div className="main-content">
+        <header className="top-bar">
+          <div className="flex gap-3" style={{ alignItems: 'center' }}>
+            <button className="btn btn-ghost btn-icon" onClick={() => setSidebarOpen(p => !p)}>
+              {sidebarOpen ? <MdClose /> : <MdMenu />}
+            </button>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>Welcome back, {user?.name?.split(' ')[0]} 👋</div>
+              <div className="text-muted text-sm">{new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+            </div>
+          </div>
+          <div className="flex gap-3" style={{ alignItems: 'center' }}>
+            {(alerts.expired > 0 || alerts.expiring > 0) && (
+              <button className="btn btn-ghost btn-icon" onClick={() => navigate('/expiry-alerts')}
+                style={{ position: 'relative', color: alerts.expired > 0 ? 'var(--danger)' : 'var(--warning)' }}>
+                <MdNotifications size={20} />
+                <span style={{ position: 'absolute', top: 3, right: 3, width: 8, height: 8, background: alerts.expired > 0 ? 'var(--danger)' : 'var(--warning)', borderRadius: '50%', border: '2px solid var(--bg-secondary)' }} />
+              </button>
+            )}
+            <button className="btn btn-ghost btn-icon" onClick={() => setSpecificTheme(theme === 'dark' ? 'light' : 'dark')}>
+              {theme === 'dark' ? <MdSunny size={18} /> : <MdDarkMode size={18} />}
+            </button>
+            <div className="avatar" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>{initials}</div>
+          </div>
+        </header>
+        <main className="page-content"><Outlet /></main>
+      </div>
+    </div>
+  );
+}
