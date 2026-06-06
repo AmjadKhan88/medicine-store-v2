@@ -314,6 +314,3 @@ This project demonstrates mastery of:
 
 Built with ❤️ as a Final Year Project for Computer Science/Software Engineering.
 
-**Supervisor:** [Add supervisor name]  
-**Institution:** [Add institution name]  
-**Year:** 2024–2025
