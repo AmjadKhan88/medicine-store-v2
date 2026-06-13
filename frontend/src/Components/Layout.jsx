@@ -1,9 +1,10 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { MdDashboard, MdMedicalServices, MdPeople, MdReceipt, MdWarning, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdNotifications, MdMenu, MdClose } from 'react-icons/md';
 import API from '../utils/api';
+import Loader from './Loader';
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -110,7 +111,11 @@ export default function Layout() {
             <div className="avatar" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>{initials}</div>
           </div>
         </header>
-        <main className="page-content"><Outlet /></main>
+        <main className="page-content">
+          <Suspense fallback={<Loader/>}>
+          <Outlet />
+          </Suspense>
+        </main>
       </div>
     </div>
   );

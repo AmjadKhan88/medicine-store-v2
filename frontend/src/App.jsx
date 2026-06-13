@@ -1,27 +1,24 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import {lazy} from 'react'
 import { useAuth } from './context/AuthContext';
 import Layout from './Components/Layout';
-import Login from './Auth/Login';
-import Register from './Auth/Register';
+const Login = lazy(()=> import ('./Auth/Login'));
+const Register = lazy(()=> import ('./Auth/Register'));
 import Dashboard from './Pages/Dashboard';
-import Medicines from './Pages/Medicines';
-import Patients from './Pages/Patients';
-import Billing from './Pages/Billing';
-import CreateBill from './Pages/CreateBill';
-import ExpiryAlerts from './Pages/ExpiryAlerts';
-import PatientBalance from './Pages/PatientBalance';
-import Reports from './Pages/Reports';
-import Settings from './Pages/Settings';
+const Medicines = lazy(()=> import('./Pages/Medicines'));
+import Loader from './Components/Loader';
+const Patients = lazy(()=> import('./Pages/Patients'));
+const Billing = lazy(()=> import('./Pages/Billing'));
+const CreateBill = lazy(()=> import('./Pages/CreateBill')) ;
+const ExpiryAlerts = lazy(()=> import('./Pages/ExpiryAlerts'));
+const PatientBalance = lazy(()=> import('./Pages/PatientBalance'));
+const Reports = lazy(()=> import('./Pages/Reports'));
+const Settings = lazy(()=> import('./Pages/Settings'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return (
-    <div className="loading-page">
-      <div style={{ textAlign:'center' }}>
-        <div style={{ fontSize:32, fontWeight:800, color:'var(--accent)', marginBottom:16 }}>Medi<span style={{color:'var(--text-muted)'}}>Store</span></div>
-        <div className="text-muted text-sm">Loading...</div>
-      </div>
-    </div>
+    <Loader/>
   );
   return user ? children : <Navigate to="/login" replace />;
 };
@@ -30,6 +27,7 @@ export default function App() {
   const { user } = useAuth();
   return (
     <Routes>
+      
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
       <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
       <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
@@ -44,6 +42,7 @@ export default function App() {
         <Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
+      
     </Routes>
   );
 }
