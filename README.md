@@ -178,7 +178,7 @@ medicine-store/
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Starte
 
 ### Prerequisites
 - Node.js 18+ installed
