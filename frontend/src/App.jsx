@@ -14,6 +14,7 @@ const ExpiryAlerts = lazy(()=> import('./Pages/ExpiryAlerts'));
 const PatientBalance = lazy(()=> import('./Pages/PatientBalance'));
 const Reports = lazy(()=> import('./Pages/Reports'));
 const Settings = lazy(()=> import('./Pages/Settings'));
+const PurchaseOrders = lazy(()=> import('./Pages/PurchaseOrders'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="expiry-alerts" element={<ExpiryAlerts />} />
         <Route path="patient-balance" element={<PatientBalance />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="purchase-orders" element={<PurchaseOrders />} />
         <Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

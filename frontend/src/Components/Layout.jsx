@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useState, useEffect, Suspense } from 'react';
-import { MdDashboard, MdMedicalServices, MdPeople, MdReceipt, MdWarning, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdNotifications, MdMenu, MdClose } from 'react-icons/md';
+import { MdDashboard, MdMedicalServices, MdPeople, MdReceipt, MdWarning, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdNotifications, MdMenu, MdClose, MdShoppingCart } from 'react-icons/md';
 import API from '../utils/api';
 import Loader from './Loader';
 
@@ -38,6 +38,7 @@ export default function Layout() {
     { to: '/expiry-alerts', icon: <MdWarning />, label: 'Expiry Alerts', badge: alerts.expired > 0 ? alerts.expired : alerts.expiring > 0 ? alerts.expiring : null, badgeClass: alerts.expired > 0 ? '' : 'warn' },
     { to: '/patient-balance', icon: <MdAccountBalance />, label: 'Patient Balances' },
     { to: '/reports', icon: <MdBarChart />, label: 'Reports & Analytics' },
+    { to: '/purchase-orders', icon: <MdShoppingCart />, label: 'Purchase Orders' },
     { to: '/settings', icon: <MdSettings />, label: 'Settings' },
   ];
 
