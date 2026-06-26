@@ -10,6 +10,7 @@ const patientRoutes = require('./routes/patients');
 const billingRoutes = require('./routes/billing');
 const dashboardRoutes = require('./routes/dashboard');
 const saleRoutes = require('./routes/sales');
+const purchaseOrderRoutes = require('./routes/purchaseOrders');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/sales', saleRoutes);
+app.use('/api/purchase-orders', purchaseOrderRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
