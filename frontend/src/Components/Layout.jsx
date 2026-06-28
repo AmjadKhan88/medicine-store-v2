@@ -1,23 +1,17 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { useState, useEffect, Suspense } from 'react';
-import { MdDashboard, MdMedicalServices, MdPeople, MdReceipt, MdWarning, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdNotifications, MdMenu, MdClose, MdShoppingCart } from 'react-icons/md';
-import API from '../utils/api';
+import { useState, Suspense } from 'react';
+import { MdDashboard, MdMedicalServices, MdPeople, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart } from 'react-icons/md';
+import NotificationCenter from './NotificationCenter';
 import Loader from './Loader';
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const { theme, setSpecificTheme } = useTheme();
   const navigate = useNavigate();
-  const [alerts, setAlerts] = useState({ expired: 0, expiring: 0 });
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  useEffect(() => {
-    API.get('/medicines/expiry-alerts').then(({ data }) => {
-      setAlerts({ expired: data.expired.length, expiring: data.expiringSoon.length });
-    }).catch(() => {});
-  }, []);
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
@@ -35,7 +29,6 @@ export default function Layout() {
     { to: '/billing', icon: <MdReceipt />, label: 'Billing & Invoices' },
   ];
   const alertItems = [
-    { to: '/expiry-alerts', icon: <MdWarning />, label: 'Expiry Alerts', badge: alerts.expired > 0 ? alerts.expired : alerts.expiring > 0 ? alerts.expiring : null, badgeClass: alerts.expired > 0 ? '' : 'warn' },
     { to: '/patient-balance', icon: <MdAccountBalance />, label: 'Patient Balances' },
     { to: '/reports', icon: <MdBarChart />, label: 'Reports & Analytics' },
     { to: '/purchase-orders', icon: <MdShoppingCart />, label: 'Purchase Orders' },
@@ -99,13 +92,8 @@ export default function Layout() {
             </div>
           </div>
           <div className="flex gap-3" style={{ alignItems: 'center' }}>
-            {(alerts.expired > 0 || alerts.expiring > 0) && (
-              <button className="btn btn-ghost btn-icon" onClick={() => navigate('/expiry-alerts')}
-                style={{ position: 'relative', color: alerts.expired > 0 ? 'var(--danger)' : 'var(--warning)' }}>
-                <MdNotifications size={20} />
-                <span style={{ position: 'absolute', top: 3, right: 3, width: 8, height: 8, background: alerts.expired > 0 ? 'var(--danger)' : 'var(--warning)', borderRadius: '50%', border: '2px solid var(--bg-secondary)' }} />
-              </button>
-            )}
+            
+            <NotificationCenter />
             <button className="btn btn-ghost btn-icon" onClick={() => setSpecificTheme(theme === 'dark' ? 'light' : 'dark')}>
               {theme === 'dark' ? <MdSunny size={18} /> : <MdDarkMode size={18} />}
             </button>
