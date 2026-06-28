@@ -5,6 +5,7 @@ const morgan = require('morgan');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
+const auditLogRoutes = require('./routes/auditLogs');
 const medicineRoutes = require('./routes/medicines');
 const patientRoutes = require('./routes/patients');
 const billingRoutes = require('./routes/billing');
@@ -30,6 +31,7 @@ app.use('/api/billing', billingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/sales', saleRoutes);
 app.use('/api/purchase-orders', purchaseOrderRoutes);
+app.use('/api/audit-logs', auditLogRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
