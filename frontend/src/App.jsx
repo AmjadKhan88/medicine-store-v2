@@ -15,6 +15,7 @@ const PatientBalance = lazy(()=> import('./Pages/PatientBalance'));
 const Reports = lazy(()=> import('./Pages/Reports'));
 const Settings = lazy(()=> import('./Pages/Settings'));
 const PurchaseOrders = lazy(()=> import('./Pages/PurchaseOrders'));
+const AuditLog = lazy(()=> import('./Pages/AuditLog'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="patient-balance" element={<PatientBalance />} />
         <Route path="reports" element={<Reports />} />
         <Route path="purchase-orders" element={<PurchaseOrders />} />
+        <Route path="audit-log" element={<AuditLog />} />
         <Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
