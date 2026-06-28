@@ -1,3 +1,4 @@
+const audit = require('../utils/audit');
 const Medicine = require('../models/Medicine');
 
 exports.getAllMedicines = async (req, res) => {
@@ -43,17 +44,63 @@ exports.getMedicine = async (req, res) => {
 exports.createMedicine = async (req, res) => {
   try {
     const medicine = await Medicine.create({ ...req.body, addedBy: req.user._id });
+
+    await audit({
+      action:     'MEDICINE_ADDED',
+      category:   'Medicine',
+      summary:    `${req.user.name} added medicine "${medicine.name}" — ${medicine.dosageForm} ${medicine.strength}, stock: ${medicine.stock} ${medicine.unit}`,
+      entityType: 'Medicine',
+      entityId:   medicine._id,
+      entityName: medicine.name,
+      meta: {
+        category:      medicine.category,
+        dosageForm:    medicine.dosageForm,
+        strength:      medicine.strength,
+        stock:         medicine.stock,
+        purchasePrice: medicine.purchasePrice,
+        salePrice:     medicine.salePrice,
+        expiryDate:    medicine.expiryDate,
+      },
+      user: req.user,
+      ip:   req.ip,
+    });
+
     res.status(201).json({ success: true, medicine, message: 'Medicine added successfully' });
   } catch (err) {
-    if (err.code === 11000) return res.status(400).json({ success: false, message: 'Duplicate batch number or barcode' });
+    if (err.code === 11000)
+      return res.status(400).json({ success: false, message: 'Duplicate batch number or barcode' });
     res.status(500).json({ success: false, message: err.message });
   }
 };
 
 exports.updateMedicine = async (req, res) => {
   try {
-    const medicine = await Medicine.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!medicine) return res.status(404).json({ success: false, message: 'Medicine not found' });
+    const old      = await Medicine.findById(req.params.id);
+    const medicine = await Medicine.findByIdAndUpdate(
+      req.params.id, req.body, { new: true, runValidators: true }
+    );
+    if (!medicine)
+      return res.status(404).json({ success: false, message: 'Medicine not found' });
+
+    await audit({
+      action:     'MEDICINE_UPDATED',
+      category:   'Medicine',
+      summary:    `${req.user.name} updated medicine "${medicine.name}"`,
+      entityType: 'Medicine',
+      entityId:   medicine._id,
+      entityName: medicine.name,
+      meta: {
+        changes: Object.keys(req.body).reduce((acc, key) => {
+          if (String(old[key]) !== String(req.body[key])) {
+            acc[key] = { from: old[key], to: req.body[key] };
+          }
+          return acc;
+        }, {}),
+      },
+      user: req.user,
+      ip:   req.ip,
+    });
+
     res.json({ success: true, medicine, message: 'Medicine updated successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -62,8 +109,24 @@ exports.updateMedicine = async (req, res) => {
 
 exports.deleteMedicine = async (req, res) => {
   try {
-    const medicine = await Medicine.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
-    if (!medicine) return res.status(404).json({ success: false, message: 'Medicine not found' });
+    const medicine = await Medicine.findByIdAndUpdate(
+      req.params.id, { isActive: false }, { new: true }
+    );
+    if (!medicine)
+      return res.status(404).json({ success: false, message: 'Medicine not found' });
+
+    await audit({
+      action:     'MEDICINE_DELETED',
+      category:   'Medicine',
+      summary:    `${req.user.name} deleted medicine "${medicine.name}"`,
+      entityType: 'Medicine',
+      entityId:   medicine._id,
+      entityName: medicine.name,
+      meta:       { stock: medicine.stock, salePrice: medicine.salePrice },
+      user: req.user,
+      ip:   req.ip,
+    });
+
     res.json({ success: true, message: 'Medicine deleted successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -99,12 +162,28 @@ exports.getLowStock = async (req, res) => {
 
 exports.updateStock = async (req, res) => {
   try {
-    const { quantity, type } = req.body; // type: 'add' | 'set'
+    const { quantity, type } = req.body;
     const medicine = await Medicine.findById(req.params.id);
-    if (!medicine) return res.status(404).json({ success: false, message: 'Medicine not found' });
+    if (!medicine)
+      return res.status(404).json({ success: false, message: 'Medicine not found' });
+
+    const oldStock = medicine.stock;
     if (type === 'add') medicine.stock += Number(quantity);
-    else medicine.stock = Number(quantity);
+    else                medicine.stock  = Number(quantity);
     await medicine.save();
+
+    await audit({
+      action:     'STOCK_UPDATED',
+      category:   'Stock',
+      summary:    `${req.user.name} manually updated stock of "${medicine.name}" — ${oldStock} → ${medicine.stock} ${medicine.unit}`,
+      entityType: 'Medicine',
+      entityId:   medicine._id,
+      entityName: medicine.name,
+      meta:       { oldStock, newStock: medicine.stock, type, quantity: Number(quantity) },
+      user: req.user,
+      ip:   req.ip,
+    });
+
     res.json({ success: true, medicine, message: 'Stock updated' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

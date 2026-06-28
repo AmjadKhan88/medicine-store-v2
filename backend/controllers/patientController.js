@@ -1,5 +1,6 @@
 const Patient = require('../models/Patient');
 const Bill = require('../models/Bill');
+const audit = require('../utils/audit');
 
 exports.getAllPatients = async (req, res) => {
   try {
@@ -38,6 +39,26 @@ exports.getPatient = async (req, res) => {
 exports.createPatient = async (req, res) => {
   try {
     const patient = await Patient.create({ ...req.body, addedBy: req.user._id });
+
+    await audit({
+      action:     'PATIENT_REGISTERED',
+      category:   'Patient',
+      summary:    `${req.user.name} registered new patient "${patient.name}" (${patient.patientId}) — ${patient.gender}, Age ${patient.age || '—'}, ${patient.city || '—'}`,
+      entityType: 'Patient',
+      entityId:   patient._id,
+      entityName: patient.name,
+      meta: {
+        patientId:  patient.patientId,
+        age:        patient.age,
+        gender:     patient.gender,
+        bloodGroup: patient.bloodGroup,
+        city:       patient.city,
+        doctor:     patient.doctor,
+      },
+      user: req.user,
+      ip:   req.ip,
+    });
+
     res.status(201).json({ success: true, patient, message: 'Patient registered successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -46,8 +67,24 @@ exports.createPatient = async (req, res) => {
 
 exports.updatePatient = async (req, res) => {
   try {
-    const patient = await Patient.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!patient) return res.status(404).json({ success: false, message: 'Patient not found' });
+    const patient = await Patient.findByIdAndUpdate(
+      req.params.id, req.body, { new: true, runValidators: true }
+    );
+    if (!patient)
+      return res.status(404).json({ success: false, message: 'Patient not found' });
+
+    await audit({
+      action:     'PATIENT_UPDATED',
+      category:   'Patient',
+      summary:    `${req.user.name} updated patient "${patient.name}" (${patient.patientId})`,
+      entityType: 'Patient',
+      entityId:   patient._id,
+      entityName: patient.name,
+      meta:       { updatedFields: Object.keys(req.body) },
+      user: req.user,
+      ip:   req.ip,
+    });
+
     res.json({ success: true, patient, message: 'Patient updated successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

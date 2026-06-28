@@ -1,6 +1,7 @@
 const Bill = require('../models/Bill');
 const Patient = require('../models/Patient');
 const Medicine = require('../models/Medicine');
+const audit = require('../utils/audit');
 
 exports.getAllBills = async (req, res) => {
   try {
@@ -42,42 +43,99 @@ exports.getBill = async (req, res) => {
 
 exports.createBill = async (req, res) => {
   try {
-    const { patient: patientId, items, discount = 0, tax = 0, amountPaid = 0, paymentMethod = 'Cash', notes } = req.body;
+    const {
+      patient: patientId, items, discount = 0,
+      tax = 0, amountPaid = 0, paymentMethod = 'Cash', notes,
+    } = req.body;
 
     const patient = await Patient.findById(patientId);
-    if (!patient) return res.status(404).json({ success: false, message: 'Patient not found' });
+    if (!patient)
+      return res.status(404).json({ success: false, message: 'Patient not found' });
 
-    // Validate and build items, deduct stock
     const billItems = [];
     let subtotal = 0;
 
     for (const item of items) {
       const medicine = await Medicine.findById(item.medicine);
-      if (!medicine) return res.status(404).json({ success: false, message: `Medicine ${item.medicine} not found` });
+      if (!medicine)
+        return res.status(404).json({ success: false, message: `Medicine ${item.medicine} not found` });
       if (medicine.stock < item.quantity)
         return res.status(400).json({ success: false, message: `Insufficient stock for ${medicine.name}` });
 
       const totalPrice = medicine.salePrice * item.quantity;
       subtotal += totalPrice;
-      billItems.push({ medicine: medicine._id, medicineName: medicine.name, quantity: item.quantity, unitPrice: medicine.salePrice, totalPrice });
+      billItems.push({
+        medicine:     medicine._id,
+        medicineName: medicine.name,
+        quantity:     item.quantity,
+        unitPrice:    medicine.salePrice,
+        totalPrice,
+      });
 
-      // Deduct stock
       medicine.stock -= item.quantity;
       await medicine.save();
+
+      // Log each medicine sale
+      await audit({
+        action:     'STOCK_UPDATED',
+        category:   'Stock',
+        summary:    `${item.quantity} × "${medicine.name}" sold to ${patient.name} — stock: ${medicine.stock + item.quantity} → ${medicine.stock} ${medicine.unit}`,
+        entityType: 'Medicine',
+        entityId:   medicine._id,
+        entityName: medicine.name,
+        meta: {
+          soldQty:     item.quantity,
+          stockBefore: medicine.stock + item.quantity,
+          stockAfter:  medicine.stock,
+          patientName: patient.name,
+          unitPrice:   medicine.salePrice,
+          totalPrice,
+        },
+        user: req.user,
+        ip:   req.ip,
+      });
     }
 
     const totalAmount = subtotal - discount + tax;
 
     const bill = await Bill.create({
-      patient: patientId, patientName: patient.name,
-      items: billItems, subtotal, discount, tax, totalAmount,
-      amountPaid, paymentMethod, notes, createdBy: req.user._id,
+      patient:       patientId,
+      patientName:   patient.name,
+      items:         billItems,
+      subtotal,
+      discount,
+      tax,
+      totalAmount,
+      amountPaid,
+      paymentMethod,
+      notes,
+      createdBy: req.user._id,
     });
 
-    // Update patient totals
     patient.totalBilled += totalAmount;
-    patient.totalPaid += amountPaid;
+    patient.totalPaid   += amountPaid;
     await patient.save();
+
+    // Log bill creation
+    await audit({
+      action:     'BILL_CREATED',
+      category:   'Billing',
+      summary:    `Invoice ${bill.billNumber} created for ${patient.name} — total: ₨${totalAmount.toLocaleString()}, paid: ₨${Number(amountPaid).toLocaleString()}`,
+      entityType: 'Bill',
+      entityId:   bill._id,
+      entityName: bill.billNumber,
+      meta: {
+        patientName:   patient.name,
+        patientId:     patient.patientId,
+        itemCount:     billItems.length,
+        totalAmount,
+        amountPaid,
+        paymentMethod,
+        balance:       totalAmount - amountPaid,
+      },
+      user: req.user,
+      ip:   req.ip,
+    });
 
     res.status(201).json({ success: true, bill, message: 'Bill created successfully' });
   } catch (err) {
@@ -89,7 +147,8 @@ exports.updatePayment = async (req, res) => {
   try {
     const { additionalPayment, paymentMethod } = req.body;
     const bill = await Bill.findById(req.params.id);
-    if (!bill) return res.status(404).json({ success: false, message: 'Bill not found' });
+    if (!bill)
+      return res.status(404).json({ success: false, message: 'Bill not found' });
 
     const payment = Number(additionalPayment);
     if (bill.amountPaid + payment > bill.totalAmount)
@@ -99,8 +158,27 @@ exports.updatePayment = async (req, res) => {
     if (paymentMethod) bill.paymentMethod = paymentMethod;
     await bill.save();
 
-    // Update patient paid amount
     await Patient.findByIdAndUpdate(bill.patient, { $inc: { totalPaid: payment } });
+
+    await audit({
+      action:     'PAYMENT_RECORDED',
+      category:   'Billing',
+      summary:    `Payment of ₨${payment.toLocaleString()} recorded for ${bill.patientName} — Invoice ${bill.billNumber} (${bill.paymentStatus})`,
+      entityType: 'Bill',
+      entityId:   bill._id,
+      entityName: bill.billNumber,
+      meta: {
+        patientName:     bill.patientName,
+        paymentAmount:   payment,
+        paymentMethod:   bill.paymentMethod,
+        totalPaid:       bill.amountPaid,
+        totalAmount:     bill.totalAmount,
+        remainingBalance:bill.totalAmount - bill.amountPaid,
+        paymentStatus:   bill.paymentStatus,
+      },
+      user: req.user,
+      ip:   req.ip,
+    });
 
     res.json({ success: true, bill, message: 'Payment updated successfully' });
   } catch (err) {
@@ -111,16 +189,45 @@ exports.updatePayment = async (req, res) => {
 exports.deleteBill = async (req, res) => {
   try {
     const bill = await Bill.findById(req.params.id);
-    if (!bill) return res.status(404).json({ success: false, message: 'Bill not found' });
+    if (!bill)
+      return res.status(404).json({ success: false, message: 'Bill not found' });
 
     // Restore stock
     for (const item of bill.items) {
       await Medicine.findByIdAndUpdate(item.medicine, { $inc: { stock: item.quantity } });
+
+      await audit({
+        action:     'STOCK_UPDATED',
+        category:   'Stock',
+        summary:    `Stock restored — ${item.quantity} × "${item.medicineName}" returned to inventory (Invoice ${bill.billNumber} deleted)`,
+        entityType: 'Medicine',
+        entityId:   item.medicine,
+        entityName: item.medicineName,
+        meta:       { restoredQty: item.quantity, reason: 'Bill deleted', billNumber: bill.billNumber },
+        user: req.user,
+        ip:   req.ip,
+      });
     }
 
-    // Revert patient totals
     await Patient.findByIdAndUpdate(bill.patient, {
       $inc: { totalBilled: -bill.totalAmount, totalPaid: -bill.amountPaid },
+    });
+
+    await audit({
+      action:     'BILL_DELETED',
+      category:   'Billing',
+      summary:    `Invoice ${bill.billNumber} deleted for ${bill.patientName} — ₨${bill.totalAmount.toLocaleString()} reversed, stock restored`,
+      entityType: 'Bill',
+      entityId:   bill._id,
+      entityName: bill.billNumber,
+      meta: {
+        patientName:  bill.patientName,
+        totalAmount:  bill.totalAmount,
+        amountPaid:   bill.amountPaid,
+        itemCount:    bill.items.length,
+      },
+      user: req.user,
+      ip:   req.ip,
     });
 
     await Bill.findByIdAndDelete(req.params.id);
