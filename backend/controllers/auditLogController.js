@@ -9,7 +9,8 @@ exports.getLogs = async (req, res) => {
       search, startDate, endDate,
     } = req.query;
 
-    const query = {};
+    // const query = {};
+    const query = { storeId: req.storeId };
 
     if (category)  query.category = category;
     if (action)    query.action   = action;

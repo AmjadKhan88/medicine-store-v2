@@ -16,6 +16,7 @@ const AuditLog = require('../models/AuditLog');
 async function audit(opts) {
   try {
     await AuditLog.create({
+      storeId:         opts.user?.storeId,
       action:          opts.action,
       category:        opts.category,
       summary:         opts.summary,

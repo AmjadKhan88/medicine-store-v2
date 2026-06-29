@@ -5,7 +5,8 @@ const Medicine      = require('../models/Medicine');
 exports.getAll = async (req, res) => {
   try {
     const { search, status, page = 1, limit = 15 } = req.query;
-    const query = {};
+    // const query = {};
+    const query = { storeId: req.storeId };
     if (status) query.status = status;
     if (search) query.$or = [
       { poNumber:        { $regex: search, $options: 'i' } },
@@ -66,6 +67,7 @@ exports.create = async (req, res) => {
     }
 
     const order = await PurchaseOrder.create({
+      storeId: req.storeId,
       supplier,
       items: builtItems,
       totalAmount,

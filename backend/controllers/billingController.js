@@ -6,7 +6,8 @@ const audit = require('../utils/audit');
 exports.getAllBills = async (req, res) => {
   try {
     const { search, status, page = 1, limit = 20, startDate, endDate } = req.query;
-    const query = {};
+    // const query = {};
+    const query = { storeId: req.storeId };
     if (search) query.$or = [
       { billNumber: { $regex: search, $options: 'i' } },
       { patientName: { $regex: search, $options: 'i' } },
@@ -99,6 +100,7 @@ exports.createBill = async (req, res) => {
     const totalAmount = subtotal - discount + tax;
 
     const bill = await Bill.create({
+      storeId:       req.storeId,
       patient:       patientId,
       patientName:   patient.name,
       items:         billItems,
