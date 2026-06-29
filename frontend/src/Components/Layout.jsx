@@ -3,13 +3,15 @@ import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import { useState, Suspense } from 'react';
-import { MdDashboard, MdMedicalServices, MdPeople, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory } from 'react-icons/md';
+import { MdDashboard, MdMedicalServices, MdPeople, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
+import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const { can, isAdmin } = usePermissions();
+  const { counts } = useNotifications();
   const { theme, setSpecificTheme } = useTheme();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -31,15 +33,22 @@ export default function Layout() {
     { to: '/billing', icon: <MdReceipt />, label: 'Billing & Invoices' },
   ];
 
-  const alertItems = [
-    { to: '/expiry-alerts',    icon: <MdWarning />,       label: 'Expiry Alerts',       show: true,           badge: alerts.expired > 0 ? alerts.expired : alerts.expiring > 0 ? alerts.expiring : null, badgeClass: alerts.expired > 0 ? '' : 'warn' },
-    { to: '/patient-balance',  icon: <MdAccountBalance />, label: 'Patient Balances',    show: true            },
-    { to: '/purchase-orders',  icon: <MdShoppingCart />,   label: 'Purchase Orders',     show: can.purchaseOrders },
-    { to: '/reports',          icon: <MdBarChart />,       label: 'Reports & Analytics', show: can.viewReports },
-    { to: '/audit-log',        icon: <MdHistory />,        label: 'Audit Log',           show: can.viewAuditLog },
-    { to: '/staff',            icon: <MdPeople />,         label: 'Staff Management',    show: can.manageStaff },
-    { to: '/settings',         icon: <MdSettings />,       label: 'Settings',            show: can.storeSettings },
-  ];
+const alertItems = [
+  {
+    to: '/expiry-alerts',
+    icon: <MdWarning />,
+    label: 'Expiry Alerts',
+    show: true,
+    badge: counts.critical > 0 ? counts.critical : counts.expiring > 0 ? counts.expiring : null,
+    badgeClass: counts.critical > 0 ? '' : 'warn',
+  },
+  { to: '/patient-balance', icon: <MdAccountBalance />, label: 'Patient Balances',    show: true                },
+  { to: '/purchase-orders', icon: <MdShoppingCart />,   label: 'Purchase Orders',     show: can.purchaseOrders  },
+  { to: '/reports',         icon: <MdBarChart />,       label: 'Reports & Analytics', show: can.viewReports     },
+  { to: '/audit-log',       icon: <MdHistory />,        label: 'Audit Log',           show: can.viewAuditLog    },
+  { to: '/staff',           icon: <MdPeople />,         label: 'Staff Management',    show: can.manageStaff     },
+  { to: '/settings',        icon: <MdSettings />,       label: 'Settings',            show: can.storeSettings   },
+];
 
   const initials = user?.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U';
 
