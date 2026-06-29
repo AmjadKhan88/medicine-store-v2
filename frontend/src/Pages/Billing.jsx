@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import PermissionGate from '../Components/PermissionGate';
 import { useNavigate } from 'react-router-dom';
 import {
   MdAdd, MdSearch, MdReceipt, MdPayment,
