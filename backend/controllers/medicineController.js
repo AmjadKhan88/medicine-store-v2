@@ -4,7 +4,8 @@ const Medicine = require('../models/Medicine');
 exports.getAllMedicines = async (req, res) => {
   try {
     const { search, category, status, page = 1, limit = 20 } = req.query;
-    const query = { isActive: true };
+    // const query = { isActive: true };
+    const query = { isActive: true, storeId: req.storeId };
 
     if (search) query.$or = [
       { name: { $regex: search, $options: 'i' } },
@@ -43,7 +44,8 @@ exports.getMedicine = async (req, res) => {
 
 exports.createMedicine = async (req, res) => {
   try {
-    const medicine = await Medicine.create({ ...req.body, addedBy: req.user._id });
+    // const medicine = await Medicine.create({ ...req.body, addedBy: req.user._id });
+    const medicine = await Medicine.create({ ...req.body, addedBy: req.user._id, storeId: req.storeId });
 
     await audit({
       action:     'MEDICINE_ADDED',

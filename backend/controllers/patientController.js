@@ -5,7 +5,8 @@ const audit = require('../utils/audit');
 exports.getAllPatients = async (req, res) => {
   try {
     const { search, page = 1, limit = 20 } = req.query;
-    const query = { isActive: true };
+    // const query = { isActive: true };
+    const query = { isActive: true, storeId: req.storeId };
     if (search) query.$or = [
       { name: { $regex: search, $options: 'i' } },
       { patientId: { $regex: search, $options: 'i' } },
@@ -38,7 +39,8 @@ exports.getPatient = async (req, res) => {
 
 exports.createPatient = async (req, res) => {
   try {
-    const patient = await Patient.create({ ...req.body, addedBy: req.user._id });
+    // const patient = await Patient.create({ ...req.body, addedBy: req.user._id });
+    const patient = await Patient.create({ ...req.body, addedBy: req.user._id, storeId: req.storeId });
 
     await audit({
       action:     'PATIENT_REGISTERED',
@@ -125,7 +127,7 @@ exports.getPatientBalance = async (req, res) => {
 
 exports.getAllPatientBalances = async (req, res) => {
   try {
-    const patients = await Patient.find({ isActive: true, $expr: { $gt: ['$totalBilled', '$totalPaid'] } })
+    const patients = await Patient.find({ isActive: true,storeId: req.storeId, $expr: { $gt: ['$totalBilled', '$totalPaid'] } })
       .sort({ createdAt: -1 });
     const data = patients.map(p => ({
       _id: p._id,
