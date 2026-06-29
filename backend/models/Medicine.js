@@ -27,6 +27,7 @@ const medicineSchema = new mongoose.Schema({
   requiresPrescription: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
   addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
 }, { timestamps: true });
 
 medicineSchema.virtual('isExpired').get(function () {

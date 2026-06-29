@@ -44,7 +44,7 @@ const auditLogSchema = new mongoose.Schema({
     ref: 'User',
   },
   performedByName: { type: String },
-
+  storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
   // IP / user-agent (optional, nice to have)
   ip: { type: String },
 }, { timestamps: true });

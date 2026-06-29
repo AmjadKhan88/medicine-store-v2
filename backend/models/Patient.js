@@ -17,6 +17,7 @@ const patientSchema = new mongoose.Schema({
   totalPaid: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true },
   addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
 }, { timestamps: true });
 
 patientSchema.virtual('remainingBalance').get(function () {

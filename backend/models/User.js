@@ -1,14 +1,31 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const bcrypt   = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true, trim: true },
-  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  name:     { type: String, required: true, trim: true },
+  email:    { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true, minlength: 6 },
-  role: { type: String, enum: ['admin', 'doctor', 'pharmacist'], default: 'doctor' },
-  phone: { type: String, trim: true },
-  avatar: { type: String },
+
+  // Role within their store
+  role: {
+    type:    String,
+    enum:    ['admin', 'doctor', 'pharmacist'],
+    default: 'admin', // first user who registers is always admin/owner
+  },
+
+  // Every user belongs to exactly one store (tenant)
+  // Admin's storeId = their own _id (set after registration)
+  storeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref:  'User', // points to the admin/owner user
+  },
+
+  phone:    { type: String, trim: true },
   isActive: { type: Boolean, default: true },
+
+  // Invite system
+  inviteToken:   { type: String },
+  inviteExpires: { type: Date },
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {
@@ -17,13 +34,14 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-userSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+userSchema.methods.matchPassword = async function (pwd) {
+  return bcrypt.compare(pwd, this.password);
 };
 
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;
+  delete obj.inviteToken;
   return obj;
 };
 

@@ -22,6 +22,7 @@ const billSchema = new mongoose.Schema({
   paymentStatus: { type: String, enum: ['Paid', 'Partial', 'Pending'], default: 'Pending' },
   notes: { type: String },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
 }, { timestamps: true });
 
 billSchema.virtual('remainingAmount').get(function () {

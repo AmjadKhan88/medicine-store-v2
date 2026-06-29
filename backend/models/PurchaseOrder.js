@@ -26,6 +26,7 @@ const purchaseOrderSchema = new mongoose.Schema({
   receivedDate:    { type: Date },
   notes:           { type: String },
   createdBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
 }, { timestamps: true });
 
 // Auto-generate PO number

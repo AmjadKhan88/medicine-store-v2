@@ -1,32 +1,43 @@
-const jwt = require('jsonwebtoken');
+const jwt  = require('jsonwebtoken');
 const User = require('../models/User');
 
+/* ── Verify JWT ── */
 const protect = async (req, res, next) => {
   try {
     let token;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    if (req.headers.authorization?.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }
-    if (!token) {
-      return res.status(401).json({ success: false, message: 'Not authorized, no token' });
-    }
+    if (!token)
+      return res.status(401).json({ success: false, message: 'Not authorized' });
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(decoded.id).select('-password');
-    if (!req.user) {
-      return res.status(401).json({ success: false, message: 'User not found' });
-    }
+    if (!req.user || !req.user.isActive)
+      return res.status(401).json({ success: false, message: 'User not found or deactivated' });
+
+    // Attach storeId to every request for tenant filtering
+    req.storeId = req.user.storeId;
     next();
-  } catch (err) {
-    return res.status(401).json({ success: false, message: 'Not authorized, token invalid' });
+  } catch {
+    res.status(401).json({ success: false, message: 'Token invalid' });
   }
 };
 
+/* ── Role guards ── */
 const adminOnly = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
-    next();
-  } else {
-    res.status(403).json({ success: false, message: 'Admin access required' });
-  }
+  if (req.user?.role === 'admin') return next();
+  res.status(403).json({ success: false, message: 'Admin access required' });
 };
 
-module.exports = { protect, adminOnly };
+const notPharmacist = (req, res, next) => {
+  if (req.user?.role !== 'pharmacist') return next();
+  res.status(403).json({ success: false, message: 'Pharmacists cannot perform this action' });
+};
+
+const canDelete = (req, res, next) => {
+  if (req.user?.role === 'admin') return next();
+  res.status(403).json({ success: false, message: 'Only admins can delete records' });
+};
+
+module.exports = { protect, adminOnly, notPharmacist, canDelete };
