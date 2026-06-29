@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import { useState, Suspense } from 'react';
 import { MdDashboard, MdMedicalServices, MdPeople, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory } from 'react-icons/md';
@@ -8,6 +9,7 @@ import Loader from './Loader';
 
 export default function Layout() {
   const { user, logout } = useAuth();
+  const { can, isAdmin } = usePermissions();
   const { theme, setSpecificTheme } = useTheme();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -28,12 +30,15 @@ export default function Layout() {
     { to: '/patients', icon: <MdPeople />, label: 'Patients' },
     { to: '/billing', icon: <MdReceipt />, label: 'Billing & Invoices' },
   ];
+
   const alertItems = [
-    { to: '/patient-balance', icon: <MdAccountBalance />, label: 'Patient Balances' },
-    { to: '/reports', icon: <MdBarChart />, label: 'Reports & Analytics' },
-    { to: '/purchase-orders', icon: <MdShoppingCart />, label: 'Purchase Orders' },
-    { to: '/audit-log', icon: <MdHistory />, label: 'Audit Log' },
-    { to: '/settings', icon: <MdSettings />, label: 'Settings' },
+    { to: '/expiry-alerts',    icon: <MdWarning />,       label: 'Expiry Alerts',       show: true,           badge: alerts.expired > 0 ? alerts.expired : alerts.expiring > 0 ? alerts.expiring : null, badgeClass: alerts.expired > 0 ? '' : 'warn' },
+    { to: '/patient-balance',  icon: <MdAccountBalance />, label: 'Patient Balances',    show: true            },
+    { to: '/purchase-orders',  icon: <MdShoppingCart />,   label: 'Purchase Orders',     show: can.purchaseOrders },
+    { to: '/reports',          icon: <MdBarChart />,       label: 'Reports & Analytics', show: can.viewReports },
+    { to: '/audit-log',        icon: <MdHistory />,        label: 'Audit Log',           show: can.viewAuditLog },
+    { to: '/staff',            icon: <MdPeople />,         label: 'Staff Management',    show: can.manageStaff },
+    { to: '/settings',         icon: <MdSettings />,       label: 'Settings',            show: can.storeSettings },
   ];
 
   const initials = user?.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U';
@@ -56,10 +61,11 @@ export default function Layout() {
           </div>
           <div className="nav-section">
             <div className="nav-section-title">Management</div>
-            {alertItems.map(item => (
-              <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
-                {item.icon}{item.label}
-                {item.badge ? <span className={`nav-badge ${item.badgeClass || ''}`}>{item.badge}</span> : null}
+            {alertItems.filter(item => item.show).map(item => (
+              <NavLink key={item.to} to={item.to}
+              className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+              {item.icon}{item.label}
+              {item.badge ? <span className={`nav-badge ${item.badgeClass || ''}`}>{item.badge}</span> : null}
               </NavLink>
             ))}
           </div>

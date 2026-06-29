@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import PermissionGate from '../Components/PermissionGate';
 import { MdAdd, MdEdit, MdDelete, MdSearch, MdPeople, MdPhone, MdAccountBalance, MdArrowForward } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -114,7 +115,9 @@ export default function Patients() {
                       <td>
                         <div className="table-actions">
                           <button className="btn btn-secondary btn-sm btn-icon" onClick={() => openEdit(p)}><MdEdit /></button>
-                          <button className="btn btn-danger btn-sm btn-icon" onClick={() => setDeleteId(p._id)}><MdDelete /></button>
+                          <PermissionGate permission="deletePatient">
+                            <button className="btn btn-danger btn-sm btn-icon" onClick={() => setDeleteId(p._id)}><MdDelete /></button>
+                          </PermissionGate>
                         </div>
                       </td>
                     </tr>

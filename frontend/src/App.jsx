@@ -16,6 +16,7 @@ const Reports = lazy(()=> import('./Pages/Reports'));
 const Settings = lazy(()=> import('./Pages/Settings'));
 const PurchaseOrders = lazy(()=> import('./Pages/PurchaseOrders'));
 const AuditLog = lazy(()=> import('./Pages/AuditLog'));
+const StaffManagement = lazy(()=> import('./Pages/StaffManagement'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -43,6 +44,7 @@ export default function App() {
         <Route path="reports" element={<Reports />} />
         <Route path="purchase-orders" element={<PurchaseOrders />} />
         <Route path="audit-log" element={<AuditLog />} />
+        <Route path="staff" element={<StaffManagement />} />
         <Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

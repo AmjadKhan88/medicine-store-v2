@@ -234,13 +234,9 @@ export default function Billing() {
                             </button>
                           )}
                           {/* Delete */}
-                          <button
-                            className="btn btn-danger btn-sm btn-icon"
-                            onClick={() => handleDelete(b._id)}
-                            title="Delete Invoice"
-                          >
-                            <MdDelete />
-                          </button>
+                          <PermissionGate permission="deleteBill">
+                            <button className="btn btn-danger btn-sm btn-icon" onClick={() => handleDelete(b._id)}><MdDelete /></button>
+                          </PermissionGate>
                         </div>
                       </td>
                     </tr>

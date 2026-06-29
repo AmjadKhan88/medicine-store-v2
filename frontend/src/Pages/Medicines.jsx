@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import PermissionGate from '../Components/PermissionGate';
 import { MdAdd, MdEdit, MdDelete, MdSearch, MdMedicalServices, MdWarning, MdInventory } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
@@ -137,7 +138,10 @@ export default function Medicines() {
                     <td>
                       <div className="table-actions">
                         <button className="btn btn-secondary btn-sm btn-icon" onClick={() => openEdit(m)} title="Edit"><MdEdit /></button>
-                        <button className="btn btn-danger btn-sm btn-icon" onClick={() => setDeleteId(m._id)} title="Delete"><MdDelete /></button>
+                        <PermissionGate permission="deleteMedicine">
+                          <button className="btn btn-danger btn-sm btn-icon"
+                          onClick={() => setDeleteId(m._id)}><MdDelete /></button>
+                        </PermissionGate>
                       </div>
                     </td>
                   </tr>
