@@ -10,7 +10,6 @@ const seed = async () => {
   await Promise.all([User.deleteMany(), Medicine.deleteMany(), Patient.deleteMany()]);
   console.log('Cleared existing data...');
 
-  const admin = await User.create({ name: 'Dr. Admin Khan', email: 'admin@medistore.com', password: 'admin123', role: 'admin', phone: '0300-1234567' });
   await User.create({ name: 'Dr. Sarah Ahmed', email: 'doctor@medistore.com', password: 'doctor123', role: 'doctor', phone: '0301-2345678' });
 
   await Medicine.insertMany([

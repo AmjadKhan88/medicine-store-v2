@@ -71,3 +71,157 @@ exports.getDashboard = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+/* ── Advanced Sales Report with date range + top patients ── */
+exports.getAdvancedReport = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    // Default to current month if no dates given
+    let from = startDate ? new Date(startDate) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    let to   = endDate   ? new Date(endDate)   : new Date();
+    to.setHours(23, 59, 59, 999);
+    from.setHours(0, 0, 0, 0);
+
+    const dateMatch = { storeId: req.storeId, createdAt: { $gte: from, $lte: to } };
+
+    const [
+      summary,
+      topPatients,
+      topMedicines,
+      paymentMethodBreakdown,
+      dailyTrend,
+      categoryBreakdown,
+    ] = await Promise.all([
+
+      // Overall summary: revenue collected vs outstanding
+      Bill.aggregate([
+        { $match: dateMatch },
+        { $group: {
+          _id: null,
+          totalBills:      { $sum: 1 },
+          totalRevenue:    { $sum: '$totalAmount' },
+          totalCollected:  { $sum: '$amountPaid' },
+          totalDiscount:   { $sum: '$discount' },
+          totalTax:        { $sum: '$tax' },
+        } },
+      ]),
+
+      // Top patients by total spending in this period
+      Bill.aggregate([
+        { $match: dateMatch },
+        { $group: {
+          _id:          '$patient',
+          patientName:  { $first: '$patientName' },
+          totalSpent:   { $sum: '$totalAmount' },
+          totalPaid:    { $sum: '$amountPaid' },
+          billCount:    { $sum: 1 },
+        } },
+        { $sort: { totalSpent: -1 } },
+        { $limit: 10 },
+      ]),
+
+      // Top selling medicines in this period
+      Bill.aggregate([
+        { $match: dateMatch },
+        { $unwind: '$items' },
+        { $group: {
+          _id:          '$items.medicineName',
+          totalQty:     { $sum: '$items.quantity' },
+          totalRevenue: { $sum: '$items.totalPrice' },
+        } },
+        { $sort: { totalRevenue: -1 } },
+        { $limit: 10 },
+      ]),
+
+      // Payment method breakdown
+      Bill.aggregate([
+        { $match: dateMatch },
+        { $group: {
+          _id:    '$paymentMethod',
+          count:  { $sum: 1 },
+          amount: { $sum: '$amountPaid' },
+        } },
+      ]),
+
+      // Daily revenue trend (for the chart)
+      Bill.aggregate([
+        { $match: dateMatch },
+        { $group: {
+          _id: {
+            year:  { $year:      '$createdAt' },
+            month: { $month:     '$createdAt' },
+            day:   { $dayOfMonth:'$createdAt' },
+          },
+          revenue:   { $sum: '$totalAmount' },
+          collected: { $sum: '$amountPaid' },
+          count:     { $sum: 1 },
+        } },
+        { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } },
+      ]),
+
+      // Category-wise revenue
+      Bill.aggregate([
+        { $match: dateMatch },
+        { $unwind: '$items' },
+        { $lookup: {
+          from: 'medicines',
+          localField: 'items.medicine',
+          foreignField: '_id',
+          as: 'medInfo',
+        } },
+        { $unwind: { path: '$medInfo', preserveNullAndEmptyArrays: true } },
+        { $group: {
+          _id:     { $ifNull: ['$medInfo.category', 'Other'] },
+          revenue: { $sum: '$items.totalPrice' },
+          qty:     { $sum: '$items.quantity' },
+        } },
+        { $sort: { revenue: -1 } },
+      ]),
+    ]);
+
+    const summaryData = summary[0] || {
+      totalBills: 0, totalRevenue: 0, totalCollected: 0, totalDiscount: 0, totalTax: 0,
+    };
+    summaryData.totalOutstanding = summaryData.totalRevenue - summaryData.totalCollected;
+
+    res.json({
+      success: true,
+      dateRange: { from, to },
+      summary: summaryData,
+      topPatients: topPatients.map(p => ({
+        ...p,
+        outstanding: p.totalSpent - p.totalPaid,
+      })),
+      topMedicines,
+      paymentMethodBreakdown,
+      dailyTrend,
+      categoryBreakdown,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/* ── Get raw bill rows for export (CSV/PDF) within date range ── */
+exports.getReportExportData = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    let from = startDate ? new Date(startDate) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    let to   = endDate   ? new Date(endDate)   : new Date();
+    to.setHours(23, 59, 59, 999);
+    from.setHours(0, 0, 0, 0);
+
+    const bills = await Bill.find({
+      storeId: req.storeId,
+      createdAt: { $gte: from, $lte: to },
+    })
+      .populate('patient', 'patientId phone')
+      .populate('createdBy', 'name')
+      .sort({ createdAt: 1 });
+
+    res.json({ success: true, bills, dateRange: { from, to } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};

@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import PermissionGate from '../Components/PermissionGate';
-import { MdAdd, MdEdit, MdDelete, MdSearch, MdMedicalServices, MdWarning, MdInventory } from 'react-icons/md';
+import { MdAdd, MdEdit, MdDelete, MdSearch, MdMedicalServices, MdWarning, MdSwapHoriz } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 
-const CATEGORIES = ['All','Antibiotic','Analgesic','Antiviral','Antifungal','Cardiovascular','Diabetes','Respiratory','Gastrointestinal','Neurological','Vitamin & Supplement','Dermatological','Other'];
-const FORMS = ['Tablet','Capsule','Syrup','Injection','Cream','Drops','Inhaler','Patch','Other'];
-const UNITS = ['Pcs','Strip','Box','Bottle','Vial','Tube'];
+const CATEGORIES = ['All', 'Antibiotic', 'Analgesic', 'Antiviral', 'Antifungal', 'Cardiovascular', 'Diabetes', 'Respiratory', 'Gastrointestinal', 'Neurological', 'Vitamin & Supplement', 'Dermatological', 'Other'];
+const FORMS = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Inhaler', 'Patch', 'Other'];
+const UNITS = ['Pcs', 'Strip', 'Box', 'Bottle', 'Vial', 'Tube'];
 const STATUSES = [
   { id: '', label: 'All' }, { id: 'expiring', label: 'Expiring Soon' },
   { id: 'expired', label: 'Expired' }, { id: 'lowstock', label: 'Low Stock' },
 ];
 
-const empty = { name:'',genericName:'',category:'Other',manufacturer:'',batchNumber:'',dosageForm:'Tablet',strength:'',unit:'Strip',purchasePrice:'',salePrice:'',stock:'',minStock:'10',expiryDate:'',manufacturingDate:'',location:'',requiresPrescription:false,description:'' };
+const empty = { name: '', genericName: '', category: 'Other', manufacturer: '', batchNumber: '', dosageForm: 'Tablet', strength: '', unit: 'Strip', purchasePrice: '', salePrice: '', stock: '', minStock: '10', expiryDate: '', manufacturingDate: '', location: '', requiresPrescription: false, description: '' };
 
 function getExpiryBadge(med) {
   const now = new Date();
@@ -38,6 +38,10 @@ export default function Medicines() {
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
+  const [subsModal, setSubsModal] = useState(null); // medicine being edited for substitutes
+  const [allMeds, setAllMeds] = useState([]);
+  const [selectedSubs, setSelectedSubs] = useState([]);
+
   const fetchMedicines = useCallback(async () => {
     setLoading(true);
     try {
@@ -56,7 +60,7 @@ export default function Medicines() {
 
   const openAdd = () => { setForm(empty); setEditing(null); setModal(true); };
   const openEdit = (m) => {
-    setForm({ ...m, expiryDate: m.expiryDate?.slice(0,10), manufacturingDate: m.manufacturingDate?.slice(0,10)||'' });
+    setForm({ ...m, expiryDate: m.expiryDate?.slice(0, 10), manufacturingDate: m.manufacturingDate?.slice(0, 10) || '' });
     setEditing(m._id); setModal(true);
   };
 
@@ -73,6 +77,29 @@ export default function Medicines() {
   const handleDelete = async () => {
     try { await API.delete(`/medicines/${deleteId}`); toast.success('Medicine deleted'); setDeleteId(null); fetchMedicines(); }
     catch { toast.error('Delete failed'); }
+  };
+
+
+  const openSubstitutes = async (med) => {
+    setSubsModal(med);
+    setSelectedSubs((med.substitutes || []).map(s => typeof s === 'object' ? s._id : s));
+    try {
+      const { data } = await API.get('/medicines', { params: { limit: 200 } });
+      setAllMeds(data.medicines.filter(m => m._id !== med._id));
+    } catch { toast.error('Failed to load medicines'); }
+  };
+
+  const toggleSub = (id) => {
+    setSelectedSubs(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+  };
+
+  const saveSubstitutes = async () => {
+    try {
+      await API.put(`/medicines/${subsModal._id}/substitutes`, { substitutes: selectedSubs });
+      toast.success('Substitutes linked!');
+      setSubsModal(null);
+      fetchMedicines();
+    } catch { toast.error('Failed to save'); }
   };
 
   const fld = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
@@ -138,9 +165,12 @@ export default function Medicines() {
                     <td>
                       <div className="table-actions">
                         <button className="btn btn-secondary btn-sm btn-icon" onClick={() => openEdit(m)} title="Edit"><MdEdit /></button>
+                        <button className="btn btn-secondary btn-sm btn-icon" onClick={() => openSubstitutes(m)} title="Link Substitutes">
+                          <MdSwapHoriz />
+                        </button>
                         <PermissionGate permission="deleteMedicine">
                           <button className="btn btn-danger btn-sm btn-icon"
-                          onClick={() => setDeleteId(m._id)}><MdDelete /></button>
+                            onClick={() => setDeleteId(m._id)}><MdDelete /></button>
                         </PermissionGate>
                       </div>
                     </td>
@@ -153,13 +183,13 @@ export default function Medicines() {
 
         {totalPages > 1 && (
           <div className="pagination">
-            <button disabled={page === 1} onClick={() => setPage(p => p-1)}>‹</button>
+            <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>‹</button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1).map((p, i, arr) => (
-              <span key={p}>{i > 0 && arr[i-1] !== p-1 && <button disabled>...</button>}
+              <span key={p}>{i > 0 && arr[i - 1] !== p - 1 && <button disabled>...</button>}
                 <button className={page === p ? 'active' : ''} onClick={() => setPage(p)}>{p}</button>
               </span>
             ))}
-            <button disabled={page === totalPages} onClick={() => setPage(p => p+1)}>›</button>
+            <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>›</button>
           </div>
         )}
       </div>
@@ -178,9 +208,9 @@ export default function Medicines() {
                 <div className="form-group"><label className="form-label">Generic Name</label><input className="form-control" value={form.genericName} onChange={fld('genericName')} placeholder="e.g. Paracetamol" /></div>
               </div>
               <div className="form-row">
-                <div className="form-group"><label className="form-label">Category</label><select className="form-control" value={form.category} onChange={fld('category')}>{CATEGORIES.filter(c=>c!=='All').map(c=><option key={c}>{c}</option>)}</select></div>
-                <div className="form-group"><label className="form-label">Dosage Form</label><select className="form-control" value={form.dosageForm} onChange={fld('dosageForm')}>{FORMS.map(f=><option key={f}>{f}</option>)}</select></div>
-                <div className="form-group"><label className="form-label">Unit</label><select className="form-control" value={form.unit} onChange={fld('unit')}>{UNITS.map(u=><option key={u}>{u}</option>)}</select></div>
+                <div className="form-group"><label className="form-label">Category</label><select className="form-control" value={form.category} onChange={fld('category')}>{CATEGORIES.filter(c => c !== 'All').map(c => <option key={c}>{c}</option>)}</select></div>
+                <div className="form-group"><label className="form-label">Dosage Form</label><select className="form-control" value={form.dosageForm} onChange={fld('dosageForm')}>{FORMS.map(f => <option key={f}>{f}</option>)}</select></div>
+                <div className="form-group"><label className="form-label">Unit</label><select className="form-control" value={form.unit} onChange={fld('unit')}>{UNITS.map(u => <option key={u}>{u}</option>)}</select></div>
               </div>
               <div className="form-row">
                 <div className="form-group"><label className="form-label">Manufacturer</label><input className="form-control" value={form.manufacturer} onChange={fld('manufacturer')} placeholder="GSK, Abbott..." /></div>
@@ -201,7 +231,7 @@ export default function Medicines() {
                 <div className="form-group"><label className="form-label">Storage Location</label><input className="form-control" value={form.location} onChange={fld('location')} placeholder="Shelf A, Row 2" /></div>
               </div>
               <div className="form-group">
-                <label style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', fontSize:14, fontWeight:600, color:'var(--text-secondary)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)' }}>
                   <input type="checkbox" checked={form.requiresPrescription} onChange={fld('requiresPrescription')} />
                   Requires Prescription (Rx)
                 </label>
@@ -211,6 +241,64 @@ export default function Medicines() {
                 <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : editing ? 'Update Medicine' : 'Add Medicine'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Link Substitutes Modal */}
+      {subsModal && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSubsModal(null)}>
+          <div className="modal modal-lg">
+            <div className="modal-header">
+              <div>
+                <div className="modal-title">Link Substitutes</div>
+                <div className="text-muted text-sm">for {subsModal.name}</div>
+              </div>
+              <button className="btn btn-ghost btn-icon" onClick={() => setSubsModal(null)}>✕</button>
+            </div>
+
+            <div style={{
+              background: 'var(--accent-light)', border: '1px solid var(--accent)',
+              borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: 'var(--accent)',
+            }}>
+              💡 Select medicines that can be used as an alternative when "{subsModal.name}" is out of stock or expired.
+            </div>
+
+            <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+              {allMeds
+                .filter(m => m.category === subsModal.category) // suggest same category first
+                .concat(allMeds.filter(m => m.category !== subsModal.category))
+                .map(m => (
+                  <label key={m._id} style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
+                    border: '1px solid var(--border)', marginBottom: 6,
+                    background: selectedSubs.includes(m._id) ? 'var(--accent-light)' : 'var(--card-bg)',
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedSubs.includes(m._id)}
+                      onChange={() => toggleSub(m._id)}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>{m.name}</div>
+                      <div className="text-muted text-sm">
+                        {m.genericName} · {m.category} · Stock: {m.stock} {m.unit}
+                      </div>
+                    </div>
+                    {m.category === subsModal.category && (
+                      <span className="badge badge-accent" style={{ fontSize: 10 }}>Same category</span>
+                    )}
+                  </label>
+                ))}
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setSubsModal(null)}>Cancel</button>
+              <button className="btn btn-primary" onClick={saveSubstitutes}>
+                <MdSwapHoriz /> Save {selectedSubs.length} Substitute{selectedSubs.length !== 1 ? 's' : ''}
+              </button>
+            </div>
           </div>
         </div>
       )}

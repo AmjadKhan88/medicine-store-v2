@@ -1,12 +1,13 @@
 // import { useState, useEffect } from 'react';
 import { useState, useEffect } from 'react';
 import {
-  MdWarning, MdError, MdCheckCircle, MdPictureAsPdf, MdDownload
+  MdWarning, MdError, MdCheckCircle, MdPictureAsPdf, MdDownload, MdSwapHoriz
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import SubstitutesPanel from '../Components/SubstitutesPanel';
 
 /* ─────────────────────────────────────────
    PDF helpers
@@ -131,7 +132,7 @@ function buildPDF({ title, subtitle, badgeLabel, badgeColor, medicines, reportTy
     },
     alternateRowStyles: { fillColor: [248, 250, 252] },
     columnStyles: {
-      0: { cellWidth: 8,  halign: 'center' },
+      0: { cellWidth: 8, halign: 'center' },
       1: { cellWidth: 38 },
       2: { cellWidth: 28 },
       3: { cellWidth: 24 },
@@ -206,6 +207,8 @@ export default function ExpiryAlerts() {
   const [tab, setTab] = useState('expired');
   const [generatingPDF, setGeneratingPDF] = useState('');
 
+  const [subsFor, setSubsFor] = useState(null); // medicine ID to show substitutes for
+
   useEffect(() => {
     API.get('/medicines/expiry-alerts')
       .then(({ data }) => { setData(data); setLoading(false); })
@@ -264,9 +267,9 @@ export default function ExpiryAlerts() {
   };
 
   const tabs = [
-    { id: 'expired',      label: 'Expired',            count: data.expired.length,      cls: 'badge-danger',  icon: <MdError />,       pdfType: 'expired'  },
-    { id: 'expiringSoon', label: 'Expiring in 30 Days', count: data.expiringSoon.length, cls: 'badge-warning', icon: <MdWarning />,     pdfType: 'warning'  },
-    { id: 'expiringIn60', label: 'Expiring in 60 Days', count: data.expiringIn60.length, cls: 'badge-info',    icon: <MdCheckCircle />, pdfType: 'notice'   },
+    { id: 'expired', label: 'Expired', count: data.expired.length, cls: 'badge-danger', icon: <MdError />, pdfType: 'expired' },
+    { id: 'expiringSoon', label: 'Expiring in 30 Days', count: data.expiringSoon.length, cls: 'badge-warning', icon: <MdWarning />, pdfType: 'warning' },
+    { id: 'expiringIn60', label: 'Expiring in 60 Days', count: data.expiringIn60.length, cls: 'badge-info', icon: <MdCheckCircle />, pdfType: 'notice' },
   ];
 
   const current = data[tab] || [];
@@ -387,6 +390,7 @@ export default function ExpiryAlerts() {
                   <th>Value at Risk</th>
                   <th>Expiry Date</th>
                   <th>Status</th>
+                  <th>Alternatives</th>
                 </tr>
               </thead>
               <tbody>
@@ -421,11 +425,24 @@ export default function ExpiryAlerts() {
                           ? <span className="badge badge-danger">Expired {Math.abs(days)}d ago</span>
                           : <span className="badge badge-warning">In {days} days</span>}
                       </td>
+                      <td>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => setSubsFor(subsFor === m._id ? null : m._id)}
+                        >
+                          <MdSwapHoriz size={14} /> {subsFor === m._id ? 'Hide' : 'View'}
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
+            {subsFor && (
+              <div style={{ marginTop: 16 }}>
+                <SubstitutesPanel medicineId={subsFor} compact />
+              </div>
+            )}
           </div>
         )}
 

@@ -54,7 +54,7 @@ const alertItems = [
 
   return (
     <div className="app-layout">
-      <aside className="sidebar" style={{ width: sidebarOpen ? '260px' : '0', overflow: 'hidden' }}>
+      <aside className="sidebar" style={{ width: sidebarOpen ? '260px' : '0', overflow: 'scroll' }}>
         <div className="sidebar-logo">
           <h1>Medi<span>Store</span></h1>
           <p>Medicine Management System</p>
