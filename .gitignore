@@ -5,7 +5,7 @@ target/
 bin/
 obj/
 vendor/
-
+features.txt
 # Build outputs
 dist/
 build/

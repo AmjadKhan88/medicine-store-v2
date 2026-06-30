@@ -22,7 +22,7 @@ exports.getAllMedicines = async (req, res) => {
 
     const skip = (Number(page) - 1) * Number(limit);
     const [medicines, total] = await Promise.all([
-      Medicine.find(query).populate('addedBy', 'name').sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
+      Medicine.find(query).populate('addedBy', 'name').populate('substitutes', 'name genericName stock salePrice unit dosageForm').sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
       Medicine.countDocuments(query),
     ]);
 
@@ -34,7 +34,8 @@ exports.getAllMedicines = async (req, res) => {
 
 exports.getMedicine = async (req, res) => {
   try {
-    const medicine = await Medicine.findById(req.params.id).populate('addedBy', 'name email');
+    const medicine = await Medicine.findById(req.params.id).populate('addedBy', 'name email').populate('substitutes', 'name genericName stock salePrice unit dosageForm');
+
     if (!medicine) return res.status(404).json({ success: false, message: 'Medicine not found' });
     res.json({ success: true, medicine });
   } catch (err) {
@@ -187,6 +188,110 @@ exports.updateStock = async (req, res) => {
     });
 
     res.json({ success: true, medicine, message: 'Stock updated' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/* ── Get substitutes for a medicine (manual + auto-matched) ── */
+exports.getSubstitutes = async (req, res) => {
+  try {
+    const medicine = await Medicine.findById(req.params.id);
+    if (!medicine)
+      return res.status(404).json({ success: false, message: 'Medicine not found' });
+
+    const now = new Date();
+
+    // 1. Manually linked substitutes (highest priority)
+    const manualSubs = await Medicine.find({
+      _id:      { $in: medicine.substitutes || [] },
+      isActive: true,
+      storeId:  req.storeId,
+      stock:    { $gt: 0 },
+      expiryDate: { $gt: now },
+    });
+
+    // 2. Auto-matched by same genericName (different brand, same drug)
+    const sameGeneric = medicine.genericName
+      ? await Medicine.find({
+          _id:         { $ne: medicine._id, $nin: medicine.substitutes || [] },
+          genericName: { $regex: `^${medicine.genericName}$`, $options: 'i' },
+          isActive:    true,
+          storeId:     req.storeId,
+          stock:       { $gt: 0 },
+          expiryDate:  { $gt: now },
+        }).limit(5)
+      : [];
+
+    // 3. Auto-matched by same category + dosage form (broader fallback)
+    const sameCategory = await Medicine.find({
+      _id:        { $ne: medicine._id, $nin: [...(medicine.substitutes || []), ...sameGeneric.map(m => m._id)] },
+      category:   medicine.category,
+      dosageForm: medicine.dosageForm,
+      isActive:   true,
+      storeId:    req.storeId,
+      stock:      { $gt: 0 },
+      expiryDate: { $gt: now },
+    }).limit(5);
+
+    res.json({
+      success: true,
+      medicine: { _id: medicine._id, name: medicine.name, genericName: medicine.genericName },
+      manual:        manualSubs,
+      sameGeneric,
+      sameCategory,
+      hasAlternatives: manualSubs.length + sameGeneric.length + sameCategory.length > 0,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/* ── Link/unlink substitutes manually ── */
+exports.updateSubstitutes = async (req, res) => {
+  try {
+    const { substitutes } = req.body; // array of medicine IDs
+    const medicine = await Medicine.findByIdAndUpdate(
+      req.params.id,
+      { substitutes },
+      { new: true }
+    ).populate('substitutes', 'name genericName stock salePrice unit');
+
+    if (!medicine)
+      return res.status(404).json({ success: false, message: 'Medicine not found' });
+
+    res.json({ success: true, medicine, message: 'Substitutes updated' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/* ── Bulk check: find substitutes for multiple medicine names at once
+       (used by CreateBill when an item search returns 0 stock items) ── */
+exports.findAlternativesByName = async (req, res) => {
+  try {
+    const { name, genericName, category } = req.query;
+    const now = new Date();
+
+    const query = {
+      isActive:   true,
+      storeId:    req.storeId,
+      stock:      { $gt: 0 },
+      expiryDate: { $gt: now },
+    };
+
+    const orConditions = [];
+    if (genericName) orConditions.push({ genericName: { $regex: genericName, $options: 'i' } });
+    if (category)    orConditions.push({ category });
+    if (name)        orConditions.push({ name: { $regex: name, $options: 'i' } });
+
+    if (orConditions.length === 0)
+      return res.json({ success: true, alternatives: [] });
+
+    query.$or = orConditions;
+
+    const alternatives = await Medicine.find(query).limit(6);
+    res.json({ success: true, alternatives });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

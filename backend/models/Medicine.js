@@ -26,6 +26,7 @@ const medicineSchema = new mongoose.Schema({
   location: { type: String, trim: true },
   requiresPrescription: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
+  substitutes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Medicine' }],
   addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
 }, { timestamps: true });

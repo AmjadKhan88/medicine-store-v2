@@ -7,9 +7,12 @@ router.use(protect);
 router.get('/',                ctrl.getAllMedicines);
 router.get('/expiry-alerts',   ctrl.getExpiryAlert);
 router.get('/low-stock',       ctrl.getLowStock);
+router.get('/find-alternatives', ctrl.findAlternativesByName);
 router.get('/:id',             ctrl.getMedicine);
+router.get('/:id/substitutes', ctrl.getSubstitutes);
 router.post('/',    notPharmacist, ctrl.createMedicine);   // pharmacist blocked
 router.put('/:id',  notPharmacist, ctrl.updateMedicine);   // pharmacist blocked
+router.put('/:id/substitutes', notPharmacist, ctrl.updateSubstitutes); // pharmacist blocked
 router.patch('/:id/stock', notPharmacist, ctrl.updateStock);
 router.delete('/:id', canDelete,   ctrl.deleteMedicine);   // admin only
 
