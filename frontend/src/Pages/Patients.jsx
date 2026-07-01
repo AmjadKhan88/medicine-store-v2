@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import PermissionGate from '../Components/PermissionGate';
-import { MdAdd, MdEdit, MdDelete, MdSearch, MdPeople, MdPhone, MdAccountBalance, MdArrowForward } from 'react-icons/md';
+import { MdAdd, MdEdit, MdDelete, MdSearch, MdPeople, MdPhone, MdAccountBalance } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 
-const BLOOD = ['A+','A-','B+','B-','AB+','AB-','O+','O-','Unknown'];
-const empty = { name:'',age:'',gender:'Male',phone:'',email:'',address:'',city:'',bloodGroup:'Unknown',medicalHistory:'',allergies:'',doctor:'' };
+const BLOOD = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'];
+const empty = { name: '', age: '', gender: 'Male', phone: '', email: '', address: '', city: '', bloodGroup: 'Unknown', medicalHistory: '', allergies: '', doctor: '' };
+
+
 
 export default function Patients() {
   const [patients, setPatients] = useState([]);
@@ -35,12 +37,12 @@ export default function Patients() {
   useEffect(() => { setPage(1); }, [search]);
 
   const openAdd = () => { setForm(empty); setEditing(null); setModal(true); };
-  const openEdit = (p) => { setForm({ ...p, allergies: (p.allergies||[]).join(', ') }); setEditing(p._id); setModal(true); };
+  const openEdit = (p) => { setForm({ ...p, allergies: (p.allergies || []).join(', ') }); setEditing(p._id); setModal(true); };
 
   const handleSave = async (e) => {
     e.preventDefault(); setSaving(true);
     try {
-      const payload = { ...form, allergies: form.allergies ? form.allergies.split(',').map(a=>a.trim()).filter(Boolean) : [] };
+      const payload = { ...form, allergies: form.allergies ? form.allergies.split(',').map(a => a.trim()).filter(Boolean) : [] };
       if (editing) { await API.put(`/patients/${editing}`, payload); toast.success('Patient updated!'); }
       else { await API.post('/patients', payload); toast.success('Patient registered!'); }
       setModal(false); fetchPatients();
@@ -54,7 +56,7 @@ export default function Patients() {
   };
 
   const fld = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.value }));
-  const fmtPKR = (n) => `₨ ${Number(n||0).toLocaleString('en-PK')}`;
+  const fmtPKR = (n) => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;
 
   return (
     <div>
@@ -91,7 +93,7 @@ export default function Patients() {
               </thead>
               <tbody>
                 {patients.map(p => {
-                  const balance = Math.max(0, (p.totalBilled||0) - (p.totalPaid||0));
+                  const balance = Math.max(0, (p.totalBilled || 0) - (p.totalPaid || 0));
                   return (
                     <tr key={p._id}>
                       <td>
@@ -100,7 +102,7 @@ export default function Patients() {
                         {p.city && <div className="text-muted text-sm">{p.city}</div>}
                       </td>
                       <td>
-                        {p.phone && <div className="flex gap-2" style={{ alignItems:'center', fontSize:13 }}><MdPhone size={14} />{p.phone}</div>}
+                        {p.phone && <div className="flex gap-2" style={{ alignItems: 'center', fontSize: 13 }}><MdPhone size={14} />{p.phone}</div>}
                         {p.email && <div className="text-muted text-sm">{p.email}</div>}
                       </td>
                       <td><span className="badge badge-accent">{p.bloodGroup}</span></td>
@@ -129,15 +131,15 @@ export default function Patients() {
         )}
         {totalPages > 1 && (
           <div className="pagination">
-            <button disabled={page===1} onClick={() => setPage(p=>p-1)}>‹</button>
-            {Array.from({length:totalPages},(_,i)=>i+1).map(p=><button key={p} className={page===p?'active':''} onClick={()=>setPage(p)}>{p}</button>)}
-            <button disabled={page===totalPages} onClick={() => setPage(p=>p+1)}>›</button>
+            <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>‹</button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => <button key={p} className={page === p ? 'active' : ''} onClick={() => setPage(p)}>{p}</button>)}
+            <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>›</button>
           </div>
         )}
       </div>
 
       {modal && (
-        <div className="modal-overlay" onClick={e => e.target===e.currentTarget && setModal(false)}>
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setModal(false)}>
           <div className="modal modal-lg">
             <div className="modal-header">
               <div className="modal-title">{editing ? 'Edit Patient' : 'Register New Patient'}</div>
@@ -152,7 +154,7 @@ export default function Patients() {
               <div className="form-row">
                 <div className="form-group"><label className="form-label">Phone</label><input className="form-control" value={form.phone} onChange={fld('phone')} placeholder="0300-1234567" /></div>
                 <div className="form-group"><label className="form-label">Email</label><input className="form-control" type="email" value={form.email} onChange={fld('email')} placeholder="patient@email.com" /></div>
-                <div className="form-group"><label className="form-label">Blood Group</label><select className="form-control" value={form.bloodGroup} onChange={fld('bloodGroup')}>{BLOOD.map(b=><option key={b}>{b}</option>)}</select></div>
+                <div className="form-group"><label className="form-label">Blood Group</label><select className="form-control" value={form.bloodGroup} onChange={fld('bloodGroup')}>{BLOOD.map(b => <option key={b}>{b}</option>)}</select></div>
               </div>
               <div className="form-row">
                 <div className="form-group"><label className="form-label">City</label><input className="form-control" value={form.city} onChange={fld('city')} placeholder="Peshawar" /></div>
@@ -172,11 +174,11 @@ export default function Patients() {
 
       {deleteId && (
         <div className="modal-overlay">
-          <div className="modal" style={{ maxWidth:400, textAlign:'center' }}>
-            <div style={{ fontSize:48, marginBottom:16 }}>🗑️</div>
-            <div className="modal-title" style={{ marginBottom:8 }}>Delete Patient?</div>
-            <p className="text-muted text-sm" style={{ marginBottom:24 }}>This will remove the patient record permanently.</p>
-            <div className="flex gap-3" style={{ justifyContent:'center' }}>
+          <div className="modal" style={{ maxWidth: 400, textAlign: 'center' }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>🗑️</div>
+            <div className="modal-title" style={{ marginBottom: 8 }}>Delete Patient?</div>
+            <p className="text-muted text-sm" style={{ marginBottom: 24 }}>This will remove the patient record permanently.</p>
+            <div className="flex gap-3" style={{ justifyContent: 'center' }}>
               <button className="btn btn-secondary" onClick={() => setDeleteId(null)}>Cancel</button>
               <button className="btn btn-danger" onClick={handleDelete}>Yes, Delete</button>
             </div>
