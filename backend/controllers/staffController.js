@@ -1,6 +1,5 @@
 const emailService = require('../utils/emailService');
 const User = require('../models/User');
-const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
 /* ── Get all staff in this store ── */
