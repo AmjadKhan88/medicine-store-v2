@@ -15,6 +15,7 @@ const purchaseOrderRoutes = require('./routes/purchaseOrders');
 const staffRoutes = require('./routes/staff');
 const backupRoutes = require('./routes/backup');
 const subscriptionRoutes = require('./routes/subscription');
+const { startExpiryDigestJob } = require('./jobs/expiryDigest');
 
 const app = express();
 
@@ -64,6 +65,7 @@ mongoose
   .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/medistore')
   .then(() => {
     console.log('✅ MongoDB connected successfully');
+     startExpiryDigestJob();
     app.listen(PORT, () => {
       console.log(`🚀 MediStore server running on port ${PORT}`);
     });

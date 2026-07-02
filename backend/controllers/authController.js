@@ -198,8 +198,12 @@ exports.getMe = async (req, res) => {
 /* ── Update profile ── */
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, phone } = req.body;
-    const user = await User.findByIdAndUpdate(req.user._id, { name, phone }, { new: true });
+    const { name, phone, storeName } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { name, phone, ...(storeName && { storeName }) },
+      { new: true }
+    );
     res.json({ success: true, user });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

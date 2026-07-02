@@ -1,4 +1,6 @@
-const User  = require('../models/User');
+const emailService = require('../utils/emailService');
+const User = require('../models/User');
+const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
 /* ── Get all staff in this store ── */
@@ -30,6 +32,21 @@ exports.addStaff = async (req, res) => {
       storeId: req.storeId,  // belongs to same store as admin
     });
 
+    // Send invitation email
+    try {
+      const storeOwner = await User.findOne({ _id: req.storeId, role: 'admin' });
+      await emailService.sendStaffInvitationEmail({
+        email: email,
+        staffName: name,
+        role: role,
+        storeName: storeOwner?.storeName || 'Your Pharmacy',
+        adminName: req.user.name,
+        tempPassword: password, // plain password before hashing — must be grabbed before User.create
+      });
+    } catch (emailErr) {
+      console.error('[Email] Staff invitation email failed:', emailErr.message);
+    }
+
     res.status(201).json({ success: true, staff, message: `${role} account created` });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -47,9 +64,9 @@ exports.updateStaff = async (req, res) => {
     if (member._id.toString() === req.user._id.toString())
       return res.status(400).json({ success: false, message: 'Cannot modify your own account here' });
 
-    if (role)               member.role     = role;
-    if (name)               member.name     = name;
-    if (phone !== undefined)member.phone    = phone;
+    if (role) member.role = role;
+    if (name) member.name = name;
+    if (phone !== undefined) member.phone = phone;
     if (isActive !== undefined) member.isActive = isActive;
     await member.save();
 

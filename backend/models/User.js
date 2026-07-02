@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // points to the admin/owner user
   },
-
+  storeName: { type: String, trim: true },
   // Email verification
   isEmailVerified: { type: Boolean, default: false },
   emailVerifyToken: { type: String },
