@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
-const bcrypt   = require('bcryptjs');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  name:     { type: String, required: true, trim: true },
-  email:    { type: String, required: true, unique: true, lowercase: true, trim: true },
+  name: { type: String, required: true, trim: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true, minlength: 6 },
 
   // Role within their store
   role: {
-    type:    String,
-    enum:    ['admin', 'doctor', 'pharmacist'],
+    type: String,
+    enum: ['admin', 'doctor', 'pharmacist'],
     default: 'admin', // first user who registers is always admin/owner
   },
 
@@ -17,14 +17,27 @@ const userSchema = new mongoose.Schema({
   // Admin's storeId = their own _id (set after registration)
   storeId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:  'User', // points to the admin/owner user
+    ref: 'User', // points to the admin/owner user
   },
 
-  phone:    { type: String, trim: true },
+  // Email verification
+  isEmailVerified: { type: Boolean, default: false },
+  emailVerifyToken: { type: String },
+  emailVerifyExpires: { type: Date },
+
+  // Password reset
+  passwordResetToken: { type: String },
+  passwordResetExpires: { type: Date },
+
+  // Onboarding
+  onboardingComplete: { type: Boolean, default: false },
+  onboardingStep: { type: Number, default: 0 },
+
+  phone: { type: String, trim: true },
   isActive: { type: Boolean, default: true },
 
   // Invite system
-  inviteToken:   { type: String },
+  inviteToken: { type: String },
   inviteExpires: { type: Date },
 }, { timestamps: true });
 
