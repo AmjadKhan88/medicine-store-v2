@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import App from './App.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { SubscriptionProvider } from './context/SubscriptionContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
 import './index.css';
@@ -11,6 +12,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <ThemeProvider>
       <AuthProvider>
+        <SubscriptionProvider>
         <NotificationProvider>
           <App />
           <Toaster position="top-right" toastOptions={{
@@ -19,6 +21,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             error:   { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
           }} />
         </NotificationProvider>
+        </SubscriptionProvider>
       </AuthProvider>
     </ThemeProvider>
   </BrowserRouter>

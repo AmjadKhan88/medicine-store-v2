@@ -1,9 +1,10 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useSubscription } from '../context/SubscriptionContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import { useState, Suspense } from 'react';
-import { MdDashboard, MdMedicalServices, MdPeople,MdBackup, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
+import { MdDashboard, MdMedicalServices, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
@@ -11,6 +12,7 @@ import Loader from './Loader';
 export default function Layout() {
   const { user, logout } = useAuth();
   const { can, isAdmin } = usePermissions();
+  const { isActive, isTrial, daysLeft, plan } = useSubscription();
   const { counts } = useNotifications();
   const { theme, setSpecificTheme } = useTheme();
   const navigate = useNavigate();
@@ -27,29 +29,31 @@ export default function Layout() {
   ];
 
   const navItems = [
+    { to: '/subscription', icon: <MdStar />, label: 'My Subscription', show: true },
     { to: '/', icon: <MdDashboard />, label: 'Dashboard', exact: true },
     { to: '/medicines', icon: <MdMedicalServices />, label: 'Medicines' },
     { to: '/patients', icon: <MdPeople />, label: 'Patients' },
     { to: '/billing', icon: <MdReceipt />, label: 'Billing & Invoices' },
   ];
 
-const alertItems = [
-  {
-    to: '/expiry-alerts',
-    icon: <MdWarning />,
-    label: 'Expiry Alerts',
-    show: true,
-    badge: counts.critical > 0 ? counts.critical : counts.expiring > 0 ? counts.expiring : null,
-    badgeClass: counts.critical > 0 ? '' : 'warn',
-  },
-  { to: '/patient-balance', icon: <MdAccountBalance />, label: 'Patient Balances',    show: true                },
-  { to: '/purchase-orders', icon: <MdShoppingCart />,   label: 'Purchase Orders',     show: can.purchaseOrders  },
-  { to: '/reports',         icon: <MdBarChart />,       label: 'Reports & Analytics', show: can.viewReports     },
-  { to: '/audit-log',       icon: <MdHistory />,        label: 'Audit Log',           show: can.viewAuditLog    },
-  { to: '/staff',           icon: <MdPeople />,         label: 'Staff Management',    show: can.manageStaff     },
-  { to: '/backup', icon: <MdBackup />, label: 'Backup & Restore', show: can.storeSettings },
-  { to: '/settings',        icon: <MdSettings />,       label: 'Settings',            show: can.storeSettings   },
-];
+  const alertItems = [
+    {
+      to: '/expiry-alerts',
+      icon: <MdWarning />,
+      label: 'Expiry Alerts',
+      show: true,
+      badge: counts.critical > 0 ? counts.critical : counts.expiring > 0 ? counts.expiring : null,
+      badgeClass: counts.critical > 0 ? '' : 'warn',
+    },
+    { to: '/patient-balance', icon: <MdAccountBalance />, label: 'Patient Balances', show: true },
+    { to: '/purchase-orders', icon: <MdShoppingCart />, label: 'Purchase Orders', show: can.purchaseOrders },
+    { to: '/reports', icon: <MdBarChart />, label: 'Reports & Analytics', show: can.viewReports },
+    { to: '/audit-log', icon: <MdHistory />, label: 'Audit Log', show: can.viewAuditLog },
+    { to: '/staff', icon: <MdPeople />, label: 'Staff Management', show: can.manageStaff },
+    { to: '/backup', icon: <MdBackup />, label: 'Backup & Restore', show: can.storeSettings },
+    { to: '/super-admin', icon: <MdAdminPanelSettings />, label: 'Super Admin Panel', show: user?.email === import.meta.env.VITE_SUPER_ADMIN_EMAIL },
+    { to: '/settings', icon: <MdSettings />, label: 'Settings', show: can.storeSettings },
+  ];
 
   const initials = user?.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U';
 
@@ -60,6 +64,21 @@ const alertItems = [
           <h1>Medi<span>Store</span></h1>
           <p>Medicine Management System</p>
         </div>
+
+        {isTrial && daysLeft <= 7 && (
+          <div style={{
+            margin: '0 12px 12px',
+            background: daysLeft <= 3 ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
+            border: `1px solid ${daysLeft <= 3 ? 'var(--danger)' : 'var(--warning)'}`,
+            borderRadius: 10, padding: '8px 12px', fontSize: 12,
+            color: daysLeft <= 3 ? 'var(--danger)' : 'var(--warning)',
+            fontWeight: 600,
+            cursor: 'pointer',
+          }} onClick={() => navigate('/subscription')}>
+            ⚠️ Trial expires in {daysLeft} day{daysLeft !== 1 ? 's' : ''} — Upgrade now
+          </div>
+        )}
+
         <nav style={{ flex: 1 }}>
           <div className="nav-section">
             <div className="nav-section-title">Main Menu</div>
@@ -73,9 +92,9 @@ const alertItems = [
             <div className="nav-section-title">Management</div>
             {alertItems.filter(item => item.show).map(item => (
               <NavLink key={item.to} to={item.to}
-              className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
-              {item.icon}{item.label}
-              {item.badge ? <span className={`nav-badge ${item.badgeClass || ''}`}>{item.badge}</span> : null}
+                className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+                {item.icon}{item.label}
+                {item.badge ? <span className={`nav-badge ${item.badgeClass || ''}`}>{item.badge}</span> : null}
               </NavLink>
             ))}
           </div>
@@ -109,7 +128,7 @@ const alertItems = [
             </div>
           </div>
           <div className="flex gap-3" style={{ alignItems: 'center' }}>
-            
+
             <NotificationCenter />
             <button className="btn btn-ghost btn-icon" onClick={() => setSpecificTheme(theme === 'dark' ? 'light' : 'dark')}>
               {theme === 'dark' ? <MdSunny size={18} /> : <MdDarkMode size={18} />}
@@ -118,8 +137,8 @@ const alertItems = [
           </div>
         </header>
         <main className="page-content">
-          <Suspense fallback={<Loader/>}>
-          <Outlet />
+          <Suspense fallback={<Loader />}>
+            <Outlet />
           </Suspense>
         </main>
       </div>

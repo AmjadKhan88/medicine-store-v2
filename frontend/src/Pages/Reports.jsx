@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer,
@@ -62,9 +62,17 @@ export default function Reports() {
   const [loading, setLoading]       = useState(true);
   const [exporting, setExporting]   = useState('');
 
-  const range = preset === 'custom' && customFrom && customTo
-    ? { from: new Date(customFrom), to: new Date(customTo) }
-    : getPresetRange(preset);
+  // const range = preset === 'custom' && customFrom && customTo
+  //   ? { from: new Date(customFrom), to: new Date(customTo) }
+  //   : getPresetRange(preset);
+
+  const range = useMemo(() => {
+  if (preset === 'custom' && customFrom && customTo) {
+    return { from: new Date(customFrom), to: new Date(customTo) };
+  }
+
+  return getPresetRange(preset);
+}, [preset, customFrom, customTo]);
 
   const fetchReport = useCallback(async () => {
     setLoading(true);
