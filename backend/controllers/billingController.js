@@ -1,7 +1,6 @@
 const emailService = require('../utils/emailService');
 const Patient = require('../models/Patient');
 const Bill = require('../models/Bill');
-const Patient = require('../models/Patient');
 const Medicine = require('../models/Medicine');
 const audit = require('../utils/audit');
 
