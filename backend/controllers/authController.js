@@ -1,4 +1,4 @@
-const jwt  = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const generateToken = (id) =>
@@ -21,6 +21,18 @@ exports.register = async (req, res) => {
     // storeId = their own _id (they are the tenant root)
     user.storeId = user._id;
     await user.save();
+
+    // Auto-create 14-day trial
+    const Subscription = require('../models/Subscription');
+    const trialEnd = new Date();
+    trialEnd.setDate(trialEnd.getDate() + 14);
+    await Subscription.create({
+      storeId: user._id,
+      plan: 'trial',
+      status: 'active',
+      trialEndsAt: trialEnd,
+      limits: { medicines: 50, patients: 20, staff: 1, billsPerMonth: 50 },
+    }).catch(() => { }); // Don't fail registration if this errors
 
     const token = generateToken(user._id);
     res.status(201).json({ success: true, token, user });
