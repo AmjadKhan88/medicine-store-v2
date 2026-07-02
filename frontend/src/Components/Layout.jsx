@@ -29,30 +29,30 @@ export default function Layout() {
   ];
 
   const navItems = [
-    { to: '/subscription', icon: <MdStar />, label: 'My Subscription', show: true },
-    { to: '/', icon: <MdDashboard />, label: 'Dashboard', exact: true },
-    { to: '/medicines', icon: <MdMedicalServices />, label: 'Medicines' },
-    { to: '/patients', icon: <MdPeople />, label: 'Patients' },
-    { to: '/billing', icon: <MdReceipt />, label: 'Billing & Invoices' },
+    { to: '/app/subscription', icon: <MdStar />, label: 'My Subscription', show: true },
+    { to: '/app', icon: <MdDashboard />, label: 'Dashboard', exact: true },
+    { to: '/app/medicines', icon: <MdMedicalServices />, label: 'Medicines' },
+    { to: '/app/patients', icon: <MdPeople />, label: 'Patients' },
+    { to: '/app/billing', icon: <MdReceipt />, label: 'Billing & Invoices' },
   ];
 
   const alertItems = [
     {
-      to: '/expiry-alerts',
+      to: '/app/expiry-alerts',
       icon: <MdWarning />,
       label: 'Expiry Alerts',
       show: true,
       badge: counts.critical > 0 ? counts.critical : counts.expiring > 0 ? counts.expiring : null,
       badgeClass: counts.critical > 0 ? '' : 'warn',
     },
-    { to: '/patient-balance', icon: <MdAccountBalance />, label: 'Patient Balances', show: true },
-    { to: '/purchase-orders', icon: <MdShoppingCart />, label: 'Purchase Orders', show: can.purchaseOrders },
-    { to: '/reports', icon: <MdBarChart />, label: 'Reports & Analytics', show: can.viewReports },
-    { to: '/audit-log', icon: <MdHistory />, label: 'Audit Log', show: can.viewAuditLog },
-    { to: '/staff', icon: <MdPeople />, label: 'Staff Management', show: can.manageStaff },
-    { to: '/backup', icon: <MdBackup />, label: 'Backup & Restore', show: can.storeSettings },
-    { to: '/super-admin', icon: <MdAdminPanelSettings />, label: 'Super Admin Panel', show: user?.email === import.meta.env.VITE_SUPER_ADMIN_EMAIL },
-    { to: '/settings', icon: <MdSettings />, label: 'Settings', show: can.storeSettings },
+    { to: '/app/patient-balance', icon: <MdAccountBalance />, label: 'Patient Balances', show: true },
+    { to: '/app/purchase-orders', icon: <MdShoppingCart />, label: 'Purchase Orders', show: can.purchaseOrders },
+    { to: '/app/reports', icon: <MdBarChart />, label: 'Reports & Analytics', show: can.viewReports },
+    { to: '/app/audit-log', icon: <MdHistory />, label: 'Audit Log', show: can.viewAuditLog },
+    { to: '/app/staff', icon: <MdPeople />, label: 'Staff Management', show: can.manageStaff },
+    { to: '/app/backup', icon: <MdBackup />, label: 'Backup & Restore', show: can.storeSettings },
+    { to: '/app/super-admin', icon: <MdAdminPanelSettings />, label: 'Super Admin Panel', show: user?.email === import.meta.env.VITE_SUPER_ADMIN_EMAIL },
+    { to: '/app/settings', icon: <MdSettings />, label: 'Settings', show: can.storeSettings },
   ];
 
   const initials = user?.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U';

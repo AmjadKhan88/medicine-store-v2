@@ -116,7 +116,7 @@ export default function Billing() {
           <h1>Billing & Invoices</h1>
           <p>{total} total invoices</p>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate('/billing/create')}>
+        <button className="btn btn-primary" onClick={() => navigate('/app/billing/create')}>
           <MdAdd /> Create Invoice
         </button>
       </div>

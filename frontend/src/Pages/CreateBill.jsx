@@ -71,7 +71,7 @@ export default function CreateBill() {
         discount: Number(discount), tax: Number(tax), amountPaid: Number(amountPaid), paymentMethod, notes,
       });
       toast.success('Invoice created successfully!');
-      navigate('/billing');
+      navigate('/app/billing');
     } catch (err) { toast.error(err.response?.data?.message || 'Failed to create invoice'); }
     finally { setSaving(false); }
   };

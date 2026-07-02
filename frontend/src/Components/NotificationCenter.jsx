@@ -434,7 +434,7 @@ export default function NotificationCenter() {
                 </button>
               )}
               <button
-                onClick={() => { navigate('/expiry-alerts'); setOpen(false); }}
+                onClick={() => { navigate('/app/expiry-alerts'); setOpen(false); }}
                 style={{
                   background: 'none', border: 'none', fontSize: 11,
                   color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600,

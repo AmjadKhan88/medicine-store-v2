@@ -8,6 +8,7 @@ import API from '../utils/api';
 export default function Login() {
   const [form, setForm] = useState({});
   const [loading, setLoading] = useState(false);
+  const [unverified, setUnverified] = useState('');
   const { setUser } = useAuth();
   const navigate = useNavigate();
 
@@ -21,11 +22,16 @@ export default function Login() {
         localStorage.setItem('medistore_user', JSON.stringify(data.user));
         setUser(data.user);
         toast.success('Welcome back!');
-        navigate('/');
+        navigate('/app');
       }
 
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed');
+      if (err.response?.data?.code === 'EMAIL_NOT_VERIFIED') {
+        toast.error('Please verify your email first');
+        setUnverified(err.response.data.email);
+      } else {
+        toast.error(err.response?.data?.message || 'Login failed');
+      }
     } finally { setLoading(false); }
   };
 
@@ -80,6 +86,23 @@ export default function Login() {
               {loading ? 'Signing in...' : 'Sign In to MediStore'}
             </button>
           </form>
+          {unverified && (
+            <div className="alert alert-warning" style={{ marginTop: 12 }}>
+              <div className="alert-text">
+                <strong>Email not verified.</strong>
+                {' '}<button style={{ background: 'none', border: 'none', color: 'var(--accent)', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}
+                  onClick={async () => {
+                    try { await API.post('/auth/resend-verification', { email: unverified }); toast.success('Verification email resent!'); }
+                    catch { toast.error('Failed to resend'); }
+                  }}>
+                  Resend verification email
+                </button>
+              </div>
+            </div>
+          )}
+          <p className="text-muted text-sm" style={{ textAlign: 'center', marginTop: 12 }}>
+            <Link to="/forgot-password" style={{ color: 'var(--accent)' }}>Forgot password?</Link>
+          </p>
           <p className="text-muted text-sm" style={{ textAlign: 'center', marginTop: 20 }}>
             New user? <Link to="/register" style={{ color: 'var(--accent)', fontWeight: 600 }}>Create an account</Link>
           </p>

@@ -66,7 +66,7 @@ export default function Patients() {
           <p>{total} registered patients</p>
         </div>
         <div className="flex gap-2">
-          <button className="btn btn-secondary" onClick={() => navigate('/patient-balance')}><MdAccountBalance /> View Balances</button>
+          <button className="btn btn-secondary" onClick={() => navigate('/app/patient-balance')}><MdAccountBalance /> View Balances</button>
           <button className="btn btn-primary" onClick={openAdd}><MdAdd /> Add Patient</button>
         </div>
       </div>

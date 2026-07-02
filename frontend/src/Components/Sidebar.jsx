@@ -2,13 +2,13 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const navItems = [
-  { to:'/', icon:'🏠', label:'Dashboard', exact:true },
-  { to:'/medicines', icon:'💊', label:'Medicines' },
-  { to:'/patients', icon:'👥', label:'Patients' },
-  { to:'/billing', icon:'🧾', label:'Billing' },
-  { to:'/expiry-alerts', icon:'⚠️', label:'Expiry Alerts' },
-  { to:'/balances', icon:'💰', label:'Patient Balances' },
-  { to:'/reports', icon:'📊', label:'Reports' },
+  { to:'/app', icon:'🏠', label:'Dashboard', exact:true },
+  { to:'/app/medicines', icon:'💊', label:'Medicines' },
+  { to:'/app/patients', icon:'👥', label:'Patients' },
+  { to:'/app/billing', icon:'🧾', label:'Billing' },
+  { to:'/app/expiry-alerts', icon:'⚠️', label:'Expiry Alerts' },
+  { to:'/app/balances', icon:'💰', label:'Patient Balances' },
+  { to:'/app/reports', icon:'📊', label:'Reports' },
 ]
 
 export default function Sidebar({ open, setOpen }) {
@@ -70,7 +70,7 @@ export default function Sidebar({ open, setOpen }) {
 
         {/* Bottom */}
         <div style={{ padding:'12px', borderTop:'1px solid rgba(255,255,255,0.06)' }}>
-          <NavLink to="/profile" onClick={() => setOpen(false)}
+          <NavLink to="/app/profile" onClick={() => setOpen(false)}
             style={({ isActive }) => ({
               display:'flex', alignItems:'center', gap:'10px',
               padding:'9px 10px', borderRadius:'8px',
