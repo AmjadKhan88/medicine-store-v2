@@ -52,14 +52,29 @@ export default function Settings() {
     finally { setSavingPw(false); }
   };
 
-  const saveStore = (e) => {
-    e.preventDefault(); setSavingStore(true);
-    setTimeout(() => {
-      localStorage.setItem('medistore_profile', JSON.stringify(store));
-      toast.success('Store profile saved! It will appear on all invoices.');
-      setSavingStore(false);
-    }, 400);
-  };
+const saveStore = async (e) => {
+  e.preventDefault();
+  setSavingStore(true);
+  try {
+    // Save to localStorage (for PDF usage)
+    localStorage.setItem('medistore_profile', JSON.stringify(store));
+
+    // Save storeName + phone to backend (for email usage in server-side jobs)
+    const { data } = await API.put('/auth/profile', {
+      name:      user.name,
+      phone:     store.phone || user.phone,
+      storeName: store.name,
+    });
+    setUser(data.user);
+    localStorage.setItem('medistore_user', JSON.stringify(data.user));
+
+    toast.success('Store profile saved! It will appear on all invoices and emails.');
+  } catch (err) {
+    toast.error('Failed to save');
+  } finally {
+    setSavingStore(false);
+  }
+};
 
   const themes = [
     { id: 'light',  label: 'Light',  colors: ['#f8fafc', '#0ea5e9'] },

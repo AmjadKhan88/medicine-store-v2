@@ -3,31 +3,33 @@ import PermissionGate from '../Components/PermissionGate';
 import { useNavigate } from 'react-router-dom';
 import {
   MdAdd, MdSearch, MdReceipt, MdPayment,
-  MdDelete, MdVisibility, MdPictureAsPdf
+  MdDelete, MdVisibility, MdEmail, MdPictureAsPdf
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { generateInvoicePDF } from '../utils/invoicePDF';
 
 const STATUS_COLORS = {
-  Paid:    'badge-success',
+  Paid: 'badge-success',
   Partial: 'badge-warning',
   Pending: 'badge-danger',
 };
 
 export default function Billing() {
-  const [bills, setBills]           = useState([]);
-  const [total, setTotal]           = useState(0);
-  const [page, setPage]             = useState(1);
+  const [bills, setBills] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [search, setSearch]         = useState('');
-  const [status, setStatus]         = useState('');
-  const [loading, setLoading]       = useState(true);
-  const [viewBill, setViewBill]     = useState(null);
-  const [payModal, setPayModal]     = useState(null);
-  const [payAmt, setPayAmt]         = useState('');
-  const [payMethod, setPayMethod]   = useState('Cash');
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [viewBill, setViewBill] = useState(null);
+  const [payModal, setPayModal] = useState(null);
+  const [payAmt, setPayAmt] = useState('');
+  const [payMethod, setPayMethod] = useState('Cash');
   const [pdfLoading, setPdfLoading] = useState('');
+  const [emailingSent, setEmailingSent] = useState(false);
+  const [emailingId, setEmailingId] = useState('');
   const navigate = useNavigate();
 
   const fetchBills = useCallback(async () => {
@@ -105,7 +107,23 @@ export default function Billing() {
     } catch { toast.error('Delete failed'); }
   };
 
-  const fmtPKR  = (n) => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;
+  /* ── Send Email ── */
+  const handleEmailInvoice = async (bill) => {
+    if (!bill.patient?.email && !bill.patientEmail) {
+      toast.error('This patient has no email address. Add it from the Patients page.');
+      return;
+    }
+    setEmailingId(bill._id);
+    try {
+      await API.post(`/billing/${bill._id}/email`);
+      toast.success('Invoice emailed to patient!');
+      setEmailingSent(true);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to send email');
+    } finally { setEmailingId(''); }
+  };
+
+  const fmtPKR = (n) => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-PK') : '—';
 
   return (
@@ -285,6 +303,13 @@ export default function Billing() {
                 >
                   <MdPictureAsPdf size={16} />
                   {pdfLoading === viewBill._id ? 'Generating...' : 'Download PDF'}
+                </button>
+                <button className="btn btn-secondary btn-sm"
+                  onClick={() => handleEmailInvoice(viewBill)}
+                  disabled={emailingId === viewBill._id}
+                >
+                  <MdEmail size={15} />
+                  {emailingId === viewBill._id ? 'Sending...' : 'Email to Patient'}
                 </button>
                 <button className="btn btn-ghost btn-icon" onClick={() => setViewBill(null)}>✕</button>
               </div>
