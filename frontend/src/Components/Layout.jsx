@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import { useState, Suspense } from 'react';
-import { MdDashboard, MdMedicalServices, MdPeople, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
+import { MdDashboard, MdMedicalServices, MdPeople,MdBackup, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
@@ -47,6 +47,7 @@ const alertItems = [
   { to: '/reports',         icon: <MdBarChart />,       label: 'Reports & Analytics', show: can.viewReports     },
   { to: '/audit-log',       icon: <MdHistory />,        label: 'Audit Log',           show: can.viewAuditLog    },
   { to: '/staff',           icon: <MdPeople />,         label: 'Staff Management',    show: can.manageStaff     },
+  { to: '/backup', icon: <MdBackup />, label: 'Backup & Restore', show: can.storeSettings },
   { to: '/settings',        icon: <MdSettings />,       label: 'Settings',            show: can.storeSettings   },
 ];
 
