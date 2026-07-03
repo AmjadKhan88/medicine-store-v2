@@ -29,6 +29,7 @@ const ResetPassword = lazy(() => import('./Pages/ResetPassword'));
 const Onboarding = lazy(() => import('./Pages/Onboarding'));
 const Appointments = lazy(()=> import('./Pages/Appointments'));
 const LabTests = lazy(()=> import('./Pages/LabTests'));
+const Suppliers = lazy(()=> import('./Pages/Suppliers'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -68,6 +69,7 @@ export default function App() {
         <Route path="appointments" element={<Appointments />} />
         <Route path="prescriptions/create" element={<CreatePrescription />} />
         <Route path="lab-tests" element={<LabTests />} />
+        <Route path="suppliers" element={<Suppliers />} />
         <Route path="super-admin" element={<SuperAdmin />} />
         <Route path="settings" element={<Settings />} />
       </Route>

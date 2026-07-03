@@ -4,7 +4,7 @@ import { useSubscription } from '../context/SubscriptionContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import { useState, Suspense } from 'react';
-import { MdDashboard,MdCalendarToday,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
+import { MdDashboard,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
@@ -50,6 +50,7 @@ export default function Layout() {
     },
     { to: '/app/patient-balance', icon: <MdAccountBalance />, label: 'Patient Balances', show: true },
     { to: '/app/purchase-orders', icon: <MdShoppingCart />, label: 'Purchase Orders', show: can.purchaseOrders },
+    { to: '/app/suppliers', icon: <MdStorefront />, label: 'Suppliers', show: can.purchaseOrders },
     { to: '/app/reports', icon: <MdBarChart />, label: 'Reports & Analytics', show: can.viewReports },
     { to: '/app/audit-log', icon: <MdHistory />, label: 'Audit Log', show: can.viewAuditLog },
     { to: '/app/staff', icon: <MdPeople />, label: 'Staff Management', show: can.manageStaff },
