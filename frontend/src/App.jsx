@@ -27,6 +27,7 @@ const VerifyEmail = lazy(() => import('./Pages/VerifyEmail'));
 const ForgotPassword = lazy(() => import('./Pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./Pages/ResetPassword'));
 const Onboarding = lazy(() => import('./Pages/Onboarding'));
+const Appointments = lazy(()=> import('./Pages/Appointments'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -63,6 +64,7 @@ export default function App() {
         <Route path="backup" element={<Backup />} />
         <Route path="subscription" element={<SubscriptionPage />} />
         <Route path="prescriptions"        element={<Prescriptions />} />
+        <Route path="appointments" element={<Appointments />} />
         <Route path="prescriptions/create" element={<CreatePrescription />} />
         <Route path="super-admin" element={<SuperAdmin />} />
         <Route path="settings" element={<Settings />} />
