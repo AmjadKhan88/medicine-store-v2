@@ -1,5 +1,6 @@
 const LabTest = require('../models/LabTest');
 const Patient = require('../models/Patient');
+const cloudinaryUtil = require('../utils/cloudinary');
 
 /* ── Get all lab tests ── */
 exports.getAll = async (req, res) => {
@@ -20,8 +21,6 @@ exports.getAll = async (req, res) => {
     const skip = (Number(page) - 1) * Number(limit);
     const [tests, total] = await Promise.all([
       LabTest.find(query)
-        // Exclude file.data from list (heavy) — only include metadata
-        .select('-file.data')
         .populate('patient',            'patientId phone age gender')
         .populate('linkedPrescription', 'rxNumber')
         .populate('linkedAppointment',  'date timeSlot')
@@ -41,7 +40,6 @@ exports.getAll = async (req, res) => {
 exports.getOne = async (req, res) => {
   try {
     const test = await LabTest.findOne({ _id: req.params.id, storeId: req.storeId })
-      .select('-file.data')
       .populate('patient',            'name patientId phone age gender bloodGroup')
       .populate('linkedPrescription', 'rxNumber doctorName')
       .populate('linkedAppointment',  'date timeSlot type')
@@ -132,36 +130,52 @@ exports.uploadFile = async (req, res) => {
     if (!req.file)
       return res.status(400).json({ success: false, message: 'No file uploaded' });
 
-    const test = await LabTest.findOneAndUpdate(
-      { _id: req.params.id, storeId: req.storeId },
-      {
-        file: {
-          originalName: req.file.originalname,
-          mimetype:     req.file.mimetype,
-          size:         req.file.size,
-          data:         req.file.buffer,
-          uploadedAt:   new Date(),
-        },
-        // Auto-set to completed if uploading result
-        status: 'Completed',
-      },
-      { new: true }
-    ).select('-file.data');
-
+    const test = await LabTest.findOne({ _id: req.params.id, storeId: req.storeId });
     if (!test)
       return res.status(404).json({ success: false, message: 'Lab test not found' });
 
+    // Delete old file from Cloudinary if exists
+    if (test.file?.publicId) {
+      await cloudinaryUtil.deleteFile(test.file.publicId, test.file.mimetype);
+    }
+
+    // Build a clean filename for Cloudinary
+    const safeName = `${test._id}_${Date.now()}`;
+    const folder   = `medistore/${req.storeId}/lab-tests`;
+
+    // Upload buffer to Cloudinary
+    const result = await cloudinaryUtil.uploadBuffer(
+      req.file.buffer,
+      req.file.mimetype,
+      folder,
+      safeName
+    );
+
+    // Save Cloudinary metadata to test (no file binary)
+    test.file = {
+      originalName: req.file.originalname,
+      mimetype:     req.file.mimetype,
+      size:         req.file.size,
+      url:          result.secure_url,
+      publicId:     result.public_id,
+      uploadedAt:   new Date(),
+    };
+    test.status = 'Completed';
+    await test.save();
+
     res.json({
-      success: true,
+      success:  true,
       test,
       fileInfo: {
         originalName: req.file.originalname,
         mimetype:     req.file.mimetype,
         size:         req.file.size,
+        url:          result.secure_url,
       },
-      message: 'File uploaded successfully',
+      message: 'File uploaded to Cloudinary successfully',
     });
   } catch (err) {
+    console.error('[Upload] Cloudinary error:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -174,13 +188,11 @@ exports.downloadFile = async (req, res) => {
       'file'
     );
 
-    if (!test || !test.file?.data)
+    if (!test?.file?.url)
       return res.status(404).json({ success: false, message: 'No file found for this test' });
 
-    res.set('Content-Type',        test.file.mimetype);
-    res.set('Content-Disposition', `inline; filename="${test.file.originalName}"`);
-    res.set('Content-Length',      test.file.size);
-    res.send(test.file.data);
+    // Redirect browser directly to Cloudinary URL
+    res.redirect(test.file.url);
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -189,11 +201,20 @@ exports.downloadFile = async (req, res) => {
 /* ── Delete file ── */
 exports.deleteFile = async (req, res) => {
   try {
-    await LabTest.findOneAndUpdate(
-      { _id: req.params.id, storeId: req.storeId },
-      { $unset: { file: 1 } }
-    );
-    res.json({ success: true, message: 'File removed' });
+    const test = await LabTest.findOne({ _id: req.params.id, storeId: req.storeId });
+    if (!test)
+      return res.status(404).json({ success: false, message: 'Lab test not found' });
+
+    // Delete from Cloudinary first
+    if (test.file?.publicId) {
+      await cloudinaryUtil.deleteFile(test.file.publicId, test.file.mimetype);
+    }
+
+    // Clear file field in DB
+    test.file = undefined;
+    await test.save();
+
+    res.json({ success: true, message: 'File deleted from Cloudinary' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -224,7 +245,6 @@ exports.getPatientHistory = async (req, res) => {
       storeId: req.storeId,
       patient: req.params.patientId,
     })
-      .select('-file.data')
       .populate('linkedPrescription', 'rxNumber')
       .sort({ createdAt: -1 });
 
