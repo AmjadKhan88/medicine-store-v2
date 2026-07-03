@@ -1,5 +1,29 @@
 const PurchaseOrder = require('../models/PurchaseOrder');
 const Medicine      = require('../models/Medicine');
+const Supplier = require('../models/Supplier');
+
+/* ── Helper: sync supplier financial totals from this store's POs ── */
+async function syncSupplierTotals(storeId, supplierName) {
+  try {
+    const supplier = await Supplier.findOne({
+      storeId,
+      name: { $regex: `^${supplierName}$`, $options: 'i' },
+      isActive: true,
+    });
+    if (!supplier) return;
+
+    const orders = await PurchaseOrder.find({
+      storeId,
+      'supplier.name': { $regex: `^${supplierName}$`, $options: 'i' },
+    });
+
+    supplier.totalOrdered = orders.reduce((s, o) => s + o.totalAmount, 0);
+    supplier.totalPaid    = orders.reduce((s, o) => s + o.amountPaid,  0);
+    await supplier.save();
+  } catch (err) {
+    console.error('[Supplier Sync]', err.message);
+  }
+}
 
 /* ── GET all ── */
 exports.getAll = async (req, res) => {
@@ -78,6 +102,8 @@ exports.create = async (req, res) => {
       createdBy: req.user._id,
     });
 
+    await syncSupplierTotals(req.storeId, supplier.name);
+
     res.status(201).json({ success: true, order, message: 'Purchase order created!' });
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 };
@@ -130,6 +156,8 @@ exports.receiveOrder = async (req, res) => {
     order.receivedDate = receivedDate ? new Date(receivedDate) : new Date();
     await order.save();
 
+    await syncSupplierTotals(req.storeId, order.supplier.name);
+
     res.json({ success: true, order, message: `Stock updated — order ${order.status}` });
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 };
@@ -147,6 +175,9 @@ exports.recordPayment = async (req, res) => {
 
     order.amountPaid += pay;
     await order.save();
+
+    await syncSupplierTotals(req.storeId, order.supplier.name);
+
     res.json({ success: true, order, message: 'Payment recorded' });
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 };
