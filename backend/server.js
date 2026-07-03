@@ -16,6 +16,7 @@ const staffRoutes = require('./routes/staff');
 const backupRoutes = require('./routes/backup');
 const subscriptionRoutes = require('./routes/subscription');
 const { startExpiryDigestJob } = require('./jobs/expiryDigest');
+const prescriptionRoutes = require('./routes/prescriptions');
 
 const app = express();
 
@@ -39,6 +40,8 @@ app.use('/api/audit-logs', auditLogRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/backup', backupRoutes);
 app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/prescriptions', prescriptionRoutes);
+
 
 // Health check
 app.get('/api/health', (req, res) => {
