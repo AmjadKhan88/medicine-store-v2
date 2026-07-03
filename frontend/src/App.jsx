@@ -20,6 +20,8 @@ const StaffManagement = lazy(() => import('./Pages/StaffManagement'));
 const Backup = lazy(() => import('./Pages/Backup'));
 const SubscriptionPage = lazy(() => import('./Pages/Subscription'));
 const SuperAdmin = lazy(() => import('./Pages/SuperAdmin'));
+const Prescriptions      = lazy(()=> import('./Pages/Prescriptions'));
+const CreatePrescription = lazy(()=> import('./Pages/CreatePrescription'));
 const Landing = lazy(() => import('./Pages/Landing'));
 const VerifyEmail = lazy(() => import('./Pages/VerifyEmail'));
 const ForgotPassword = lazy(() => import('./Pages/ForgotPassword'));
@@ -60,6 +62,8 @@ export default function App() {
         <Route path="staff" element={<StaffManagement />} />
         <Route path="backup" element={<Backup />} />
         <Route path="subscription" element={<SubscriptionPage />} />
+        <Route path="prescriptions"        element={<Prescriptions />} />
+        <Route path="prescriptions/create" element={<CreatePrescription />} />
         <Route path="super-admin" element={<SuperAdmin />} />
         <Route path="settings" element={<Settings />} />
       </Route>

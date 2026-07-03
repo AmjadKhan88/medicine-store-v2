@@ -4,7 +4,7 @@ import { useSubscription } from '../context/SubscriptionContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import { useState, Suspense } from 'react';
-import { MdDashboard, MdMedicalServices, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
+import { MdDashboard, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
@@ -34,6 +34,7 @@ export default function Layout() {
     { to: '/app/medicines', icon: <MdMedicalServices />, label: 'Medicines' },
     { to: '/app/patients', icon: <MdPeople />, label: 'Patients' },
     { to: '/app/billing', icon: <MdReceipt />, label: 'Billing & Invoices' },
+    { to: '/app/prescriptions', icon: <MdAssignment />, label: 'Prescriptions' },
   ];
 
   const alertItems = [
