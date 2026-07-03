@@ -18,59 +18,59 @@ const CATEGORIES = [
 ];
 
 const COMMON_TESTS = {
-  'Blood Test':    ['CBC (Complete Blood Count)', 'Blood Sugar (Fasting)', 'Blood Sugar (Random)', 'HbA1c', 'Lipid Profile', 'LFT (Liver Function)', 'KFT (Kidney Function)', 'Thyroid Profile (TSH)', 'Uric Acid', 'CRP'],
-  'Urine Test':    ['Urine R/E (Routine)', 'Urine C/S (Culture)', '24-Hour Urine Protein'],
-  'Imaging':       ['X-Ray Chest', 'X-Ray KUB', 'Ultrasound Abdomen', 'Ultrasound Pelvis', 'ECG', 'Echo', 'CT Scan', 'MRI'],
-  'Microbiology':  ['Blood Culture', 'Sputum C/S', 'Stool R/E', 'HCV Antibody', 'HBsAg', 'HIV Test'],
-  'Pathology':     ['Biopsy', 'FNAC', 'Pap Smear'],
-  'Cardiac':       ['ECG', 'Troponin', 'CPK-MB', 'BNP'],
-  'Other':         ['Custom Test'],
+  'Blood Test': ['CBC (Complete Blood Count)', 'Blood Sugar (Fasting)', 'Blood Sugar (Random)', 'HbA1c', 'Lipid Profile', 'LFT (Liver Function)', 'KFT (Kidney Function)', 'Thyroid Profile (TSH)', 'Uric Acid', 'CRP'],
+  'Urine Test': ['Urine R/E (Routine)', 'Urine C/S (Culture)', '24-Hour Urine Protein'],
+  'Imaging': ['X-Ray Chest', 'X-Ray KUB', 'Ultrasound Abdomen', 'Ultrasound Pelvis', 'ECG', 'Echo', 'CT Scan', 'MRI'],
+  'Microbiology': ['Blood Culture', 'Sputum C/S', 'Stool R/E', 'HCV Antibody', 'HBsAg', 'HIV Test'],
+  'Pathology': ['Biopsy', 'FNAC', 'Pap Smear'],
+  'Cardiac': ['ECG', 'Troponin', 'CPK-MB', 'BNP'],
+  'Other': ['Custom Test'],
 };
 
 const CBC_PARAMS = [
-  { parameter: 'WBC',         unit: '×10³/μL', normalRange: '4.5–11.0'  },
-  { parameter: 'RBC',         unit: '×10⁶/μL', normalRange: '4.5–5.5'   },
-  { parameter: 'Hemoglobin',  unit: 'g/dL',    normalRange: '12.0–16.0'  },
-  { parameter: 'Hematocrit',  unit: '%',        normalRange: '37–47'      },
-  { parameter: 'MCV',         unit: 'fL',       normalRange: '80–100'     },
-  { parameter: 'MCH',         unit: 'pg',       normalRange: '27–33'      },
-  { parameter: 'MCHC',        unit: 'g/dL',     normalRange: '32–36'      },
-  { parameter: 'Platelets',   unit: '×10³/μL', normalRange: '150–400'    },
-  { parameter: 'Neutrophils', unit: '%',        normalRange: '40–75'      },
-  { parameter: 'Lymphocytes', unit: '%',        normalRange: '20–45'      },
+  { parameter: 'WBC', unit: '×10³/μL', normalRange: '4.5–11.0' },
+  { parameter: 'RBC', unit: '×10⁶/μL', normalRange: '4.5–5.5' },
+  { parameter: 'Hemoglobin', unit: 'g/dL', normalRange: '12.0–16.0' },
+  { parameter: 'Hematocrit', unit: '%', normalRange: '37–47' },
+  { parameter: 'MCV', unit: 'fL', normalRange: '80–100' },
+  { parameter: 'MCH', unit: 'pg', normalRange: '27–33' },
+  { parameter: 'MCHC', unit: 'g/dL', normalRange: '32–36' },
+  { parameter: 'Platelets', unit: '×10³/μL', normalRange: '150–400' },
+  { parameter: 'Neutrophils', unit: '%', normalRange: '40–75' },
+  { parameter: 'Lymphocytes', unit: '%', normalRange: '20–45' },
 ];
 
 const STATUS_BADGE = {
-  Ordered:           'badge-info',
-  'Sample Collected':'badge-warning',
-  'In Progress':     'badge-warning',
-  Completed:         'badge-success',
-  Cancelled:         'badge-danger',
+  Ordered: 'badge-info',
+  'Sample Collected': 'badge-warning',
+  'In Progress': 'badge-warning',
+  Completed: 'badge-success',
+  Cancelled: 'badge-danger',
 };
 
 const INTERP_COLOR = {
-  Normal:   'var(--success)',
-  High:     'var(--danger)',
-  Low:      'var(--info)',
+  Normal: 'var(--success)',
+  High: 'var(--danger)',
+  Low: 'var(--info)',
   Critical: 'var(--danger)',
-  Pending:  'var(--text-muted)',
+  Pending: 'var(--text-muted)',
 };
 
 const FLAG_COLOR = { H: 'var(--danger)', L: 'var(--info)', HH: 'var(--danger)', LL: 'var(--info)', '': 'inherit' };
-const bytes = (b) => b < 1024 ? `${b} B` : b < 1048576 ? `${(b/1024).toFixed(1)} KB` : `${(b/1048576).toFixed(1)} MB`;
+const bytes = (b) => b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`;
 
 /* ═══════════════════════════════════
    ORDER LAB TEST MODAL
 ═══════════════════════════════════ */
 function OrderModal({ onClose, onSaved }) {
-  const store  = (() => { try { return JSON.parse(localStorage.getItem('medistore_profile'))||{}; } catch { return {}; } })();
-  const [patSearch, setPatSearch]   = useState('');
-  const [patients, setPatients]     = useState([]);
-  const [showDrop, setShowDrop]     = useState(false);
+  const store = (() => { try { return JSON.parse(localStorage.getItem('medistore_profile')) || {}; } catch { return {}; } })();
+  const [patSearch, setPatSearch] = useState('');
+  const [patients, setPatients] = useState([]);
+  const [showDrop, setShowDrop] = useState(false);
   const [selectedPat, setSelectedPat] = useState(null);
-  const [category, setCategory]     = useState('Blood Test');
+  const [category, setCategory] = useState('Blood Test');
   const [form, setForm] = useState({
-    testName: '', orderedBy: store.doctor || '', lab: '', orderedDate: new Date().toISOString().slice(0,10), notes: '',
+    testName: '', orderedBy: store.doctor || '', lab: '', orderedDate: new Date().toISOString().slice(0, 10), notes: '',
   });
   const [saving, setSaving] = useState(false);
 
@@ -83,8 +83,8 @@ function OrderModal({ onClose, onSaved }) {
   const fld = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.value }));
 
   const handleSave = async () => {
-    if (!selectedPat)    { toast.error('Select a patient'); return; }
-    if (!form.testName)  { toast.error('Test name is required'); return; }
+    if (!selectedPat) { toast.error('Select a patient'); return; }
+    if (!form.testName) { toast.error('Test name is required'); return; }
     setSaving(true);
     try {
       await API.post('/lab-tests', { patient: selectedPat._id, testCategory: category, ...form });
@@ -96,7 +96,7 @@ function OrderModal({ onClose, onSaved }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal modal-lg">
         <div className="modal-header">
           <div className="modal-title">Order Lab Test</div>
@@ -107,26 +107,26 @@ function OrderModal({ onClose, onSaved }) {
         <div className="form-group">
           <label className="form-label required">Patient</label>
           {selectedPat ? (
-            <div className="flex-between" style={{ background:'var(--bg-tertiary)', borderRadius:10, padding:'10px 14px' }}>
+            <div className="flex-between" style={{ background: 'var(--bg-tertiary)', borderRadius: 10, padding: '10px 14px' }}>
               <div>
-                <div style={{ fontWeight:700 }}>{selectedPat.name}</div>
+                <div style={{ fontWeight: 700 }}>{selectedPat.name}</div>
                 <div className="text-muted text-sm">{selectedPat.patientId} · Age {selectedPat.age}</div>
               </div>
               <button className="btn btn-secondary btn-sm" onClick={() => setSelectedPat(null)}>Change</button>
             </div>
           ) : (
-            <div style={{ position:'relative' }}>
+            <div style={{ position: 'relative' }}>
               <div className="input-group">
                 <MdSearch className="input-icon" />
                 <input className="form-control" placeholder="Search patient..."
                   value={patSearch} onChange={e => setPatSearch(e.target.value)} />
               </div>
               {showDrop && patients.length > 0 && (
-                <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'var(--card-bg)', border:'1px solid var(--border)', borderRadius:10, zIndex:100, boxShadow:'var(--shadow-lg)', marginTop:4 }}>
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 10, zIndex: 100, boxShadow: 'var(--shadow-lg)', marginTop: 4 }}>
                   {patients.map(p => (
-                    <div key={p._id} style={{ padding:'10px 14px', cursor:'pointer', borderBottom:'1px solid var(--border-light)' }}
+                    <div key={p._id} style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid var(--border-light)' }}
                       onMouseDown={() => { setSelectedPat(p); setPatSearch(''); setShowDrop(false); }}>
-                      <div style={{ fontWeight:600 }}>{p.name}</div>
+                      <div style={{ fontWeight: 600 }}>{p.name}</div>
                       <div className="text-muted text-sm">{p.patientId} · Age {p.age}</div>
                     </div>
                   ))}
@@ -140,7 +140,7 @@ function OrderModal({ onClose, onSaved }) {
         <div className="form-row">
           <div className="form-group">
             <label className="form-label">Test Category</label>
-            <select className="form-control" value={category} onChange={e => { setCategory(e.target.value); setForm(p=>({...p,testName:''})); }}>
+            <select className="form-control" value={category} onChange={e => { setCategory(e.target.value); setForm(p => ({ ...p, testName: '' })); }}>
               {CATEGORIES.map(c => <option key={c}>{c}</option>)}
             </select>
           </div>
@@ -149,7 +149,7 @@ function OrderModal({ onClose, onSaved }) {
             <input className="form-control" list="test-list" value={form.testName}
               onChange={fld('testName')} placeholder="Select or type test name..." />
             <datalist id="test-list">
-              {(COMMON_TESTS[category]||[]).map(t => <option key={t} value={t} />)}
+              {(COMMON_TESTS[category] || []).map(t => <option key={t} value={t} />)}
             </datalist>
           </div>
         </div>
@@ -190,20 +190,20 @@ function OrderModal({ onClose, onSaved }) {
    ENTER RESULT MODAL
 ═══════════════════════════════════ */
 function ResultModal({ test, onClose, onSaved }) {
-  const isCBC    = test.testName?.toLowerCase().includes('cbc');
-  const isPanel  = isCBC || test.resultRows?.length > 0;
+  const isCBC = test.testName?.toLowerCase().includes('cbc');
+  const isPanel = isCBC || test.resultRows?.length > 0;
 
   const [form, setForm] = useState({
-    status:        'Completed',
-    resultDate:    new Date().toISOString().slice(0,10),
+    status: 'Completed',
+    resultDate: new Date().toISOString().slice(0, 10),
     result: {
-      value:          test.result?.value          || '',
-      unit:           test.result?.unit           || '',
-      normalRange:    test.result?.normalRange    || '',
+      value: test.result?.value || '',
+      unit: test.result?.unit || '',
+      normalRange: test.result?.normalRange || '',
       interpretation: test.result?.interpretation || 'Pending',
-      notes:          test.result?.notes          || '',
+      notes: test.result?.notes || '',
     },
-    resultRows: test.resultRows?.length > 0 ? test.resultRows : isCBC ? CBC_PARAMS.map(p => ({ ...p, value:'', flag:'' })) : [],
+    resultRows: test.resultRows?.length > 0 ? test.resultRows : isCBC ? CBC_PARAMS.map(p => ({ ...p, value: '', flag: '' })) : [],
     usePanel: isPanel,
   });
   const [saving, setSaving] = useState(false);
@@ -216,16 +216,16 @@ function ResultModal({ test, onClose, onSaved }) {
       resultRows: p.resultRows.map((r, i) => i === idx ? { ...r, [field]: val } : r),
     }));
 
-  const addRow = () => setForm(p => ({ ...p, resultRows: [...p.resultRows, { parameter:'', value:'', unit:'', normalRange:'', flag:'' }] }));
-  const removeRow = (idx) => setForm(p => ({ ...p, resultRows: p.resultRows.filter((_,i)=>i!==idx) }));
+  const addRow = () => setForm(p => ({ ...p, resultRows: [...p.resultRows, { parameter: '', value: '', unit: '', normalRange: '', flag: '' }] }));
+  const removeRow = (idx) => setForm(p => ({ ...p, resultRows: p.resultRows.filter((_, i) => i !== idx) }));
 
   const handleSave = async () => {
     setSaving(true);
     try {
       const payload = {
-        status:     form.status,
+        status: form.status,
         resultDate: form.resultDate,
-        result:     form.usePanel ? { interpretation: form.result.interpretation, notes: form.result.notes } : form.result,
+        result: form.usePanel ? { interpretation: form.result.interpretation, notes: form.result.notes } : form.result,
         resultRows: form.usePanel ? form.resultRows : [],
       };
       await API.put(`/lab-tests/${test._id}`, payload);
@@ -237,8 +237,8 @@ function ResultModal({ test, onClose, onSaved }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
-      <div className="modal modal-xl" style={{ maxHeight:'90vh', overflowY:'auto' }}>
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal modal-xl" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
         <div className="modal-header">
           <div>
             <div className="modal-title">Enter Results — {test.testName}</div>
@@ -247,23 +247,23 @@ function ResultModal({ test, onClose, onSaved }) {
           <button className="btn btn-ghost btn-icon" onClick={onClose}>✕</button>
         </div>
 
-        <div className="form-row" style={{ marginBottom:16 }}>
-          <div className="form-group" style={{ marginBottom:0 }}>
+        <div className="form-row" style={{ marginBottom: 16 }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Result Date</label>
             <input className="form-control" type="date" value={form.resultDate}
-              onChange={e => setForm(p=>({...p,resultDate:e.target.value}))} />
+              onChange={e => setForm(p => ({ ...p, resultDate: e.target.value }))} />
           </div>
-          <div className="form-group" style={{ marginBottom:0 }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Overall Interpretation</label>
             <select className="form-control" value={form.result.interpretation}
               onChange={e => setResult('interpretation', e.target.value)}>
-              {['Normal','High','Low','Critical','Pending'].map(i => <option key={i}>{i}</option>)}
+              {['Normal', 'High', 'Low', 'Critical', 'Pending'].map(i => <option key={i}>{i}</option>)}
             </select>
           </div>
-          <div className="form-group" style={{ marginBottom:0 }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Entry Mode</label>
             <select className="form-control" value={form.usePanel ? 'panel' : 'single'}
-              onChange={e => setForm(p=>({...p, usePanel: e.target.value==='panel'}))}>
+              onChange={e => setForm(p => ({ ...p, usePanel: e.target.value === 'panel' }))}>
               <option value="single">Single Result</option>
               <option value="panel">Panel / Multiple Parameters</option>
             </select>
@@ -272,18 +272,18 @@ function ResultModal({ test, onClose, onSaved }) {
 
         {/* Single result */}
         {!form.usePanel && (
-          <div className="form-row" style={{ marginBottom:16 }}>
-            <div className="form-group" style={{ marginBottom:0 }}>
+          <div className="form-row" style={{ marginBottom: 16 }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Result Value</label>
               <input className="form-control" value={form.result.value}
                 onChange={e => setResult('value', e.target.value)} placeholder="e.g. 14.5" />
             </div>
-            <div className="form-group" style={{ marginBottom:0 }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Unit</label>
               <input className="form-control" value={form.result.unit}
                 onChange={e => setResult('unit', e.target.value)} placeholder="e.g. g/dL" />
             </div>
-            <div className="form-group" style={{ marginBottom:0 }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Normal Range</label>
               <input className="form-control" value={form.result.normalRange}
                 onChange={e => setResult('normalRange', e.target.value)} placeholder="e.g. 12–16 g/dL" />
@@ -293,9 +293,9 @@ function ResultModal({ test, onClose, onSaved }) {
 
         {/* Panel results table */}
         {form.usePanel && (
-          <div style={{ marginBottom:16 }}>
-            <div className="flex-between" style={{ marginBottom:10 }}>
-              <div style={{ fontWeight:700, fontSize:13, color:'var(--text-secondary)' }}>PARAMETERS</div>
+          <div style={{ marginBottom: 16 }}>
+            <div className="flex-between" style={{ marginBottom: 10 }}>
+              <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-secondary)' }}>PARAMETERS</div>
               <button className="btn btn-secondary btn-sm" onClick={addRow}><MdAdd /> Add Row</button>
             </div>
             <div className="table-container">
@@ -303,7 +303,7 @@ function ResultModal({ test, onClose, onSaved }) {
                 <thead>
                   <tr>
                     <th>Parameter</th>
-                    <th style={{ textAlign:'right' }}>Value</th>
+                    <th style={{ textAlign: 'right' }}>Value</th>
                     <th>Unit</th>
                     <th>Normal Range</th>
                     <th>Flag</th>
@@ -315,33 +315,33 @@ function ResultModal({ test, onClose, onSaved }) {
                     <tr key={idx}>
                       <td>
                         <input className="form-control" value={row.parameter}
-                          onChange={e => setRow(idx,'parameter',e.target.value)}
-                          placeholder="Parameter name" style={{ minWidth:140 }} />
+                          onChange={e => setRow(idx, 'parameter', e.target.value)}
+                          placeholder="Parameter name" style={{ minWidth: 140 }} />
                       </td>
-                      <td style={{ textAlign:'right' }}>
+                      <td style={{ textAlign: 'right' }}>
                         <input className="form-control" value={row.value}
-                          onChange={e => setRow(idx,'value',e.target.value)}
-                          placeholder="Value" style={{ width:80, textAlign:'right', color: FLAG_COLOR[row.flag] || 'inherit' }} />
+                          onChange={e => setRow(idx, 'value', e.target.value)}
+                          placeholder="Value" style={{ width: 80, textAlign: 'right', color: FLAG_COLOR[row.flag] || 'inherit' }} />
                       </td>
                       <td>
                         <input className="form-control" value={row.unit}
-                          onChange={e => setRow(idx,'unit',e.target.value)}
-                          placeholder="Unit" style={{ width:80 }} />
+                          onChange={e => setRow(idx, 'unit', e.target.value)}
+                          placeholder="Unit" style={{ width: 80 }} />
                       </td>
                       <td>
                         <input className="form-control" value={row.normalRange}
-                          onChange={e => setRow(idx,'normalRange',e.target.value)}
-                          placeholder="e.g. 12–16" style={{ width:110 }} />
+                          onChange={e => setRow(idx, 'normalRange', e.target.value)}
+                          placeholder="e.g. 12–16" style={{ width: 110 }} />
                       </td>
                       <td>
                         <select className="form-control" value={row.flag}
-                          onChange={e => setRow(idx,'flag',e.target.value)}
-                          style={{ width:70, color: FLAG_COLOR[row.flag] || 'inherit', fontWeight:700 }}>
+                          onChange={e => setRow(idx, 'flag', e.target.value)}
+                          style={{ width: 70, color: FLAG_COLOR[row.flag] || 'inherit', fontWeight: 700 }}>
                           <option value="">—</option>
-                          <option value="H" style={{ color:'var(--danger)' }}>H</option>
-                          <option value="L" style={{ color:'var(--info)' }}>L</option>
-                          <option value="HH" style={{ color:'var(--danger)' }}>HH</option>
-                          <option value="LL" style={{ color:'var(--info)' }}>LL</option>
+                          <option value="H" style={{ color: 'var(--danger)' }}>H</option>
+                          <option value="L" style={{ color: 'var(--info)' }}>L</option>
+                          <option value="HH" style={{ color: 'var(--danger)' }}>HH</option>
+                          <option value="LL" style={{ color: 'var(--info)' }}>LL</option>
                         </select>
                       </td>
                       <td>
@@ -378,34 +378,34 @@ function ResultModal({ test, onClose, onSaved }) {
    VIEW TEST MODAL
 ═══════════════════════════════════ */
 function ViewModal({ test, onClose, onEnterResult, onUpload, onDownloadFile, onDeleteFile }) {
-  const hasFile   = !!test.file?.originalName;
-  const hasRows   = test.resultRows?.length > 0;
+  const hasFile = !!test.file?.originalName;
+  const hasRows = test.resultRows?.length > 0;
   const hasResult = test.result?.value || hasRows;
 
   return (
-    <div className="modal-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
-      <div className="modal modal-lg" style={{ maxHeight:'90vh', overflowY:'auto' }}>
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal modal-lg" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
         <div className="modal-header">
           <div>
             <div className="modal-title">{test.testName}</div>
             <div className="text-muted text-sm">{test.patientName} · {fmtDate(test.orderedDate)}</div>
           </div>
           <div className="flex gap-2">
-            <span className={`badge ${STATUS_BADGE[test.status]||'badge-default'}`}>{test.status}</span>
+            <span className={`badge ${STATUS_BADGE[test.status] || 'badge-default'}`}>{test.status}</span>
             <button className="btn btn-ghost btn-icon" onClick={onClose}>✕</button>
           </div>
         </div>
 
         {/* Info grid */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:16 }}>
-          <div style={{ background:'var(--bg-tertiary)', borderRadius:10, padding:14 }}>
-            <div className="text-muted text-sm" style={{ marginBottom:4 }}>Patient</div>
-            <div style={{ fontWeight:700 }}>{test.patientName}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+          <div style={{ background: 'var(--bg-tertiary)', borderRadius: 10, padding: 14 }}>
+            <div className="text-muted text-sm" style={{ marginBottom: 4 }}>Patient</div>
+            <div style={{ fontWeight: 700 }}>{test.patientName}</div>
             <div className="text-muted text-sm">{test.patient?.patientId} · Age {test.patient?.age}</div>
           </div>
-          <div style={{ background:'var(--bg-tertiary)', borderRadius:10, padding:14 }}>
-            <div className="text-muted text-sm" style={{ marginBottom:4 }}>Test Info</div>
-            <div style={{ fontWeight:700 }}>{test.testCategory}</div>
+          <div style={{ background: 'var(--bg-tertiary)', borderRadius: 10, padding: 14 }}>
+            <div className="text-muted text-sm" style={{ marginBottom: 4 }}>Test Info</div>
+            <div style={{ fontWeight: 700 }}>{test.testCategory}</div>
             <div className="text-sm">Dr. {test.orderedBy || '—'} · {test.lab || 'Lab not specified'}</div>
             {test.resultDate && <div className="text-sm text-muted">Result: {fmtDate(test.resultDate)}</div>}
           </div>
@@ -413,15 +413,15 @@ function ViewModal({ test, onClose, onEnterResult, onUpload, onDownloadFile, onD
 
         {/* Result — single */}
         {test.result?.value && !hasRows && (
-          <div style={{ background:'var(--bg-tertiary)', borderRadius:10, padding:16, marginBottom:16 }}>
-            <div style={{ fontWeight:700, fontSize:13, color:'var(--text-secondary)', marginBottom:10 }}>RESULT</div>
-            <div style={{ display:'flex', alignItems:'baseline', gap:8, marginBottom:6 }}>
-              <div style={{ fontSize:28, fontWeight:800, color: INTERP_COLOR[test.result.interpretation] }}>
+          <div style={{ background: 'var(--bg-tertiary)', borderRadius: 10, padding: 16, marginBottom: 16 }}>
+            <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-secondary)', marginBottom: 10 }}>RESULT</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
+              <div style={{ fontSize: 28, fontWeight: 800, color: INTERP_COLOR[test.result.interpretation] }}>
                 {test.result.value}
               </div>
-              <div style={{ fontSize:14, color:'var(--text-muted)' }}>{test.result.unit}</div>
-              <div style={{ marginLeft:'auto' }}>
-                <span style={{ background: INTERP_COLOR[test.result.interpretation]+'20', color: INTERP_COLOR[test.result.interpretation], padding:'3px 12px', borderRadius:99, fontSize:12, fontWeight:700 }}>
+              <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>{test.result.unit}</div>
+              <div style={{ marginLeft: 'auto' }}>
+                <span style={{ background: INTERP_COLOR[test.result.interpretation] + '20', color: INTERP_COLOR[test.result.interpretation], padding: '3px 12px', borderRadius: 99, fontSize: 12, fontWeight: 700 }}>
                   {test.result.interpretation}
                 </span>
               </div>
@@ -430,18 +430,18 @@ function ViewModal({ test, onClose, onEnterResult, onUpload, onDownloadFile, onD
               <div className="text-muted text-sm">Normal Range: {test.result.normalRange}</div>
             )}
             {test.result.notes && (
-              <div style={{ marginTop:8, fontSize:13, color:'var(--text-secondary)' }}>{test.result.notes}</div>
+              <div style={{ marginTop: 8, fontSize: 13, color: 'var(--text-secondary)' }}>{test.result.notes}</div>
             )}
           </div>
         )}
 
         {/* Result — panel */}
         {hasRows && (
-          <div style={{ marginBottom:16 }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
-              <div style={{ fontWeight:700, fontSize:13, color:'var(--text-secondary)' }}>RESULTS PANEL</div>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-secondary)' }}>RESULTS PANEL</div>
               {test.result?.interpretation && (
-                <span style={{ background: INTERP_COLOR[test.result.interpretation]+'20', color: INTERP_COLOR[test.result.interpretation], padding:'3px 12px', borderRadius:99, fontSize:12, fontWeight:700 }}>
+                <span style={{ background: INTERP_COLOR[test.result.interpretation] + '20', color: INTERP_COLOR[test.result.interpretation], padding: '3px 12px', borderRadius: 99, fontSize: 12, fontWeight: 700 }}>
                   Overall: {test.result.interpretation}
                 </span>
               )}
@@ -449,18 +449,18 @@ function ViewModal({ test, onClose, onEnterResult, onUpload, onDownloadFile, onD
             <div className="table-container">
               <table>
                 <thead>
-                  <tr><th>Parameter</th><th style={{ textAlign:'right' }}>Value</th><th>Unit</th><th>Normal Range</th><th>Flag</th></tr>
+                  <tr><th>Parameter</th><th style={{ textAlign: 'right' }}>Value</th><th>Unit</th><th>Normal Range</th><th>Flag</th></tr>
                 </thead>
                 <tbody>
                   {test.resultRows.map((r, i) => (
                     <tr key={i}>
-                      <td style={{ fontWeight:600 }}>{r.parameter}</td>
-                      <td style={{ textAlign:'right', fontWeight:700, color: FLAG_COLOR[r.flag]||'inherit' }}>{r.value || '—'}</td>
+                      <td style={{ fontWeight: 600 }}>{r.parameter}</td>
+                      <td style={{ textAlign: 'right', fontWeight: 700, color: FLAG_COLOR[r.flag] || 'inherit' }}>{r.value || '—'}</td>
                       <td className="text-muted text-sm">{r.unit}</td>
                       <td className="text-muted text-sm">{r.normalRange}</td>
                       <td>
                         {r.flag
-                          ? <span style={{ color: FLAG_COLOR[r.flag], fontWeight:800 }}>{r.flag}</span>
+                          ? <span style={{ color: FLAG_COLOR[r.flag], fontWeight: 800 }}>{r.flag}</span>
                           : <span className="text-muted">—</span>}
                       </td>
                     </tr>
@@ -468,24 +468,31 @@ function ViewModal({ test, onClose, onEnterResult, onUpload, onDownloadFile, onD
                 </tbody>
               </table>
             </div>
-            {test.result?.notes && <div style={{ marginTop:8, fontSize:13, color:'var(--text-secondary)', padding:'10px 0' }}>{test.result.notes}</div>}
+            {test.result?.notes && <div style={{ marginTop: 8, fontSize: 13, color: 'var(--text-secondary)', padding: '10px 0' }}>{test.result.notes}</div>}
           </div>
         )}
 
         {/* Linked records */}
         {(test.linkedPrescription || test.linkedAppointment) && (
-          <div className="flex gap-3" style={{ marginBottom:16 }}>
+          <div className="flex gap-3" style={{ marginBottom: 16 }}>
             {test.linkedPrescription && <span className="badge badge-accent">Rx: {test.linkedPrescription.rxNumber}</span>}
-            {test.linkedAppointment  && <span className="badge badge-info">Appointment: {fmtDate(test.linkedAppointment.date)}</span>}
+            {test.linkedAppointment && <span className="badge badge-info">Appointment: {fmtDate(test.linkedAppointment.date)}</span>}
           </div>
         )}
 
         {/* File */}
         {hasFile ? (
-          <div style={{ background:'var(--success-bg)', border:'1px solid var(--success)', borderRadius:10, padding:'12px 16px', marginBottom:16, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ background: 'var(--success-bg)', border: '1px solid var(--success)', borderRadius: 10, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ fontWeight:700, fontSize:14, color:'var(--success)' }}>📎 Result File Uploaded</div>
-              <div className="text-muted text-sm">{test.file.originalName} · {bytes(test.file.size)}</div>
+              <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--success)' }}>📎 Result File Uploaded</div>
+              <div className="text-muted text-sm">
+                {test.file.originalName} · {bytes(test.file.size)}
+                {test.file.mimetype?.startsWith('image/') && (
+                  <img src={test.file.url} alt="result"
+                    style={{ display: 'block', maxWidth: '100%', maxHeight: 200, borderRadius: 8, marginTop: 8 }}
+                  />
+                )}
+              </div>
             </div>
             <div className="flex gap-2">
               <button className="btn btn-secondary btn-sm" onClick={onDownloadFile}>
@@ -495,8 +502,8 @@ function ViewModal({ test, onClose, onEnterResult, onUpload, onDownloadFile, onD
             </div>
           </div>
         ) : (
-          <div style={{ border:'2px dashed var(--border)', borderRadius:10, padding:'16px', marginBottom:16, textAlign:'center' }}>
-            <div className="text-muted text-sm" style={{ marginBottom:8 }}>No result file uploaded yet</div>
+          <div style={{ border: '2px dashed var(--border)', borderRadius: 10, padding: '16px', marginBottom: 16, textAlign: 'center' }}>
+            <div className="text-muted text-sm" style={{ marginBottom: 8 }}>No result file uploaded yet</div>
             <button className="btn btn-secondary btn-sm" onClick={onUpload}>
               <MdUploadFile /> Upload PDF or Image
             </button>
@@ -530,7 +537,7 @@ function ViewModal({ test, onClose, onEnterResult, onUpload, onDownloadFile, onD
    UPLOAD FILE MODAL
 ═══════════════════════════════════ */
 function UploadModal({ test, onClose, onUploaded }) {
-  const [file, setFile]       = useState(null);
+  const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(null);
 
@@ -565,8 +572,8 @@ function UploadModal({ test, onClose, onUploaded }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
-      <div className="modal" style={{ maxWidth:440 }}>
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal" style={{ maxWidth: 440 }}>
         <div className="modal-header">
           <div>
             <div className="modal-title">Upload Result File</div>
@@ -575,30 +582,30 @@ function UploadModal({ test, onClose, onUploaded }) {
           <button className="btn btn-ghost btn-icon" onClick={onClose}>✕</button>
         </div>
 
-        <div style={{ border:'2px dashed var(--border)', borderRadius:12, padding:24, textAlign:'center', marginBottom:16, cursor:'pointer', position:'relative' }}
+        <div style={{ border: '2px dashed var(--border)', borderRadius: 12, padding: 24, textAlign: 'center', marginBottom: 16, cursor: 'pointer', position: 'relative' }}
           onClick={() => document.getElementById('lab-file-input').click()}>
           <input id="lab-file-input" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp"
-            style={{ display:'none' }} onChange={handleFile} />
+            style={{ display: 'none' }} onChange={handleFile} />
           {preview ? (
-            <img src={preview} alt="preview" style={{ maxWidth:'100%', maxHeight:200, borderRadius:8 }} />
+            <img src={preview} alt="preview" style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8 }} />
           ) : file ? (
             <div>
-              <div style={{ fontSize:36, marginBottom:8 }}>📄</div>
-              <div style={{ fontWeight:700 }}>{file.name}</div>
+              <div style={{ fontSize: 36, marginBottom: 8 }}>📄</div>
+              <div style={{ fontWeight: 700 }}>{file.name}</div>
               <div className="text-muted text-sm">{bytes(file.size)}</div>
             </div>
           ) : (
             <>
-              <MdUploadFile size={40} style={{ color:'var(--text-muted)', marginBottom:8 }} />
-              <div style={{ fontWeight:600, marginBottom:4 }}>Click to select file</div>
+              <MdUploadFile size={40} style={{ color: 'var(--text-muted)', marginBottom: 8 }} />
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>Click to select file</div>
               <div className="text-muted text-sm">PDF, JPEG, PNG, WebP · Max 5MB</div>
             </>
           )}
         </div>
 
         {file && (
-          <div style={{ background:'var(--bg-tertiary)', borderRadius:8, padding:'10px 14px', marginBottom:16, fontSize:13 }}>
-            <div style={{ fontWeight:600 }}>{file.name}</div>
+          <div style={{ background: 'var(--bg-tertiary)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13 }}>
+            <div style={{ fontWeight: 600 }}>{file.name}</div>
             <div className="text-muted">{bytes(file.size)} · {file.type}</div>
           </div>
         )}
@@ -618,19 +625,19 @@ function UploadModal({ test, onClose, onUploaded }) {
    MAIN PAGE
 ═══════════════════════════════════ */
 export default function LabTests() {
-  const [tests, setTests]         = useState([]);
-  const [total, setTotal]         = useState(0);
-  const [page, setPage]           = useState(1);
+  const [tests, setTests] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading]     = useState(true);
-  const [stats, setStats]         = useState({});
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({});
 
-  const [search, setSearch]       = useState('');
-  const [status, setStatus]       = useState('');
-  const [category, setCategory]   = useState('');
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('');
+  const [category, setCategory] = useState('');
 
-  const [orderModal, setOrderModal]   = useState(false);
-  const [viewTest, setViewTest]       = useState(null);
+  const [orderModal, setOrderModal] = useState(false);
+  const [viewTest, setViewTest] = useState(null);
   const [resultModal, setResultModal] = useState(null);
   const [uploadModal, setUploadModal] = useState(null);
 
@@ -638,8 +645,8 @@ export default function LabTests() {
     setLoading(true);
     try {
       const params = { page, limit: 20 };
-      if (search)   params.search   = search;
-      if (status)   params.status   = status;
+      if (search) params.search = search;
+      if (status) params.status = status;
       if (category) params.category = category;
       const { data } = await API.get('/lab-tests', { params });
       setTests(data.tests);
@@ -651,7 +658,7 @@ export default function LabTests() {
 
   useEffect(() => { fetchTests(); }, [fetchTests]);
   useEffect(() => {
-    API.get('/lab-tests/stats').then(({ data }) => setStats(data.stats)).catch(() => {});
+    API.get('/lab-tests/stats').then(({ data }) => setStats(data.stats)).catch(() => { });
   }, []);
   useEffect(() => { setPage(1); }, [search, status, category]);
 
@@ -662,9 +669,10 @@ export default function LabTests() {
     } catch { toast.error('Failed to load'); }
   };
 
-  const handleDownloadFile = async () => {
-    if (!viewTest) return;
-    window.open(`/api/lab-tests/${viewTest._id}/file`, '_blank');
+  const handleDownloadFile = () => {
+    if (!viewTest?.file?.url) return;
+    // Open Cloudinary URL directly in new tab
+    window.open(viewTest.file.url, '_blank', 'noopener,noreferrer');
   };
 
   const handleDeleteFile = async () => {
@@ -690,16 +698,16 @@ export default function LabTests() {
     setOrderModal(false); setResultModal(null);
     setUploadModal(null); setViewTest(null);
     fetchTests();
-    API.get('/lab-tests/stats').then(({ data }) => setStats(data.stats)).catch(() => {});
+    API.get('/lab-tests/stats').then(({ data }) => setStats(data.stats)).catch(() => { });
   };
 
   const statusTabs = [
-    { id:'',                 label:'All'              },
-    { id:'Ordered',          label:'Ordered'          },
-    { id:'Sample Collected', label:'Sample Collected' },
-    { id:'In Progress',      label:'In Progress'      },
-    { id:'Completed',        label:'Completed'        },
-    { id:'Cancelled',        label:'Cancelled'        },
+    { id: '', label: 'All' },
+    { id: 'Ordered', label: 'Ordered' },
+    { id: 'Sample Collected', label: 'Sample Collected' },
+    { id: 'In Progress', label: 'In Progress' },
+    { id: 'Completed', label: 'Completed' },
+    { id: 'Cancelled', label: 'Cancelled' },
   ];
 
   return (
@@ -715,17 +723,17 @@ export default function LabTests() {
       </div>
 
       {/* Stats */}
-      <div className="stat-grid" style={{ marginBottom:20 }}>
+      <div className="stat-grid" style={{ marginBottom: 20 }}>
         {[
-          { label:'Total Tests',  value: stats.total     || 0, cls:'blue'   },
-          { label:'Pending',      value: stats.ordered   || 0, cls:'yellow' },
-          { label:'Completed',    value: stats.completed || 0, cls:'green'  },
-          { label:'Critical',     value: stats.critical  || 0, cls:'red'    },
+          { label: 'Total Tests', value: stats.total || 0, cls: 'blue' },
+          { label: 'Pending', value: stats.ordered || 0, cls: 'yellow' },
+          { label: 'Completed', value: stats.completed || 0, cls: 'green' },
+          { label: 'Critical', value: stats.critical || 0, cls: 'red' },
         ].map((s, i) => (
           <div key={i} className="stat-card">
             <div className={`stat-icon ${s.cls}`}><MdScience /></div>
             <div>
-              <div className="stat-value" style={{ fontSize:24 }}>{s.value}</div>
+              <div className="stat-value" style={{ fontSize: 24 }}>{s.value}</div>
               <div className="stat-label">{s.label}</div>
             </div>
           </div>
@@ -733,22 +741,22 @@ export default function LabTests() {
       </div>
 
       {/* Filters */}
-      <div className="card" style={{ marginBottom:16 }}>
-        <div className="toolbar" style={{ marginBottom:10 }}>
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="toolbar" style={{ marginBottom: 10 }}>
           <div className="search-box">
             <MdSearch className="search-icon" />
             <input placeholder="Search by test, patient, doctor, lab..."
               value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <select className="form-control" style={{ width:170 }} value={category}
+          <select className="form-control" style={{ width: 170 }} value={category}
             onChange={e => setCategory(e.target.value)}>
             <option value="">All Categories</option>
             {CATEGORIES.map(c => <option key={c}>{c}</option>)}
           </select>
         </div>
-        <div className="flex gap-2" style={{ flexWrap:'wrap' }}>
+        <div className="flex gap-2" style={{ flexWrap: 'wrap' }}>
           {statusTabs.map(t => (
-            <button key={t.id} className={`pill${status===t.id?' active':''}`}
+            <button key={t.id} className={`pill${status === t.id ? ' active' : ''}`}
               onClick={() => setStatus(t.id)}>{t.label}</button>
           ))}
         </div>
@@ -757,12 +765,12 @@ export default function LabTests() {
       {/* Table */}
       <div className="card">
         {loading ? (
-          <div className="flex-center" style={{ height:200 }}>
+          <div className="flex-center" style={{ height: 200 }}>
             <div className="text-muted">Loading...</div>
           </div>
         ) : tests.length === 0 ? (
           <div className="empty-state">
-            <MdScience size={52} style={{ opacity:0.3, marginBottom:16 }} />
+            <MdScience size={52} style={{ opacity: 0.3, marginBottom: 16 }} />
             <h3>No lab tests found</h3>
             <p>Order your first lab test to get started</p>
           </div>
@@ -779,11 +787,11 @@ export default function LabTests() {
                 {tests.map(t => (
                   <tr key={t._id}>
                     <td>
-                      <div style={{ fontWeight:700 }}>{t.testName}</div>
+                      <div style={{ fontWeight: 700 }}>{t.testName}</div>
                       <div className="text-muted text-sm">{t.testCategory}</div>
                     </td>
                     <td>
-                      <div style={{ fontWeight:600 }}>{t.patientName}</div>
+                      <div style={{ fontWeight: 600 }}>{t.patientName}</div>
                       <div className="text-muted text-sm">{t.patient?.patientId}</div>
                     </td>
                     <td className="text-sm">{t.orderedBy ? `Dr. ${t.orderedBy}` : '—'}</td>
@@ -791,9 +799,9 @@ export default function LabTests() {
                     <td className="text-sm">{fmtDate(t.orderedDate)}</td>
                     <td>
                       {t.result?.interpretation && t.result.interpretation !== 'Pending' ? (
-                        <span style={{ color: INTERP_COLOR[t.result.interpretation], fontWeight:700, fontSize:13 }}>
+                        <span style={{ color: INTERP_COLOR[t.result.interpretation], fontWeight: 700, fontSize: 13 }}>
                           {t.result.interpretation}
-                          {t.result.value ? ` — ${t.result.value} ${t.result.unit||''}` : ''}
+                          {t.result.value ? ` — ${t.result.value} ${t.result.unit || ''}` : ''}
                         </span>
                       ) : t.resultRows?.length > 0 ? (
                         <span className="badge badge-accent">{t.resultRows.length} params</span>
@@ -803,11 +811,11 @@ export default function LabTests() {
                     </td>
                     <td>
                       {t.file?.originalName
-                        ? <span className="badge badge-success text-sm" style={{ fontSize:11 }}>📎 {t.file.originalName.slice(0,12)}...</span>
+                        ? <span className="badge badge-success text-sm" style={{ fontSize: 11 }}>📎 {t.file.originalName.slice(0, 12)}...</span>
                         : <span className="text-muted text-sm">—</span>}
                     </td>
                     <td>
-                      <span className={`badge ${STATUS_BADGE[t.status]||'badge-default'}`}>{t.status}</span>
+                      <span className={`badge ${STATUS_BADGE[t.status] || 'badge-default'}`}>{t.status}</span>
                     </td>
                     <td>
                       <div className="table-actions">
@@ -815,7 +823,7 @@ export default function LabTests() {
                           onClick={() => openView(t._id)} title="View"><MdVisibility /></button>
                         {t.status !== 'Cancelled' && (
                           <button className="btn btn-sm btn-icon"
-                            style={{ background:'var(--success-bg)', color:'var(--success)' }}
+                            style={{ background: 'var(--success-bg)', color: 'var(--success)' }}
                             onClick={() => setResultModal(t)} title="Enter Result"><MdEdit /></button>
                         )}
                         {t.status !== 'Cancelled' && !t.file?.originalName && (
@@ -837,11 +845,11 @@ export default function LabTests() {
 
         {totalPages > 1 && (
           <div className="pagination">
-            <button disabled={page===1} onClick={() => setPage(p=>p-1)}>‹</button>
-            {Array.from({length:totalPages},(_,i)=>i+1).map(p => (
-              <button key={p} className={page===p?'active':''} onClick={() => setPage(p)}>{p}</button>
+            <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>‹</button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+              <button key={p} className={page === p ? 'active' : ''} onClick={() => setPage(p)}>{p}</button>
             ))}
-            <button disabled={page===totalPages} onClick={() => setPage(p=>p+1)}>›</button>
+            <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>›</button>
           </div>
         )}
       </div>
