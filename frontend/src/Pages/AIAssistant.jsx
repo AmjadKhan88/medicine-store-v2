@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import Markdown from 'react-markdown';
 import {
   MdSend, MdAutoAwesome, MdPerson, MdRefresh,
   MdLightbulb, MdInventory, MdWarning,
@@ -20,28 +21,28 @@ const QUICK_QUESTIONS = [
 ];
 
 /* ── Markdown-like formatter ── */
-function formatMessage(text) {
-  const lines = text.split('\n');
-  return lines.map((line, i) => {
-    if (line.startsWith('## ')) return <div key={i} style={{ fontWeight: 800, fontSize: 16, color: 'var(--text-primary)', margin: '10px 0 4px' }}>{line.slice(3)}</div>;
-    if (line.startsWith('# '))  return <div key={i} style={{ fontWeight: 800, fontSize: 18, color: 'var(--text-primary)', margin: '12px 0 6px' }}>{line.slice(2)}</div>;
-    if (line.startsWith('**') && line.endsWith('**')) return <div key={i} style={{ fontWeight: 700, margin: '4px 0' }}>{line.slice(2, -2)}</div>;
-    if (line.startsWith('- ') || line.startsWith('• ')) return (
-      <div key={i} style={{ display: 'flex', gap: 8, margin: '3px 0', paddingLeft: 4 }}>
-        <span style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }}>•</span>
-        <span>{line.slice(2)}</span>
-      </div>
-    );
-    if (line.match(/^\d+\./)) return (
-      <div key={i} style={{ display: 'flex', gap: 8, margin: '3px 0', paddingLeft: 4 }}>
-        <span style={{ color: 'var(--accent)', flexShrink: 0, fontWeight: 700 }}>{line.match(/^\d+/)[0]}.</span>
-        <span>{line.replace(/^\d+\./, '').trim()}</span>
-      </div>
-    );
-    if (line.trim() === '') return <div key={i} style={{ height: 6 }} />;
-    return <div key={i} style={{ margin: '2px 0', lineHeight: 1.6 }}>{line}</div>;
-  });
-}
+// function formatMessage(text) {
+//   const lines = text.split('\n');
+//   return lines.map((line, i) => {
+//     if (line.startsWith('## ')) return <div key={i} style={{ fontWeight: 800, fontSize: 16, color: 'var(--text-primary)', margin: '10px 0 4px' }}>{line.slice(3)}</div>;
+//     if (line.startsWith('# '))  return <div key={i} style={{ fontWeight: 800, fontSize: 18, color: 'var(--text-primary)', margin: '12px 0 6px' }}>{line.slice(2)}</div>;
+//     if (line.startsWith('**') && line.endsWith('**')) return <div key={i} style={{ fontWeight: 700, margin: '4px 0' }}>{line.slice(2, -2)}</div>;
+//     if (line.startsWith('- ') || line.startsWith('• ')) return (
+//       <div key={i} style={{ display: 'flex', gap: 8, margin: '3px 0', paddingLeft: 4 }}>
+//         <span style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }}>•</span>
+//         <span>{line.slice(2)}</span>
+//       </div>
+//     );
+//     if (line.match(/^\d+\./)) return (
+//       <div key={i} style={{ display: 'flex', gap: 8, margin: '3px 0', paddingLeft: 4 }}>
+//         <span style={{ color: 'var(--accent)', flexShrink: 0, fontWeight: 700 }}>{line.match(/^\d+/)[0]}.</span>
+//         <span>{line.replace(/^\d+\./, '').trim()}</span>
+//       </div>
+//     );
+//     if (line.trim() === '') return <div key={i} style={{ height: 6 }} />;
+//     return <div key={i} style={{ margin: '2px 0', lineHeight: 1.6 }}>{line}</div>;
+//   });
+// }
 
 /* ── Reorder Suggestions Panel ── */
 function ReorderPanel({ onClose }) {
@@ -347,7 +348,8 @@ export default function AIAssistant() {
                 lineHeight:   1.6,
                 boxShadow:    'var(--shadow-sm)',
               }}>
-                {msg.role === 'assistant' ? formatMessage(msg.content) : msg.content}
+                {/* {msg.role === 'assistant' ? formatMessage(msg.content) : msg.content} */}
+                {msg.role === 'assistant' ? <div className="ai-content"><Markdown>{msg.content}</Markdown></div>: msg.content}
 
                 {/* Meta */}
                 <div style={{
