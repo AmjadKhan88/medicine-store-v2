@@ -99,7 +99,7 @@ export default function CreatePrescription() {
       };
       const { data } = await API.post('/prescriptions', payload);
       toast.success(`Prescription ${data.prescription.rxNumber} created!`);
-      navigate('/prescriptions');
+      navigate('/app/prescriptions');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to create prescription');
     } finally { setSaving(false); }
@@ -110,7 +110,7 @@ export default function CreatePrescription() {
       <div className="page-header">
         <div className="page-header-left">
           <button className="btn btn-ghost btn-sm" style={{ marginBottom: 6 }}
-            onClick={() => navigate('/prescriptions')}>
+            onClick={() => navigate('/app/prescriptions')}>
             <MdArrowBack /> Back
           </button>
           <h1>Write Prescription</h1>

@@ -107,7 +107,7 @@ export default function Prescriptions() {
           <h1>Prescriptions</h1>
           <p>{total} total prescriptions</p>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate('/prescriptions/create')}>
+        <button className="btn btn-primary" onClick={() => navigate('/app/prescriptions/create')}>
           <MdAdd /> Write Prescription
         </button>
       </div>
