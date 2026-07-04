@@ -20,6 +20,7 @@ const prescriptionRoutes = require('./routes/prescriptions');
 const appointmentRoutes = require('./routes/appointments');
 const labTestRoutes = require('./routes/labTests');
 const supplierRoutes = require('./routes/suppliers');
+const pushRoutes = require('./routes/push');
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/lab-tests', labTestRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/push', pushRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

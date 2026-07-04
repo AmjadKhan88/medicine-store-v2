@@ -1,6 +1,6 @@
-const cron         = require('node-cron');
-const User         = require('../models/User');
-const Medicine     = require('../models/Medicine');
+const cron = require('node-cron');
+const User = require('../models/User');
+const Medicine = require('../models/Medicine');
 const emailService = require('../utils/emailService');
 
 /**
@@ -14,10 +14,11 @@ function startExpiryDigestJob() {
     try {
       // Get all admin users (one per store)
       const admins = await User.find({ role: 'admin', isActive: true });
+
       console.log(`[Cron] Found ${admins.length} stores to notify`);
 
-      const now       = new Date();
-      const in30Days  = new Date(); in30Days.setDate(in30Days.getDate() + 30);
+      const now = new Date();
+      const in30Days = new Date(); in30Days.setDate(in30Days.getDate() + 30);
 
       for (const admin of admins) {
         try {
@@ -43,13 +44,24 @@ function startExpiryDigestJob() {
           const storeName = admin.storeName || 'Your Pharmacy';
 
           await emailService.sendExpiryDigestEmail({
-            email:       admin.email,
-            adminName:   admin.name,
+            email: admin.email,
+            adminName: admin.name,
             storeName,
             expired,
             expiringSoon,
             lowStock,
           });
+
+          try {
+            const { sendExpiryPush } = require('../controllers/pushController');
+            await sendExpiryPush(storeId, {
+              expiredCount: expired.length,
+              expiringSoonCount: expiringSoon.length,
+              lowStockCount: lowStock.length,
+            });
+          } catch (pushErr) {
+            console.error(`[Cron] Push failed for ${admin.email}:`, pushErr.message);
+          }
 
           console.log(`[Cron] Digest sent to ${admin.email} — ${expired.length} expired, ${expiringSoon.length} expiring, ${lowStock.length} low stock`);
         } catch (err) {
