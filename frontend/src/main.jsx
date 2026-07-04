@@ -7,6 +7,7 @@ import { SubscriptionProvider } from './context/SubscriptionContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
 import { OfflineBanner, UpdateBanner, InstallBanner } from './Components/PWAInstallBanner';
+import { AIProvider } from './context/AIContext.jsx';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -14,17 +15,19 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ThemeProvider>
       <AuthProvider>
         <SubscriptionProvider>
-          <NotificationProvider>
-            <App />
-            <Toaster position="top-right" toastOptions={{
-              style: { borderRadius: '10px', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: '14px' },
-              success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
-              error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
-            }} />
-            <OfflineBanner />
-            <UpdateBanner />
-            <InstallBanner />
-          </NotificationProvider>
+          <AIProvider>
+            <NotificationProvider>
+              <App />
+              <Toaster position="top-right" toastOptions={{
+                style: { borderRadius: '10px', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: '14px' },
+                success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
+                error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+              }} />
+              <OfflineBanner />
+              <UpdateBanner />
+              <InstallBanner />
+            </NotificationProvider>
+          </AIProvider>
         </SubscriptionProvider>
       </AuthProvider>
     </ThemeProvider>

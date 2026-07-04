@@ -4,7 +4,7 @@ import { useSubscription } from '../context/SubscriptionContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import { useState, Suspense } from 'react';
-import { MdDashboard,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
+import { MdDashboard,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
@@ -31,6 +31,7 @@ export default function Layout() {
   const navItems = [
     { to: '/app/subscription', icon: <MdStar />, label: 'My Subscription', show: true },
     { to: '/app', icon: <MdDashboard />, label: 'Dashboard', exact: true },
+    { to: '/app/ai-assistant', icon: <MdAutoAwesome />, label: 'AI Assistant', show: true },
     { to: '/app/medicines', icon: <MdMedicalServices />, label: 'Medicines' },
     { to: '/app/patients', icon: <MdPeople />, label: 'Patients' },
     { to: '/app/billing', icon: <MdReceipt />, label: 'Billing & Invoices' },

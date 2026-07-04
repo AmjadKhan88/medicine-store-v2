@@ -31,6 +31,7 @@ const Appointments = lazy(()=> import('./Pages/Appointments'));
 const LabTests = lazy(()=> import('./Pages/LabTests'));
 const Suppliers = lazy(()=> import('./Pages/Suppliers'));
 const PatientPortal = lazy(()=> import('./Pages/PatientPortal'));
+const AIAssistant = lazy(()=> import('./Pages/AIAssistant'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -72,6 +73,7 @@ export default function App() {
         <Route path="prescriptions/create" element={<CreatePrescription />} />
         <Route path="lab-tests" element={<LabTests />} />
         <Route path="suppliers" element={<Suppliers />} />
+        <Route path="ai-assistant" element={<AIAssistant />} />
         <Route path="super-admin" element={<SuperAdmin />} />
         <Route path="settings" element={<Settings />} />
       </Route>

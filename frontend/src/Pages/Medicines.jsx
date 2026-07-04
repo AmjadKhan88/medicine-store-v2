@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import PermissionGate from '../Components/PermissionGate';
-import { MdAdd, MdEdit, MdDelete, MdSearch, MdMedicalServices, MdWarning, MdSwapHoriz } from 'react-icons/md';
+import { useAI } from '../context/AIContext';
+import { MdAdd, MdAutoAwesome, MdEdit, MdDelete, MdSearch, MdMedicalServices, MdWarning, MdSwapHoriz } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 
@@ -41,6 +42,9 @@ export default function Medicines() {
   const [subsModal, setSubsModal] = useState(null); // medicine being edited for substitutes
   const [allMeds, setAllMeds] = useState([]);
   const [selectedSubs, setSelectedSubs] = useState([]);
+
+  const { selectedModel } = useAI();
+  const [suggesting, setSuggesting] = useState(false);
 
   const fetchMedicines = useCallback(async () => {
     setLoading(true);
@@ -100,6 +104,31 @@ export default function Medicines() {
       setSubsModal(null);
       fetchMedicines();
     } catch { toast.error('Failed to save'); }
+  };
+
+  const handleAISuggest = async () => {
+    if (!form.name?.trim()) { toast.error('Enter medicine name first'); return; }
+    setSuggesting(true);
+    try {
+      const { data } = await API.post('/ai/suggest-medicine', {
+        name: form.name,
+        modelKey: selectedModel,
+      });
+      if (data.suggestion) {
+        setForm(p => ({
+          ...p,
+          genericName: data.suggestion.genericName || p.genericName,
+          category: data.suggestion.category || p.category,
+          dosageForm: data.suggestion.dosageForm || p.dosageForm,
+          strength: data.suggestion.strength || p.strength,
+          requiresPrescription: data.suggestion.requiresPrescription ?? p.requiresPrescription,
+          description: data.suggestion.description || p.description,
+        }));
+        toast.success('AI filled in medicine details!');
+      }
+    } catch (err) {
+      toast.error('AI suggestion failed');
+    } finally { setSuggesting(false); }
   };
 
   const fld = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
@@ -204,7 +233,33 @@ export default function Medicines() {
             </div>
             <form onSubmit={handleSave}>
               <div className="form-row">
-                <div className="form-group"><label className="form-label required">Medicine Name</label><input className="form-control" value={form.name} onChange={fld('name')} required placeholder="e.g. Panadol Extra" /></div>
+                <div className="form-group">
+                  <label className="form-label required">Medicine Name</label>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input className="form-control" value={form.name} onChange={fld('name')} required placeholder="e.g. Panadol Extra" style={{ flex: 1 }} />
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={handleAISuggest}
+                      disabled={suggesting || !form.name}
+                      title="Auto-fill details using AI"
+                      style={{ flexShrink: 0 }}
+                    >
+                      {suggesting
+                        ? <span className="spin" style={{ display: 'inline-block', fontSize: 11 }}>⏳</span>
+                        : <MdAutoAwesome size={16} style={{ color: 'var(--accent)' }} />}
+                    </button>
+                  </div>
+                  {!suggesting && form.name && (
+                    <div className="form-hint">
+                      Click ✦ to auto-fill category, generic name and details with AI
+                    </div>
+                  )}
+                </div>
+                {/* <div className="form-group">
+                  <label className="form-label required">Medicine Name</label>
+                  <input className="form-control" value={form.name} onChange={fld('name')} required placeholder="e.g. Panadol Extra" />
+                </div> */}
                 <div className="form-group"><label className="form-label">Generic Name</label><input className="form-control" value={form.genericName} onChange={fld('genericName')} placeholder="e.g. Paracetamol" /></div>
               </div>
               <div className="form-row">

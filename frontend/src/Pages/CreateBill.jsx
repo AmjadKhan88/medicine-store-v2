@@ -4,6 +4,7 @@ import { MdAdd, MdDelete, MdSearch, MdArrowBack, MdReceipt, MdSwapHoriz } from '
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import SubstitutesPanel from '../Components/SubstitutesPanel';
+import DrugInteractionChecker from '../Components/DrugInteractionChecker';
 
 export default function CreateBill() {
   const navigate = useNavigate();
@@ -187,6 +188,11 @@ export default function CreateBill() {
             )}
           </div>
         </div>
+
+        <DrugInteractionChecker
+          medicineIds={items.map(i => i.medicine)}
+          medicineNames={items.map(i => i.medicineName)}
+        />
 
         {/* Right: Summary */}
         <div>
