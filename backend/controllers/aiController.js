@@ -10,12 +10,10 @@ const groqClient   = new Groq({ apiKey: process.env.GROQ_API_KEY || '' });
 
 /* ── Available models ── */
 const MODELS = {
-  'gemini-2.0-flash':     { provider: 'gemini', label: 'Gemini 2.0 Flash',        model: 'gemini-2.0-flash-exp' },
-  'gemini-1.5-flash':     { provider: 'gemini', label: 'Gemini 1.5 Flash',        model: 'gemini-1.5-flash'     },
+  'gemini-2.5-flash':     { provider: 'gemini', label: 'Gemini 2.5 Flash',        model: 'gemini-2.5-flash' },
+  'gemini-3.5-flash':     { provider: 'gemini', label: 'Gemini 3.5 Flash',        model: 'gemini-3.5-flash'     },
   'llama-3.3-70b':        { provider: 'groq',   label: 'Groq — Llama 3.3 70B',   model: 'llama-3.3-70b-versatile' },
   'llama-3.1-8b':         { provider: 'groq',   label: 'Groq — Llama 3.1 8B',    model: 'llama-3.1-8b-instant'    },
-  'mixtral-8x7b':         { provider: 'groq',   label: 'Groq — Mixtral 8x7B',    model: 'mixtral-8x7b-32768'      },
-  'gemma2-9b':            { provider: 'groq',   label: 'Groq — Gemma 2 9B',      model: 'gemma2-9b-it'            },
 };
 
 exports.getModels = (req, res) => {
@@ -57,7 +55,7 @@ async function callAI(modelKey, messages, systemPrompt = '') {
 ═══════════════════════════════════════ */
 exports.askAssistant = async (req, res) => {
   try {
-    const { message, history = [], modelKey = 'gemini-2.0-flash' } = req.body;
+    const { message, history = [], modelKey = 'gemini-2.5-flash' } = req.body;
     if (!message?.trim())
       return res.status(400).json({ success: false, message: 'Message is required' });
 
@@ -113,7 +111,7 @@ ${inventoryContext}`;
 ═══════════════════════════════════════ */
 exports.suggestMedicineDetails = async (req, res) => {
   try {
-    const { name, modelKey = 'gemini-2.0-flash' } = req.body;
+    const { name, modelKey = 'gemini-2.5-flash' } = req.body;
     if (!name?.trim())
       return res.status(400).json({ success: false, message: 'Medicine name is required' });
 
@@ -160,7 +158,7 @@ Return a JSON object with these exact fields:
 ═══════════════════════════════════════ */
 exports.checkInteractions = async (req, res) => {
   try {
-    const { medicines: medicineIds, modelKey = 'gemini-2.0-flash' } = req.body;
+    const { medicines: medicineIds, modelKey = 'gemini-2.5-flash' } = req.body;
     if (!medicineIds?.length || medicineIds.length < 2)
       return res.json({ success: true, interactions: [], safe: true, message: 'Need at least 2 medicines to check interactions' });
 
@@ -219,7 +217,7 @@ If no interactions found, return safe: true and empty interactions array.`;
 ═══════════════════════════════════════ */
 exports.getReorderSuggestions = async (req, res) => {
   try {
-    const { modelKey = 'gemini-2.0-flash' } = req.query;
+    const { modelKey = 'gemini-2.5-flash' } = req.query;
 
     // Gather data: low stock + sales history
     const now          = new Date();

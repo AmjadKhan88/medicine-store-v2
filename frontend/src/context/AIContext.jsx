@@ -5,7 +5,7 @@ const AIContext = createContext(null);
 
 export function AIProvider({ children }) {
   const [selectedModel, setSelectedModel] = useState(
-    () => localStorage.getItem('medistore_ai_model') || 'gemini-2.0-flash'
+    () => localStorage.getItem('medistore_ai_model') || 'gemini-2.5-flash'
   );
   const [models, setModels] = useState({});
 
