@@ -16,6 +16,10 @@ const patientSchema = new mongoose.Schema({
   totalBilled: { type: Number, default: 0 },
   totalPaid: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true },
+  // Portal access
+  portalToken: { type: String, unique: true, sparse: true },
+  portalEnabled: { type: Boolean, default: true },
+  portalLastViewed: { type: Date },
   addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
 }, { timestamps: true });
