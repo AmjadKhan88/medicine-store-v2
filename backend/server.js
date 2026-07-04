@@ -23,6 +23,8 @@ const supplierRoutes = require('./routes/suppliers');
 const pushRoutes = require('./routes/push');
 const portalRoutes = require('./routes/portal');
 const aiRoutes = require('./routes/ai');
+const superAdminRoutes = require('./routes/superAdmin');
+const supportRoutes    = require('./routes/support');
 
 const app = express();
 
@@ -53,6 +55,8 @@ app.use('/api/suppliers', supplierRoutes);
 app.use('/api/push', pushRoutes);
 app.use('/api/portal', portalRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/super-admin', superAdminRoutes);
+app.use('/api/support',     supportRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
