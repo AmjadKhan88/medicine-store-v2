@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { MdSettings, MdPerson, MdLock, MdPalette, MdStore, MdSave } from 'react-icons/md';
+import { PushNotificationToggle } from '../Components/PWAInstallBanner';
+import { usePWA } from '../hooks/usePWA';
+import { MdSettings, MdGetApp, MdPhoneIphone, MdPerson, MdLock, MdPalette, MdStore, MdSave } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 
@@ -13,10 +15,11 @@ export default function Settings() {
   const { user, setUser } = useAuth();
   const { theme, setSpecificTheme } = useTheme();
 
-  const [profile, setProfile]   = useState({ name: user?.name || '', phone: user?.phone || '' });
+  const [profile, setProfile] = useState({ name: user?.name || '', phone: user?.phone || '' });
   const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '', confirm: '' });
-  const [saving, setSaving]     = useState(false);
+  const [saving, setSaving] = useState(false);
   const [savingPw, setSavingPw] = useState(false);
+  const { canInstall, isInstalled, triggerInstall } = usePWA();
 
   // Store profile — stored in localStorage
   const [store, setStore] = useState(() => {
@@ -52,34 +55,34 @@ export default function Settings() {
     finally { setSavingPw(false); }
   };
 
-const saveStore = async (e) => {
-  e.preventDefault();
-  setSavingStore(true);
-  try {
-    // Save to localStorage (for PDF usage)
-    localStorage.setItem('medistore_profile', JSON.stringify(store));
+  const saveStore = async (e) => {
+    e.preventDefault();
+    setSavingStore(true);
+    try {
+      // Save to localStorage (for PDF usage)
+      localStorage.setItem('medistore_profile', JSON.stringify(store));
 
-    // Save storeName + phone to backend (for email usage in server-side jobs)
-    const { data } = await API.put('/auth/profile', {
-      name:      user.name,
-      phone:     store.phone || user.phone,
-      storeName: store.name,
-    });
-    setUser(data.user);
-    localStorage.setItem('medistore_user', JSON.stringify(data.user));
+      // Save storeName + phone to backend (for email usage in server-side jobs)
+      const { data } = await API.put('/auth/profile', {
+        name: user.name,
+        phone: store.phone || user.phone,
+        storeName: store.name,
+      });
+      setUser(data.user);
+      localStorage.setItem('medistore_user', JSON.stringify(data.user));
 
-    toast.success('Store profile saved! It will appear on all invoices and emails.');
-  } catch (err) {
-    toast.error('Failed to save');
-  } finally {
-    setSavingStore(false);
-  }
-};
+      toast.success('Store profile saved! It will appear on all invoices and emails.');
+    } catch (err) {
+      toast.error('Failed to save');
+    } finally {
+      setSavingStore(false);
+    }
+  };
 
   const themes = [
-    { id: 'light',  label: 'Light',  colors: ['#f8fafc', '#0ea5e9'] },
-    { id: 'dark',   label: 'Dark',   colors: ['#111827', '#38bdf8'] },
-    { id: 'teal',   label: 'Teal',   colors: ['#f0fdf9', '#0d9488'] },
+    { id: 'light', label: 'Light', colors: ['#f8fafc', '#0ea5e9'] },
+    { id: 'dark', label: 'Dark', colors: ['#111827', '#38bdf8'] },
+    { id: 'teal', label: 'Teal', colors: ['#f0fdf9', '#0d9488'] },
     { id: 'purple', label: 'Purple', colors: ['#faf5ff', '#7c3aed'] },
   ];
 
@@ -153,6 +156,60 @@ const saveStore = async (e) => {
             <MdSave /> {savingStore ? 'Saving...' : 'Save Store Profile'}
           </button>
         </form>
+      </div>
+
+      {/* PWA Section */}
+      <div className="card" style={{ marginBottom: 20 }}>
+        <div className="card-header">
+          <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <MdPhoneIphone /> Mobile App
+          </div>
+        </div>
+
+        {/* Install App */}
+        <div style={{ marginBottom: 16 }}>
+          {isInstalled ? (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '12px 16px', background: 'var(--success-bg)',
+              border: '1px solid var(--success)', borderRadius: 12,
+            }}>
+              <span style={{ fontSize: 22 }}>✓</span>
+              <div>
+                <div style={{ fontWeight: 700, color: 'var(--success)' }}>App is Installed</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>MediStore is running as an installed app</div>
+              </div>
+            </div>
+          ) : canInstall ? (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px 16px', background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border)', borderRadius: 12,
+            }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>Install MediStore App</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                  Works offline · Faster access · Home screen shortcut
+                </div>
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={triggerInstall}>
+                <MdGetApp /> Install
+              </button>
+            </div>
+          ) : (
+            <div style={{
+              padding: '12px 16px', background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border)', borderRadius: 12,
+              fontSize: 13, color: 'var(--text-muted)',
+            }}>
+              <strong>iOS:</strong> Tap Share → Add to Home Screen<br />
+              <strong>Android:</strong> Tap menu → Add to Home Screen
+            </div>
+          )}
+        </div>
+
+        {/* Push notifications */}
+        <PushNotificationToggle />
       </div>
 
       {/* ── Appearance ── */}
