@@ -4,7 +4,7 @@ import { useSubscription } from '../context/SubscriptionContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import { useState, Suspense } from 'react';
-import { MdDashboard,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
+import { MdDashboard,MdSupportAgent,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
@@ -53,10 +53,12 @@ export default function Layout() {
     { to: '/app/purchase-orders', icon: <MdShoppingCart />, label: 'Purchase Orders', show: can.purchaseOrders },
     { to: '/app/suppliers', icon: <MdStorefront />, label: 'Suppliers', show: can.purchaseOrders },
     { to: '/app/reports', icon: <MdBarChart />, label: 'Reports & Analytics', show: can.viewReports },
+    { to: '/app/support', icon: <MdSupportAgent />, label: 'Support Center', show: true },
     { to: '/app/audit-log', icon: <MdHistory />, label: 'Audit Log', show: can.viewAuditLog },
     { to: '/app/staff', icon: <MdPeople />, label: 'Staff Management', show: can.manageStaff },
     { to: '/app/backup', icon: <MdBackup />, label: 'Backup & Restore', show: can.storeSettings },
-    { to: '/app/super-admin', icon: <MdAdminPanelSettings />, label: 'Super Admin Panel', show: user?.email === import.meta.env.VITE_SUPER_ADMIN_EMAIL },
+    // { to: '/app/super-admin', icon: <MdAdminPanelSettings />, label: 'Super Admin Panel', show: user?.email === import.meta.env.VITE_SUPER_ADMIN_EMAIL },
+    { to: '/app/super-admin', icon: <MdAdminPanelSettings />, label: 'Super Admin', show: user?.email === import.meta.env.VITE_SUPER_ADMIN_EMAIL },
     { to: '/app/settings', icon: <MdSettings />, label: 'Settings', show: can.storeSettings },
   ];
 

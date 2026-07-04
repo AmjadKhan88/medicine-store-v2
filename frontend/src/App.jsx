@@ -19,7 +19,8 @@ const AuditLog = lazy(() => import('./Pages/AuditLog'));
 const StaffManagement = lazy(() => import('./Pages/StaffManagement'));
 const Backup = lazy(() => import('./Pages/Backup'));
 const SubscriptionPage = lazy(() => import('./Pages/Subscription'));
-const SuperAdmin = lazy(() => import('./Pages/SuperAdmin'));
+// const SuperAdmin = lazy(() => import('./Pages/SuperAdmin'));
+const SuperAdminDashboard = lazy(() => import('./Pages/SuperAdminDashboard'));
 const Prescriptions      = lazy(()=> import('./Pages/Prescriptions'));
 const CreatePrescription = lazy(()=> import('./Pages/CreatePrescription'));
 const Landing = lazy(() => import('./Pages/Landing'));
@@ -32,6 +33,7 @@ const LabTests = lazy(()=> import('./Pages/LabTests'));
 const Suppliers = lazy(()=> import('./Pages/Suppliers'));
 const PatientPortal = lazy(()=> import('./Pages/PatientPortal'));
 const AIAssistant = lazy(()=> import('./Pages/AIAssistant'));
+const SupportCenter = lazy(()=> import('./Pages/SupportCenter'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -74,7 +76,9 @@ export default function App() {
         <Route path="lab-tests" element={<LabTests />} />
         <Route path="suppliers" element={<Suppliers />} />
         <Route path="ai-assistant" element={<AIAssistant />} />
-        <Route path="super-admin" element={<SuperAdmin />} />
+        {/* <Route path="super-admin" element={<SuperAdmin />} /> */}
+        <Route path="super-admin"    element={<SuperAdminDashboard />} />
+        <Route path="support"        element={<SupportCenter />} />
         <Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
