@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import PermissionGate from '../Components/PermissionGate';
-import { MdAdd, MdEdit, MdDelete, MdSearch, MdPeople, MdPhone, MdAccountBalance } from 'react-icons/md';
+import { MdAdd, MdEdit, MdLink, MdLinkOff, MdShare, MdContentCopy, MdDelete, MdSearch, MdPeople, MdPhone, MdAccountBalance } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
@@ -22,6 +22,7 @@ export default function Patients() {
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [portalModal, setPortalModal] = useState(null); // { patient, token, link }
   const navigate = useNavigate();
 
   const fetchPatients = useCallback(async () => {
@@ -53,6 +54,39 @@ export default function Patients() {
   const handleDelete = async () => {
     try { await API.delete(`/patients/${deleteId}`); toast.success('Patient deleted'); setDeleteId(null); fetchPatients(); }
     catch { toast.error('Delete failed'); }
+  };
+
+  const handleGeneratePortal = async (patient) => {
+    try {
+      const { data } = await API.post(`/portal/patients/${patient._id}/generate-token`);
+      setPortalModal({ patient, token: data.token, link: data.link });
+      toast.success('Portal link generated!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed');
+    }
+  };
+
+  const handleRevokePortal = async (patientId) => {
+    if (!confirm('Revoke portal access? The existing link will stop working.')) return;
+    try {
+      await API.delete(`/portal/patients/${patientId}/token`);
+      toast.success('Portal access revoked');
+      setPortalModal(null);
+      fetchPatients();
+    } catch { toast.error('Failed'); }
+  };
+
+  const copyLink = (link) => {
+    navigator.clipboard.writeText(link);
+    toast.success('Link copied to clipboard!');
+  };
+
+  const shareLink = (link, patientName) => {
+    if (navigator.share) {
+      navigator.share({ title: `${patientName} — MediStore Portal`, url: link });
+    } else {
+      copyLink(link);
+    }
   };
 
   const fld = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.value }));
@@ -117,6 +151,9 @@ export default function Patients() {
                       <td>
                         <div className="table-actions">
                           <button className="btn btn-secondary btn-sm btn-icon" onClick={() => openEdit(p)}><MdEdit /></button>
+                          <button className="btn btn-secondary btn-sm btn-icon" onClick={() => handleGeneratePortal(p)} title="Generate Patient Portal Link">
+                            <MdLink />
+                          </button>
                           <PermissionGate permission="deletePatient">
                             <button className="btn btn-danger btn-sm btn-icon" onClick={() => setDeleteId(p._id)}><MdDelete /></button>
                           </PermissionGate>
@@ -181,6 +218,57 @@ export default function Patients() {
             <div className="flex gap-3" style={{ justifyContent: 'center' }}>
               <button className="btn btn-secondary" onClick={() => setDeleteId(null)}>Cancel</button>
               <button className="btn btn-danger" onClick={handleDelete}>Yes, Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Portal Link Modal */}
+      {portalModal && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setPortalModal(null)}>
+          <div className="modal" style={{ maxWidth: 480 }}>
+            <div className="modal-header">
+              <div>
+                <div className="modal-title">Patient Portal Link</div>
+                <div className="text-muted text-sm">{portalModal.patient.name}</div>
+              </div>
+              <button className="btn btn-ghost btn-icon" onClick={() => setPortalModal(null)}>✕</button>
+            </div>
+
+            {/* Info */}
+            <div style={{ background: 'var(--accent-light)', border: '1px solid var(--accent)', borderRadius: 12, padding: '12px 16px', marginBottom: 16, fontSize: 13, color: 'var(--accent)' }}>
+              <strong>Share this link with {portalModal.patient.name}.</strong> They can view their bills, prescriptions, lab tests and appointments — no login needed.
+            </div>
+
+            {/* Link box */}
+            <div style={{ background: 'var(--bg-tertiary)', borderRadius: 10, padding: '12px 14px', marginBottom: 16, fontFamily: 'monospace', fontSize: 12, wordBreak: 'break-all', color: 'var(--text-secondary)' }}>
+              {portalModal.link}
+            </div>
+
+            {/* QR hint */}
+            <div style={{ background: 'var(--bg-tertiary)', borderRadius: 10, padding: 12, marginBottom: 16, textAlign: 'center' }}>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                📱 Open this link on mobile to see the patient-friendly view
+              </div>
+            </div>
+
+            <div className="flex gap-2" style={{ marginBottom: 16 }}>
+              <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => copyLink(portalModal.link)}>
+                <MdContentCopy /> Copy Link
+              </button>
+              <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => shareLink(portalModal.link, portalModal.patient.name)}>
+                <MdShare /> Share
+              </button>
+              <a className="btn btn-secondary" href={portalModal.link} target="_blank" rel="noopener noreferrer">
+                <MdLink /> Open
+              </a>
+            </div>
+
+            <div className="modal-footer" style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+              <button className="btn btn-danger btn-sm" onClick={() => handleRevokePortal(portalModal.patient._id)}>
+                <MdLinkOff /> Revoke Access
+              </button>
+              <button className="btn btn-secondary" onClick={() => setPortalModal(null)}>Close</button>
             </div>
           </div>
         </div>

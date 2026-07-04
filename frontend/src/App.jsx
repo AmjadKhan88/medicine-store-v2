@@ -30,6 +30,7 @@ const Onboarding = lazy(() => import('./Pages/Onboarding'));
 const Appointments = lazy(()=> import('./Pages/Appointments'));
 const LabTests = lazy(()=> import('./Pages/LabTests'));
 const Suppliers = lazy(()=> import('./Pages/Suppliers'));
+const PatientPortal = lazy(()=> import('./Pages/PatientPortal'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -44,6 +45,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={user ? <Navigate to="/app" replace /> :<Landing />} />
+      <Route path="/portal/:token" element={<PatientPortal />} />
       <Route path="/login" element={user ? <Navigate to="/app" replace /> : <Login />} />
       <Route path="/register" element={user ? <Navigate to="/app" replace /> : <Register />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
