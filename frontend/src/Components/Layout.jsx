@@ -5,7 +5,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import RealTimeIndicator from './RealTimeIndicator';
 import { useState, Suspense } from 'react';
-import { MdDashboard,MdReceipt, MdSupportAgent,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
+import { MdDashboard,MdReceipt,MdFolderOpen, MdSupportAgent,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
@@ -61,6 +61,7 @@ export default function Layout() {
     // { to: '/app/super-admin', icon: <MdAdminPanelSettings />, label: 'Super Admin Panel', show: user?.email === import.meta.env.VITE_SUPER_ADMIN_EMAIL },
     { to: '/app/super-admin', icon: <MdAdminPanelSettings />, label: 'Super Admin', show: user?.email === import.meta.env.VITE_SUPER_ADMIN_EMAIL },
     { to: '/app/invoice-settings', icon: <MdReceipt />, label: 'Invoice Templates', show: can.settings },
+    { to: '/app/documents', icon: <MdFolderOpen />, label: 'Documents', show: true },
     { to: '/app/settings', icon: <MdSettings />, label: 'Settings', show: can.storeSettings },
   ];
 

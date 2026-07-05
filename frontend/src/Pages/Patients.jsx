@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import PermissionGate from '../Components/PermissionGate';
-import { MdAdd, MdEdit, MdLink, MdLinkOff, MdShare, MdContentCopy, MdDelete, MdSearch, MdPeople, MdPhone, MdAccountBalance } from 'react-icons/md';
+import { MdAdd, MdEdit, MdLink, MdLinkOff, MdShare, MdContentCopy, MdDelete, MdSearch, MdPeople, MdPhone, MdAccountBalance, MdVisibility } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useSocketEvent } from '../hooks/useSocketEvent';
+import PatientDocuments from '../Components/PatientDocuments';
 
 const BLOOD = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'];
 const empty = { name: '', age: '', gender: 'Male', phone: '', email: '', address: '', city: '', bloodGroup: 'Unknown', medicalHistory: '', allergies: '', doctor: '' };
@@ -24,6 +25,8 @@ export default function Patients() {
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [portalModal, setPortalModal] = useState(null); // { patient, token, link }
+  const [viewPatient, setViewPatient] = useState(null);
+  const [viewTab, setViewTab] = useState('info');
   const navigate = useNavigate();
 
   const fetchPatients = useCallback(async () => {
@@ -158,6 +161,7 @@ export default function Patients() {
                       </td>
                       <td>
                         <div className="table-actions">
+                          <button className="btn btn-secondary btn-sm btn-icon" onClick={() => { setViewPatient(p); setViewTab('info'); }} title="View"><MdVisibility /></button>
                           <button className="btn btn-secondary btn-sm btn-icon" onClick={() => openEdit(p)}><MdEdit /></button>
                           <button className="btn btn-secondary btn-sm btn-icon" onClick={() => handleGeneratePortal(p)} title="Generate Patient Portal Link">
                             <MdLink />
@@ -213,6 +217,87 @@ export default function Patients() {
                 <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : editing ? 'Update Patient' : 'Register Patient'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* View Patient Modal */}
+      {viewPatient && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setViewPatient(null)}>
+          <div className="modal modal-lg" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+            <div className="modal-header">
+              <div>
+                <div className="modal-title">{viewPatient.name}</div>
+                <div className="text-muted text-sm">{viewPatient.patientId} · Age {viewPatient.age} · {viewPatient.gender}</div>
+              </div>
+              <div className="flex gap-2">
+                <button className="btn btn-secondary btn-sm" onClick={() => { openEdit(viewPatient); setViewPatient(null); }}>
+                  <MdEdit /> Edit
+                </button>
+                <button className="btn btn-ghost btn-icon" onClick={() => setViewPatient(null)}>✕</button>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-2" style={{ marginBottom: 16 }}>
+              {[
+                { id: 'info', label: '👤 Info' },
+                { id: 'documents', label: '📁 Documents' },
+              ].map(t => (
+                <button key={t.id} className={`pill${viewTab === t.id ? ' active' : ''}`}
+                  onClick={() => setViewTab(t.id)}>{t.label}</button>
+              ))}
+            </div>
+
+            {/* Info tab */}
+            {viewTab === 'info' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                {[
+                  { label: 'Phone', value: viewPatient.phone },
+                  { label: 'Email', value: viewPatient.email },
+                  { label: 'Blood Group', value: viewPatient.bloodGroup },
+                  { label: 'City', value: viewPatient.city },
+                  { label: 'Doctor', value: viewPatient.doctor },
+                  { label: 'Total Billed', value: fmtPKR(viewPatient.totalBilled) },
+                  { label: 'Total Paid', value: fmtPKR(viewPatient.totalPaid) },
+                ].filter(r => r.value).map((r, i) => (
+                  <div key={i} style={{ background: 'var(--bg-tertiary)', borderRadius: 10, padding: '10px 14px' }}>
+                    <div className="text-muted text-sm">{r.label}</div>
+                    <div style={{ fontWeight: 600, marginTop: 3 }}>{r.value}</div>
+                  </div>
+                ))}
+                {viewPatient.address && (
+                  <div style={{ background: 'var(--bg-tertiary)', borderRadius: 10, padding: '10px 14px', gridColumn: '1/-1' }}>
+                    <div className="text-muted text-sm">Address</div>
+                    <div style={{ fontWeight: 600, marginTop: 3 }}>{viewPatient.address}</div>
+                  </div>
+                )}
+                {viewPatient.medicalHistory && (
+                  <div style={{ background: 'var(--bg-tertiary)', borderRadius: 10, padding: '10px 14px', gridColumn: '1/-1' }}>
+                    <div className="text-muted text-sm">Medical History</div>
+                    <div style={{ marginTop: 3 }}>{viewPatient.medicalHistory}</div>
+                  </div>
+                )}
+                {viewPatient.allergies?.length > 0 && (
+                  <div style={{ background: 'var(--danger-bg)', border: '1px solid var(--danger)', borderRadius: 10, padding: '10px 14px', gridColumn: '1/-1' }}>
+                    <div className="text-muted text-sm">⚠️ Known Allergies</div>
+                    <div style={{ marginTop: 4, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {viewPatient.allergies.map(a => (
+                        <span key={a} style={{ background: 'var(--danger)', color: '#fff', fontSize: 12, fontWeight: 600, padding: '2px 10px', borderRadius: 99 }}>{a}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Documents tab */}
+            {viewTab === 'documents' && (
+              <PatientDocuments
+                patientId={viewPatient._id}
+                patientName={viewPatient.name}
+              />
+            )}
           </div>
         </div>
       )}
