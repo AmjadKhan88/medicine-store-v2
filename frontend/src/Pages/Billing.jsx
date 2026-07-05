@@ -49,6 +49,14 @@ export default function Billing() {
   useEffect(() => { fetchBills(); }, [fetchBills]);
   useEffect(() => { setPage(1); }, [search, status]);
 
+  useEffect(() => {
+    API.get('/invoice-settings')
+      .then(({ data }) => {
+        localStorage.setItem('medistore_invoice_settings', JSON.stringify(data.settings));
+      })
+      .catch(() => { });
+  }, []);
+
   /* ── Open detailed bill view ── */
   const openView = async (id) => {
     try {

@@ -13,7 +13,7 @@ export function getStoreProfile() {
   }
 }
 
-export function generateInvoicePDF(bill) {
+ function generateInvoicePDF(bill) {
   const store = getStoreProfile();
   const storeName    = store.name     || 'MediStore Pharmacy';
   const storeAddress = store.address  || 'Peshawar, KPK, Pakistan';
@@ -303,3 +303,5 @@ export function generateInvoicePDF(bill) {
 
   return doc;
 }
+
+export { printInvoice as generateInvoicePDF } from './invoiceTemplates';

@@ -34,6 +34,7 @@ const Suppliers = lazy(()=> import('./Pages/Suppliers'));
 const PatientPortal = lazy(()=> import('./Pages/PatientPortal'));
 const AIAssistant = lazy(()=> import('./Pages/AIAssistant'));
 const SupportCenter = lazy(()=> import('./Pages/SupportCenter'));
+const InvoiceSettings = lazy(()=> import('./Pages/InvoiceSettings'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -76,6 +77,7 @@ export default function App() {
         <Route path="lab-tests" element={<LabTests />} />
         <Route path="suppliers" element={<Suppliers />} />
         <Route path="ai-assistant" element={<AIAssistant />} />
+        <Route path="invoice-settings" element={<InvoiceSettings />} />
         {/* <Route path="super-admin" element={<SuperAdmin />} /> */}
         <Route path="super-admin"    element={<SuperAdminDashboard />} />
         <Route path="support"        element={<SupportCenter />} />
