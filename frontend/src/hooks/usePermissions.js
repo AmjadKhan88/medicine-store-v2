@@ -23,6 +23,7 @@ export function usePermissions() {
       viewReports:      role !== 'pharmacist',
       manageStaff:      role === 'admin',
       storeSettings:    role === 'admin',
+      sitting:          role === 'admin',
       purchaseOrders:   role !== 'pharmacist',
       viewAuditLog:     role === 'admin',
     },
