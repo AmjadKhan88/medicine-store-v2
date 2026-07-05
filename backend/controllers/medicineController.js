@@ -1,5 +1,6 @@
 const audit = require('../utils/audit');
 const Medicine = require('../models/Medicine');
+const { emitMedicineCreated, emitMedicineUpdated, emitStockUpdated, emitLowStock } = require('../socket');
 
 exports.getAllMedicines = async (req, res) => {
   try {
@@ -49,24 +50,26 @@ exports.createMedicine = async (req, res) => {
     const medicine = await Medicine.create({ ...req.body, addedBy: req.user._id, storeId: req.storeId });
 
     await audit({
-      action:     'MEDICINE_ADDED',
-      category:   'Medicine',
-      summary:    `${req.user.name} added medicine "${medicine.name}" — ${medicine.dosageForm} ${medicine.strength}, stock: ${medicine.stock} ${medicine.unit}`,
+      action: 'MEDICINE_ADDED',
+      category: 'Medicine',
+      summary: `${req.user.name} added medicine "${medicine.name}" — ${medicine.dosageForm} ${medicine.strength}, stock: ${medicine.stock} ${medicine.unit}`,
       entityType: 'Medicine',
-      entityId:   medicine._id,
+      entityId: medicine._id,
       entityName: medicine.name,
       meta: {
-        category:      medicine.category,
-        dosageForm:    medicine.dosageForm,
-        strength:      medicine.strength,
-        stock:         medicine.stock,
+        category: medicine.category,
+        dosageForm: medicine.dosageForm,
+        strength: medicine.strength,
+        stock: medicine.stock,
         purchasePrice: medicine.purchasePrice,
-        salePrice:     medicine.salePrice,
-        expiryDate:    medicine.expiryDate,
+        salePrice: medicine.salePrice,
+        expiryDate: medicine.expiryDate,
       },
       user: req.user,
-      ip:   req.ip,
+      ip: req.ip,
     });
+
+    try { emitMedicineCreated(req.storeId, medicine); } catch { }
 
     res.status(201).json({ success: true, medicine, message: 'Medicine added successfully' });
   } catch (err) {
@@ -78,7 +81,7 @@ exports.createMedicine = async (req, res) => {
 
 exports.updateMedicine = async (req, res) => {
   try {
-    const old      = await Medicine.findById(req.params.id);
+    const old = await Medicine.findById(req.params.id);
     const medicine = await Medicine.findByIdAndUpdate(
       req.params.id, req.body, { new: true, runValidators: true }
     );
@@ -86,11 +89,11 @@ exports.updateMedicine = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Medicine not found' });
 
     await audit({
-      action:     'MEDICINE_UPDATED',
-      category:   'Medicine',
-      summary:    `${req.user.name} updated medicine "${medicine.name}"`,
+      action: 'MEDICINE_UPDATED',
+      category: 'Medicine',
+      summary: `${req.user.name} updated medicine "${medicine.name}"`,
       entityType: 'Medicine',
-      entityId:   medicine._id,
+      entityId: medicine._id,
       entityName: medicine.name,
       meta: {
         changes: Object.keys(req.body).reduce((acc, key) => {
@@ -101,8 +104,10 @@ exports.updateMedicine = async (req, res) => {
         }, {}),
       },
       user: req.user,
-      ip:   req.ip,
+      ip: req.ip,
     });
+
+    try { emitMedicineUpdated(req.storeId, medicine); } catch { }
 
     res.json({ success: true, medicine, message: 'Medicine updated successfully' });
   } catch (err) {
@@ -119,15 +124,15 @@ exports.deleteMedicine = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Medicine not found' });
 
     await audit({
-      action:     'MEDICINE_DELETED',
-      category:   'Medicine',
-      summary:    `${req.user.name} deleted medicine "${medicine.name}"`,
+      action: 'MEDICINE_DELETED',
+      category: 'Medicine',
+      summary: `${req.user.name} deleted medicine "${medicine.name}"`,
       entityType: 'Medicine',
-      entityId:   medicine._id,
+      entityId: medicine._id,
       entityName: medicine.name,
-      meta:       { stock: medicine.stock, salePrice: medicine.salePrice },
+      meta: { stock: medicine.stock, salePrice: medicine.salePrice },
       user: req.user,
-      ip:   req.ip,
+      ip: req.ip,
     });
 
     res.json({ success: true, message: 'Medicine deleted successfully' });
@@ -172,20 +177,25 @@ exports.updateStock = async (req, res) => {
 
     const oldStock = medicine.stock;
     if (type === 'add') medicine.stock += Number(quantity);
-    else                medicine.stock  = Number(quantity);
+    else medicine.stock = Number(quantity);
     await medicine.save();
 
     await audit({
-      action:     'STOCK_UPDATED',
-      category:   'Stock',
-      summary:    `${req.user.name} manually updated stock of "${medicine.name}" — ${oldStock} → ${medicine.stock} ${medicine.unit}`,
+      action: 'STOCK_UPDATED',
+      category: 'Stock',
+      summary: `${req.user.name} manually updated stock of "${medicine.name}" — ${oldStock} → ${medicine.stock} ${medicine.unit}`,
       entityType: 'Medicine',
-      entityId:   medicine._id,
+      entityId: medicine._id,
       entityName: medicine.name,
-      meta:       { oldStock, newStock: medicine.stock, type, quantity: Number(quantity) },
+      meta: { oldStock, newStock: medicine.stock, type, quantity: Number(quantity) },
       user: req.user,
-      ip:   req.ip,
+      ip: req.ip,
     });
+
+    try {
+      emitStockUpdated(req.storeId, medicine);
+      if (medicine.stock <= medicine.minStock) emitLowStock(req.storeId, medicine);
+    } catch { }
 
     res.json({ success: true, medicine, message: 'Stock updated' });
   } catch (err) {
@@ -204,40 +214,40 @@ exports.getSubstitutes = async (req, res) => {
 
     // 1. Manually linked substitutes (highest priority)
     const manualSubs = await Medicine.find({
-      _id:      { $in: medicine.substitutes || [] },
+      _id: { $in: medicine.substitutes || [] },
       isActive: true,
-      storeId:  req.storeId,
-      stock:    { $gt: 0 },
+      storeId: req.storeId,
+      stock: { $gt: 0 },
       expiryDate: { $gt: now },
     });
 
     // 2. Auto-matched by same genericName (different brand, same drug)
     const sameGeneric = medicine.genericName
       ? await Medicine.find({
-          _id:         { $ne: medicine._id, $nin: medicine.substitutes || [] },
-          genericName: { $regex: `^${medicine.genericName}$`, $options: 'i' },
-          isActive:    true,
-          storeId:     req.storeId,
-          stock:       { $gt: 0 },
-          expiryDate:  { $gt: now },
-        }).limit(5)
+        _id: { $ne: medicine._id, $nin: medicine.substitutes || [] },
+        genericName: { $regex: `^${medicine.genericName}$`, $options: 'i' },
+        isActive: true,
+        storeId: req.storeId,
+        stock: { $gt: 0 },
+        expiryDate: { $gt: now },
+      }).limit(5)
       : [];
 
     // 3. Auto-matched by same category + dosage form (broader fallback)
     const sameCategory = await Medicine.find({
-      _id:        { $ne: medicine._id, $nin: [...(medicine.substitutes || []), ...sameGeneric.map(m => m._id)] },
-      category:   medicine.category,
+      _id: { $ne: medicine._id, $nin: [...(medicine.substitutes || []), ...sameGeneric.map(m => m._id)] },
+      category: medicine.category,
       dosageForm: medicine.dosageForm,
-      isActive:   true,
-      storeId:    req.storeId,
-      stock:      { $gt: 0 },
+      isActive: true,
+      storeId: req.storeId,
+      stock: { $gt: 0 },
       expiryDate: { $gt: now },
     }).limit(5);
 
     res.json({
       success: true,
       medicine: { _id: medicine._id, name: medicine.name, genericName: medicine.genericName },
-      manual:        manualSubs,
+      manual: manualSubs,
       sameGeneric,
       sameCategory,
       hasAlternatives: manualSubs.length + sameGeneric.length + sameCategory.length > 0,
@@ -274,16 +284,16 @@ exports.findAlternativesByName = async (req, res) => {
     const now = new Date();
 
     const query = {
-      isActive:   true,
-      storeId:    req.storeId,
-      stock:      { $gt: 0 },
+      isActive: true,
+      storeId: req.storeId,
+      stock: { $gt: 0 },
       expiryDate: { $gt: now },
     };
 
     const orConditions = [];
     if (genericName) orConditions.push({ genericName: { $regex: genericName, $options: 'i' } });
-    if (category)    orConditions.push({ category });
-    if (name)        orConditions.push({ name: { $regex: name, $options: 'i' } });
+    if (category) orConditions.push({ category });
+    if (name) orConditions.push({ name: { $regex: name, $options: 'i' } });
 
     if (orConditions.length === 0)
       return res.json({ success: true, alternatives: [] });

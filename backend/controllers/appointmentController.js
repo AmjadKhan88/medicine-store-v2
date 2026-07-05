@@ -1,5 +1,6 @@
 const Appointment = require('../models/Appointment');
 const Patient     = require('../models/Patient');
+const { emitAppointmentCreated, emitAppointmentUpdated } = require('../socket');
 
 /* ── Get all appointments (with date range + filters) ── */
 exports.getAll = async (req, res) => {
@@ -135,6 +136,8 @@ exports.create = async (req, res) => {
       createdBy:  req.user._id,
     });
 
+    try { emitAppointmentCreated(req.storeId, appt); } catch {}
+
     res.status(201).json({ success: true, appointment: appt, message: 'Appointment scheduled' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -167,6 +170,8 @@ exports.completeVisit = async (req, res) => {
 
     if (!appt)
       return res.status(404).json({ success: false, message: 'Appointment not found' });
+
+    try { emitAppointmentUpdated(req.storeId, appt); } catch {}
 
     res.json({ success: true, appointment: appt, message: 'Visit recorded successfully' });
   } catch (err) {
@@ -201,6 +206,8 @@ exports.cancel = async (req, res) => {
     );
     if (!appt)
       return res.status(404).json({ success: false, message: 'Appointment not found' });
+
+    try { emitAppointmentUpdated(req.storeId, appt); } catch {}
 
     res.json({ success: true, message: 'Appointment cancelled' });
   } catch (err) {

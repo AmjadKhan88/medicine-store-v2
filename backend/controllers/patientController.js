@@ -1,6 +1,7 @@
 const Patient = require('../models/Patient');
 const Bill = require('../models/Bill');
 const audit = require('../utils/audit');
+const { emitPatientCreated, emitDashboardUpdate } = require('../socket');
 
 exports.getAllPatients = async (req, res) => {
   try {
@@ -43,23 +44,29 @@ exports.createPatient = async (req, res) => {
     const patient = await Patient.create({ ...req.body, addedBy: req.user._id, storeId: req.storeId });
 
     await audit({
-      action:     'PATIENT_REGISTERED',
-      category:   'Patient',
-      summary:    `${req.user.name} registered new patient "${patient.name}" (${patient.patientId}) — ${patient.gender}, Age ${patient.age || '—'}, ${patient.city || '—'}`,
+      action: 'PATIENT_REGISTERED',
+      category: 'Patient',
+      summary: `${req.user.name} registered new patient "${patient.name}" (${patient.patientId}) — ${patient.gender}, Age ${patient.age || '—'}, ${patient.city || '—'}`,
       entityType: 'Patient',
-      entityId:   patient._id,
+      entityId: patient._id,
       entityName: patient.name,
       meta: {
-        patientId:  patient.patientId,
-        age:        patient.age,
-        gender:     patient.gender,
+        patientId: patient.patientId,
+        age: patient.age,
+        gender: patient.gender,
         bloodGroup: patient.bloodGroup,
-        city:       patient.city,
-        doctor:     patient.doctor,
+        city: patient.city,
+        doctor: patient.doctor,
       },
       user: req.user,
-      ip:   req.ip,
+      ip: req.ip,
     });
+
+    try {
+      emitPatientCreated(req.storeId, patient);
+      const count = await Patient.countDocuments({ storeId: req.storeId, isActive: true });
+      emitDashboardUpdate(req.storeId, { totalPatients: count });
+    } catch { }
 
     res.status(201).json({ success: true, patient, message: 'Patient registered successfully' });
   } catch (err) {
@@ -76,15 +83,15 @@ exports.updatePatient = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Patient not found' });
 
     await audit({
-      action:     'PATIENT_UPDATED',
-      category:   'Patient',
-      summary:    `${req.user.name} updated patient "${patient.name}" (${patient.patientId})`,
+      action: 'PATIENT_UPDATED',
+      category: 'Patient',
+      summary: `${req.user.name} updated patient "${patient.name}" (${patient.patientId})`,
       entityType: 'Patient',
-      entityId:   patient._id,
+      entityId: patient._id,
       entityName: patient.name,
-      meta:       { updatedFields: Object.keys(req.body) },
+      meta: { updatedFields: Object.keys(req.body) },
       user: req.user,
-      ip:   req.ip,
+      ip: req.ip,
     });
 
     res.json({ success: true, patient, message: 'Patient updated successfully' });
@@ -127,7 +134,7 @@ exports.getPatientBalance = async (req, res) => {
 
 exports.getAllPatientBalances = async (req, res) => {
   try {
-    const patients = await Patient.find({ isActive: true,storeId: req.storeId, $expr: { $gt: ['$totalBilled', '$totalPaid'] } })
+    const patients = await Patient.find({ isActive: true, storeId: req.storeId, $expr: { $gt: ['$totalBilled', '$totalPaid'] } })
       .sort({ createdAt: -1 });
     const data = patients.map(p => ({
       _id: p._id,

@@ -1,4 +1,6 @@
 const express = require('express');
+const http = require('http');
+const { initSocket } = require('./socket');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -27,6 +29,8 @@ const superAdminRoutes = require('./routes/superAdmin');
 const supportRoutes    = require('./routes/support');
 
 const app = express();
+const httpServer = http.createServer(app);
+initSocket(httpServer);
 
 // Middleware
 app.use(cors({
@@ -84,7 +88,7 @@ mongoose
   .then(() => {
     console.log('✅ MongoDB connected successfully');
      startExpiryDigestJob();
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       console.log(`🚀 MediStore server running on port ${PORT}`);
     });
   })

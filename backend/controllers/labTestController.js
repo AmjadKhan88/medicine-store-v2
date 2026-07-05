@@ -1,6 +1,7 @@
 const LabTest = require('../models/LabTest');
 const Patient = require('../models/Patient');
 const cloudinaryUtil = require('../utils/cloudinary');
+const { emitLabTestUpdated } = require('../socket');
 
 /* ── Get all lab tests ── */
 exports.getAll = async (req, res) => {
@@ -118,6 +119,8 @@ exports.update = async (req, res) => {
     if (!test)
       return res.status(404).json({ success: false, message: 'Lab test not found' });
 
+    try { emitLabTestUpdated(req.storeId, test); } catch {}
+
     res.json({ success: true, test, message: 'Lab test updated' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -162,6 +165,8 @@ exports.uploadFile = async (req, res) => {
     };
     test.status = 'Completed';
     await test.save();
+
+    try { emitLabTestUpdated(req.storeId, test); } catch {}
 
     res.json({
       success:  true,

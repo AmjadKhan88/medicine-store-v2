@@ -3,6 +3,10 @@ const Patient = require('../models/Patient');
 const Bill = require('../models/Bill');
 const Medicine = require('../models/Medicine');
 const audit = require('../utils/audit');
+const {
+  emitBillCreated, emitPaymentUpdated,
+  emitStockUpdated, emitLowStock, emitDashboardUpdate,
+} = require('../socket');
 
 exports.getAllBills = async (req, res) => {
   try {
@@ -157,6 +161,40 @@ exports.createBill = async (req, res) => {
     } catch (emailErr) {
       console.error('[Email] Invoice email failed:', emailErr.message);
       // Don't fail the request if email fails
+    }
+
+    // Emit real-time events
+    try {
+      emitBillCreated(req.storeId, bill);
+
+      // Check and emit any low stock after deducting
+      for (const item of billItems) {
+        const updatedMed = await Medicine.findById(item.medicine);
+        if (updatedMed) {
+          emitStockUpdated(req.storeId, updatedMed);
+          if (updatedMed.stock <= updatedMed.minStock) {
+            emitLowStock(req.storeId, updatedMed);
+          }
+        }
+      }
+
+      // Quick dashboard stats push
+      const [todayBillCount, totalPatients, lowStockCount] = await Promise.all([
+        Bill.countDocuments({
+          storeId: req.storeId,
+          createdAt: { $gte: new Date().setHours(0, 0, 0, 0) },
+        }),
+        Patient.countDocuments({ storeId: req.storeId, isActive: true }),
+        Medicine.countDocuments({
+          storeId: req.storeId,
+          isActive: true,
+          $expr: { $lte: ['$stock', '$minStock'] },
+        }),
+      ]);
+
+      emitDashboardUpdate(req.storeId, { todayBillCount, totalPatients, lowStockCount });
+    } catch (socketErr) {
+      console.error('[Socket] Emit error:', socketErr.message);
     }
 
     res.status(201).json({ success: true, bill, message: 'Bill created successfully' });
