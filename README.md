@@ -312,5 +312,5 @@ This project demonstrates mastery of:
 
 ## 👨‍💻 Developer
 
-Built with ❤️ as a Final Year Project for Computer Science/Software Engineering.
+Built with Amjad Full-Stack Developer as a Final Year Project for Computer Science/Software Engineering.
 
