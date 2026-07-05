@@ -27,6 +27,7 @@ const portalRoutes = require('./routes/portal');
 const aiRoutes = require('./routes/ai');
 const superAdminRoutes = require('./routes/superAdmin');
 const supportRoutes    = require('./routes/support');
+const invoiceSettingsRoutes = require('./routes/invoiceSettings');
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -61,6 +62,7 @@ app.use('/api/portal', portalRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/support',     supportRoutes);
+app.use('/api/invoice-settings', invoiceSettingsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

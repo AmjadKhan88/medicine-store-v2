@@ -5,7 +5,7 @@ const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   const allowed = [
-    'image/jpeg', 'image/png', 'image/webp',
+    'image/jpeg', 'image/png', 'image/webp', 'image/gif',
     'application/pdf',
   ];
   if (allowed.includes(file.mimetype)) {
