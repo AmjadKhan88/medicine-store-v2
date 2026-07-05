@@ -4,6 +4,7 @@ import { MdAdd, MdEdit, MdLink, MdLinkOff, MdShare, MdContentCopy, MdDelete, MdS
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import { useSocketEvent } from '../hooks/useSocketEvent';
 
 const BLOOD = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'];
 const empty = { name: '', age: '', gender: 'Male', phone: '', email: '', address: '', city: '', bloodGroup: 'Unknown', medicalHistory: '', allergies: '', doctor: '' };
@@ -88,6 +89,13 @@ export default function Patients() {
       copyLink(link);
     }
   };
+
+  useSocketEvent('patient:created', (patient) => {
+    toast.success(`New patient registered: ${patient.name}`, {
+      icon: '👤', duration: 3000,
+    });
+    if (page === 1) fetchPatients();
+  }, [page]);
 
   const fld = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.value }));
   const fmtPKR = (n) => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;

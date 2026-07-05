@@ -3,19 +3,47 @@ import { useNavigate } from 'react-router-dom';
 import { MdMedicalServices, MdPeople, MdWarning, MdTrendingUp, MdAccountBalance, MdInventory, MdReceipt, MdArrowForward } from 'react-icons/md';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import API from '../utils/api';
+import { useSocketEvent } from '../hooks/useSocketEvent';
 
-const COLORS = ['#0ea5e9','#10b981','#f59e0b','#ef4444','#6366f1','#ec4899','#14b8a6'];
+const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#ec4899', '#14b8a6'];
 
-const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [liveStats, setLiveStats] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
     API.get('/dashboard').then(({ data }) => { setData(data); setLoading(false); }).catch(() => setLoading(false));
   }, []);
+
+  // socket listener for dashboard updates:
+  useSocketEvent('dashboard:update', (data) => {
+    setLiveStats(prev => ({ ...prev, ...data }));
+  }, []);
+
+  // socket listener for live bill feed:
+  const [recentBills, setRecentBills] = useState([]);
+  useSocketEvent('bill:created', (bill) => {
+    setRecentBills(prev => [bill, ...prev.slice(0, 4)]);
+  }, []);
+
+  //socket listener for stock updates in the dashboard:
+  useSocketEvent('stock:low', (med) => {
+    // If dashboard shows low stock count, increment it
+    setLiveStats(prev => ({ ...prev, lowStockCount: (prev.lowStockCount || 0) + 1 }));
+  }, []);
+
+  // When rendering stats cards — merge liveStats over fetched stats:
+  // Example: Instead of showing stats.todayRevenue, show liveStats.todayRevenue ?? stats.todayRevenue
+  // Add a helper:
+  const getStat = (key, fetchedValue) => liveStats[key] ?? fetchedValue;
+
+  // Usage in cards:
+  // value={getStat('totalPatients', stats.totalPatients)}
+  // value={getStat('lowStockCount', stats.lowStock)}
 
   if (loading) return <div className="flex-center" style={{ height: 300 }}><div className="text-muted">Loading dashboard...</div></div>;
   if (!data) return null;
@@ -86,9 +114,9 @@ export default function Dashboard() {
             <BarChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} tickFormatter={v => `₨${(v/1000).toFixed(0)}k`} />
+              <YAxis tick={{ fontSize: 12, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} tickFormatter={v => `₨${(v / 1000).toFixed(0)}k`} />
               <Tooltip formatter={(v) => [`₨ ${v.toLocaleString()}`, 'Revenue']} contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }} />
-              <Bar dataKey="revenue" fill="var(--accent)" radius={[6,6,0,0]} />
+              <Bar dataKey="revenue" fill="var(--accent)" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -99,7 +127,7 @@ export default function Dashboard() {
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={categoryDist.map(c => ({ name: c._id, value: c.count }))} cx="50%" cy="50%" outerRadius={75} dataKey="value" label={({ name, percent }) => `${name} ${(percent*100).toFixed(0)}%`} labelLine={false} fontSize={11}>
+              <Pie data={categoryDist.map(c => ({ name: c._id, value: c.count }))} cx="50%" cy="50%" outerRadius={75} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
                 {categoryDist.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
               <Tooltip contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }} />
@@ -121,7 +149,7 @@ export default function Dashboard() {
               <tbody>
                 {topMedicines.map((m, i) => (
                   <tr key={i}>
-                    <td><span className="badge badge-accent">#{i+1}</span></td>
+                    <td><span className="badge badge-accent">#{i + 1}</span></td>
                     <td><strong>{m._id}</strong></td>
                     <td>{m.totalQty} units</td>
                     <td className="text-success fw-bold">₨ {m.totalRevenue.toLocaleString()}</td>
@@ -132,6 +160,48 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {recentBills.length > 0 && (
+        <div className="card" style={{ marginTop: 20 }}>
+          <div className="card-header">
+            <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 8, height: 8, borderRadius: '50%', background: '#22c55e',
+                animation: 'socketPulse 2s ease-out infinite',
+              }} />
+              Live Activity
+            </div>
+          </div>
+          {recentBills.map((bill, i) => (
+            <div key={bill._id || i} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '10px 0', borderBottom: '1px solid var(--border-light)', fontSize: 13,
+              animation: i === 0 ? 'slideInLeft 0.3s ease' : 'none',
+            }}>
+              <div>
+                <span style={{ fontWeight: 700 }}>{bill.billNumber}</span>
+                <span className="text-muted" style={{ marginLeft: 8 }}>{bill.patientName}</span>
+              </div>
+              <span style={{ fontWeight: 700, color: 'var(--success)' }}>
+                ₨{bill.totalAmount?.toLocaleString()}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <style>{`
+          @keyframes slideInLeft {
+          from { opacity: 0; transform: translateX(-12px); }
+          to   { opacity: 1; transform: translateX(0); }
+          }
+          @keyframes socketPulse {
+          0%   { transform: scale(1);   opacity: 0.8; }
+          100% { transform: scale(2.5); opacity: 0; }
+          }
+        `}
+      </style>
+
     </div>
   );
 }

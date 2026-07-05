@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import App from './App.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { SocketProvider } from './context/SocketContext.jsx';
 import { SubscriptionProvider } from './context/SubscriptionContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
@@ -14,21 +15,23 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <ThemeProvider>
       <AuthProvider>
-        <SubscriptionProvider>
-          <AIProvider>
-            <NotificationProvider>
-              <App />
-              <Toaster position="top-right" toastOptions={{
-                style: { borderRadius: '10px', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: '14px' },
-                success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
-                error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
-              }} />
-              <OfflineBanner />
-              <UpdateBanner />
-              <InstallBanner />
-            </NotificationProvider>
-          </AIProvider>
-        </SubscriptionProvider>
+        <SocketProvider>
+          <SubscriptionProvider>
+            <AIProvider>
+              <NotificationProvider>
+                <App />
+                <Toaster position="top-right" toastOptions={{
+                  style: { borderRadius: '10px', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: '14px' },
+                  success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
+                  error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+                }} />
+                <OfflineBanner />
+                <UpdateBanner />
+                <InstallBanner />
+              </NotificationProvider>
+            </AIProvider>
+          </SubscriptionProvider>
+        </SocketProvider>
       </AuthProvider>
     </ThemeProvider>
   </BrowserRouter>

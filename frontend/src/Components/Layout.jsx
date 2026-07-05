@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
+import RealTimeIndicator from './RealTimeIndicator';
 import { useState, Suspense } from 'react';
 import { MdDashboard,MdSupportAgent,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdReceipt, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
@@ -135,6 +136,8 @@ export default function Layout() {
             </div>
           </div>
           <div className="flex gap-3" style={{ alignItems: 'center' }}>
+
+            <RealTimeIndicator />
 
             <NotificationCenter />
             <button className="btn btn-ghost btn-icon" onClick={() => setSpecificTheme(theme === 'dark' ? 'light' : 'dark')}>

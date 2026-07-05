@@ -8,6 +8,7 @@ import {
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { generateInvoicePDF } from '../utils/invoicePDF';
+import { useSocketEvent } from '../hooks/useSocketEvent';
 
 const STATUS_COLORS = {
   Paid: 'badge-success',
@@ -122,6 +123,25 @@ export default function Billing() {
       toast.error(err.response?.data?.message || 'Failed to send email');
     } finally { setEmailingId(''); }
   };
+
+  useSocketEvent('bill:created', (bill) => {
+    // Show toast if a colleague created a bill
+    toast.success(`New bill: ${bill.billNumber} — ${bill.patientName}`, {
+      icon: '🧾',
+      duration: 3000,
+    });
+    // Refresh the list if on page 1
+    if (page === 1) fetchBills();
+  }, [page]);
+
+  useSocketEvent('bill:paymentUpdated', (data) => {
+    setBills(prev =>
+      prev.map(b => b._id === data._id
+        ? { ...b, amountPaid: data.amountPaid, paymentStatus: data.paymentStatus }
+        : b
+      )
+    );
+  }, []);
 
   const fmtPKR = (n) => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-PK') : '—';

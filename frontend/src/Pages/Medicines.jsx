@@ -4,6 +4,7 @@ import { useAI } from '../context/AIContext';
 import { MdAdd, MdAutoAwesome, MdEdit, MdDelete, MdSearch, MdMedicalServices, MdWarning, MdSwapHoriz } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import { useSocketEvent } from '../hooks/useSocketEvent';
 
 const CATEGORIES = ['All', 'Antibiotic', 'Analgesic', 'Antiviral', 'Antifungal', 'Cardiovascular', 'Diabetes', 'Respiratory', 'Gastrointestinal', 'Neurological', 'Vitamin & Supplement', 'Dermatological', 'Other'];
 const FORMS = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Inhaler', 'Patch', 'Other'];
@@ -130,6 +131,23 @@ export default function Medicines() {
       toast.error('AI suggestion failed');
     } finally { setSuggesting(false); }
   };
+
+  useSocketEvent('stock:updated', (data) => {
+    setMedicines(prev =>
+      prev.map(m => m._id === data._id ? { ...m, stock: data.stock, isLow: data.isLow } : m)
+    );
+  }, []);
+
+  useSocketEvent('medicine:created', () => {
+    // Refetch if on first page — new medicine may have been added by another user
+    if (page === 1) fetchMedicines();
+  }, [page]);
+
+  useSocketEvent('medicine:updated', (data) => {
+    setMedicines(prev =>
+      prev.map(m => m._id === data._id ? { ...m, ...data } : m)
+    );
+  }, []);
 
   const fld = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
