@@ -1,10 +1,16 @@
 const express = require('express');
 const http = require('http');
+require('dotenv').config();
 const { initSocket } = require('./socket');
-const mongoose = require('mongoose');
+const helmet     = require('helmet');
+const compression= require('compression');
+const { connectRedis } = require('./config/redis');
+const connectDB = require('./config/db');
 const cors = require('cors');
 const morgan = require('morgan');
-require('dotenv').config();
+const { apiLimiter, authLimiter, aiLimiter, speedLimiter } = require('./middleware/rateLimiter');
+const timeout = require('./middleware/timeout');
+const logger     = require('./utils/logger');
 
 const authRoutes = require('./routes/auth');
 const auditLogRoutes = require('./routes/auditLogs');
@@ -32,18 +38,86 @@ const documentRoutes = require('./routes/documents');
 
 const app = express();
 const httpServer = http.createServer(app);
-initSocket(httpServer);
+// initSocket(httpServer);
 
-// Middleware
+/* ════════════════════════════════
+   SECURITY & PERFORMANCE MIDDLEWARE
+════════════════════════════════ */
+
+// Security headers
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }, // allow Cloudinary images
+  contentSecurityPolicy:     false,                       // set your own if needed
+}));
+
+// Compress all responses (gzip)
+app.use(compression({
+  level:     6,
+  threshold: 1024,   // only compress > 1KB
+  filter:    (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  },
+}));
+
+// cors
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5173',
+  'http://localhost:3000',
+].filter(Boolean);
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000','https://medicine-store-v2.vercel.app'],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (Postman, mobile apps)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS blocked: ${origin}`));
+  },
   credentials: true,
 }));
-app.use(express.json());
-app.use(morgan('dev'));
 
-// Routes
-app.use('/api/auth', authRoutes);
+// Body parsing — with size limits
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// HTTP request logging
+app.use(morgan('combined', {
+  stream: { write: (msg) => logger.http(msg.trim()) },
+  skip:   (req) => req.path === '/api/health', // skip health checks
+}));
+
+// Speed limiter — applied globally
+app.use('/api', speedLimiter);
+
+// Rate limiter — general API
+app.use('/api', apiLimiter);
+
+app.use('/api', timeout(30000)); // 30s max for any request
+
+/* ════════════════════════════════
+   HEALTH CHECK (no auth/rate limit)
+════════════════════════════════ */
+app.get('/api/health', async (req, res) => {
+  const { getRedis } = require('./config/redis');
+  const redis = getRedis();
+
+  res.json({
+    status:   'ok',
+    pid:       process.pid,
+    uptime:   Math.round(process.uptime()),
+    memory:   process.memoryUsage().heapUsed,
+    mongodb:  require('mongoose').connection.readyState === 1 ? 'connected' : 'disconnected',
+    redis:    redis?.isReady ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+/* ════════════════════════════════
+   ROUTES
+════════════════════════════════ */
+
+app.use('/api/auth',authLimiter, authRoutes);
 app.use('/api/medicines', medicineRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/billing', billingRoutes);
@@ -60,45 +134,97 @@ app.use('/api/lab-tests', labTestRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/push', pushRoutes);
 app.use('/api/portal', portalRoutes);
-app.use('/api/ai', aiRoutes);
+app.use('/api/ai',aiLimiter, aiRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/support',     supportRoutes);
 app.use('/api/invoice-settings', invoiceSettingsRoutes);
 app.use('/api/documents', documentRoutes);
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'MediStore API is running', timestamp: new Date() });
-});
+/* ════════════════════════════════
+   GLOBAL ERROR HANDLER
+════════════════════════════════ */
 
-// Global error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  logger.error('Unhandled error:', { message: err.message, stack: err.stack, url: req.originalUrl });
+
+  // Mongoose validation error
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({ success: false, message: Object.values(err.errors).map(e => e.message).join(', ') });
+  }
+  // JWT error
+  if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({ success: false, message: 'Invalid token' });
+  }
+  // Multer file size
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({ success: false, message: 'File too large' });
+  }
+
   res.status(err.status || 500).json({
     success: false,
-    message: err.message || 'Internal Server Error',
+    message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
   });
 });
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
+  res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
 });
 
-// Connect to MongoDB and start server
-const PORT = process.env.PORT || 5000;
-mongoose
-  .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/medistore')
-  .then(() => {
-    console.log('✅ MongoDB connected successfully');
-     startExpiryDigestJob();
-    httpServer.listen(PORT, () => {
-      console.log(`🚀 MediStore server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('❌ MongoDB connection failed:', err.message);
-    process.exit(1);
+/* ════════════════════════════════
+   GRACEFUL SHUTDOWN
+════════════════════════════════ */
+
+const gracefulShutdown = async (signal) => {
+  logger.info(`${signal} received — shutting down gracefully`);
+
+  httpServer.close(async () => {
+    logger.info('HTTP server closed');
+    await require('mongoose').connection.close();
+    logger.info('MongoDB connection closed');
+    process.exit(0);
   });
 
-module.exports = app;
+  // Force shutdown after 10s
+  setTimeout(() => {
+    logger.error('Forced shutdown after timeout');
+    process.exit(1);
+  }, 10000);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT',  () => gracefulShutdown('SIGINT'));
+
+// Catch unhandled promise rejections
+process.on('unhandledRejection', (reason) => {
+  logger.error('Unhandled rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  logger.error('Uncaught exception:', err);
+  process.exit(1);
+});
+
+/* ════════════════════════════════
+   STARTUP
+════════════════════════════════ */
+
+const PORT = process.env.PORT || 5000;
+const start = async () => {
+  await connectDB();
+  await connectRedis().catch(err => {
+    logger.warn('Redis unavailable — continuing without cache:', err.message);
+  });
+
+  initSocket(httpServer);
+
+  httpServer.listen(PORT, () => {
+    logger.info(`✅ Worker ${process.pid} listening on port ${PORT}`);
+    startExpiryDigestJob();
+
+    // Tell PM2 we're ready
+    if (process.send) process.send('ready');
+  });
+};
+
+start();
