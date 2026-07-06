@@ -16,7 +16,6 @@ API.interceptors.response.use(
     if (err.response?.status === 401) {
       localStorage.removeItem('medistore_token');
       localStorage.removeItem('medistore_user');
-      window.location.href = '/login';
     }
     return Promise.reject(err);
   }

@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { lazy } from 'react'
+import { lazy, Suspense } from 'react'
 import { useAuth } from './context/AuthContext';
 import Layout from './Components/Layout';
 const Login = lazy(() => import('./Auth/Login'));
@@ -48,6 +48,7 @@ const PrivateRoute = ({ children }) => {
 export default function App() {
   const { user } = useAuth();
   return (
+    <Suspense fallback={<Loader />}>
     <Routes>
       <Route path="/" element={user ? <Navigate to="/app" replace /> :<Landing />} />
       <Route path="/portal/:token" element={<PatientPortal />} />
@@ -88,5 +89,6 @@ export default function App() {
       <Route path="*" element={<Navigate to="/" replace />} />
 
     </Routes>
+    </Suspense>
   );
 }
