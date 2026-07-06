@@ -1,5 +1,5 @@
 const Appointment = require('../models/Appointment');
-const Patient     = require('../models/Patient');
+const Patient = require('../models/Patient');
 const { emitAppointmentCreated, emitAppointmentUpdated } = require('../socket');
 
 /* ── Get all appointments (with date range + filters) ── */
@@ -8,9 +8,9 @@ exports.getAll = async (req, res) => {
     const { startDate, endDate, status, doctorName, patientId, page = 1, limit = 30 } = req.query;
     const query = { storeId: req.storeId };
 
-    if (status)     query.status     = status;
+    if (status) query.status = status;
     if (doctorName) query.doctorName = { $regex: doctorName, $options: 'i' };
-    if (patientId)  query.patient    = patientId;
+    if (patientId) query.patient = patientId;
 
     if (startDate || endDate) {
       query.date = {};
@@ -22,19 +22,29 @@ exports.getAll = async (req, res) => {
       }
     }
 
-    const skip = (Number(page) - 1) * Number(limit);
-    const [appointments, total] = await Promise.all([
-      Appointment.find(query)
-        .populate('patient',             'patientId phone age gender')
-        .populate('linkedPrescription',  'rxNumber')
-        .populate('linkedBill',          'billNumber')
-        .populate('createdBy',           'name')
-        .sort({ date: 1 })
-        .skip(skip).limit(Number(limit)),
-      Appointment.countDocuments(query),
-    ]);
+    const result = await Appointment.paginate(query, {
+      page: Number(page),
+      limit: Number(limit),
+      sort: { date: 1 },
+      populate: [
+        { path: 'patient', select: 'patientId phone age gender' },
+        { path: 'linkedPrescription', select: 'rxNumber' },
+        { path: 'linkedBill', select: 'billNumber' },
+        { path: 'createdBy', select: 'name' },
+      ],
+      lean: true,
+      leanWithId: false,
+    });
 
-    res.json({ success: true, appointments, total, totalPages: Math.ceil(total / Number(limit)) });
+    res.json({
+      success: true,
+      appointments: result.docs,
+      total: result.totalDocs,
+      totalPages: result.totalPages,
+      page: result.page,
+      hasNext: result.hasNextPage,
+      hasPrev: result.hasPrevPage,
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -44,11 +54,11 @@ exports.getAll = async (req, res) => {
 exports.getToday = async (req, res) => {
   try {
     const start = new Date(); start.setHours(0, 0, 0, 0);
-    const end   = new Date(); end.setHours(23, 59, 59, 999);
+    const end = new Date(); end.setHours(23, 59, 59, 999);
 
     const appointments = await Appointment.find({
       storeId: req.storeId,
-      date:    { $gte: start, $lte: end },
+      date: { $gte: start, $lte: end },
     })
       .populate('patient', 'patientId phone age gender')
       .sort({ date: 1 });
@@ -63,15 +73,15 @@ exports.getToday = async (req, res) => {
 exports.getCalendar = async (req, res) => {
   try {
     const { year, month } = req.query;
-    const y = Number(year)  || new Date().getFullYear();
+    const y = Number(year) || new Date().getFullYear();
     const m = Number(month) || new Date().getMonth() + 1;
 
     const start = new Date(y, m - 1, 1);
-    const end   = new Date(y, m, 0, 23, 59, 59);
+    const end = new Date(y, m, 0, 23, 59, 59);
 
     const appointments = await Appointment.find({
       storeId: req.storeId,
-      date:    { $gte: start, $lte: end },
+      date: { $gte: start, $lte: end },
     })
       .populate('patient', 'patientId')
       .sort({ date: 1 });
@@ -82,12 +92,12 @@ exports.getCalendar = async (req, res) => {
       const day = new Date(a.date).getDate();
       if (!grouped[day]) grouped[day] = [];
       grouped[day].push({
-        _id:         a._id,
+        _id: a._id,
         patientName: a.patientName,
-        timeSlot:    a.timeSlot,
-        type:        a.type,
-        status:      a.status,
-        doctorName:  a.doctorName,
+        timeSlot: a.timeSlot,
+        type: a.type,
+        status: a.status,
+        doctorName: a.doctorName,
       });
     });
 
@@ -101,10 +111,10 @@ exports.getCalendar = async (req, res) => {
 exports.getOne = async (req, res) => {
   try {
     const appt = await Appointment.findOne({ _id: req.params.id, storeId: req.storeId })
-      .populate('patient',            'name patientId phone age gender bloodGroup medicalHistory allergies')
+      .populate('patient', 'name patientId phone age gender bloodGroup medicalHistory allergies')
       .populate('linkedPrescription', 'rxNumber items')
-      .populate('linkedBill',         'billNumber totalAmount paymentStatus')
-      .populate('createdBy',          'name');
+      .populate('linkedBill', 'billNumber totalAmount paymentStatus')
+      .populate('createdBy', 'name');
 
     if (!appt)
       return res.status(404).json({ success: false, message: 'Appointment not found' });
@@ -125,18 +135,18 @@ exports.create = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Patient not found' });
 
     const appt = await Appointment.create({
-      storeId:    req.storeId,
-      patient:    patientId,
-      patientName:patient.name,
+      storeId: req.storeId,
+      patient: patientId,
+      patientName: patient.name,
       doctorName,
-      date:       new Date(date),
+      date: new Date(date),
       timeSlot,
-      type:       type || 'Checkup',
+      type: type || 'Checkup',
       visitNotes: notes,
-      createdBy:  req.user._id,
+      createdBy: req.user._id,
     });
 
-    try { emitAppointmentCreated(req.storeId, appt); } catch {}
+    try { emitAppointmentCreated(req.storeId, appt); } catch { }
 
     res.status(201).json({ success: true, appointment: appt, message: 'Appointment scheduled' });
   } catch (err) {
@@ -160,10 +170,10 @@ exports.completeVisit = async (req, res) => {
         visitNotes,
         diagnosis,
         vitalSigns,
-        medicinesGiven:  medicinesGiven  || [],
-        followUpDate:    followUpDate    || null,
+        medicinesGiven: medicinesGiven || [],
+        followUpDate: followUpDate || null,
         linkedPrescription: linkedPrescription || null,
-        linkedBill:         linkedBill         || null,
+        linkedBill: linkedBill || null,
       },
       { new: true }
     );
@@ -171,7 +181,7 @@ exports.completeVisit = async (req, res) => {
     if (!appt)
       return res.status(404).json({ success: false, message: 'Appointment not found' });
 
-    try { emitAppointmentUpdated(req.storeId, appt); } catch {}
+    try { emitAppointmentUpdated(req.storeId, appt); } catch { }
 
     res.json({ success: true, appointment: appt, message: 'Visit recorded successfully' });
   } catch (err) {
@@ -207,7 +217,7 @@ exports.cancel = async (req, res) => {
     if (!appt)
       return res.status(404).json({ success: false, message: 'Appointment not found' });
 
-    try { emitAppointmentUpdated(req.storeId, appt); } catch {}
+    try { emitAppointmentUpdated(req.storeId, appt); } catch { }
 
     res.json({ success: true, message: 'Appointment cancelled' });
   } catch (err) {
@@ -221,10 +231,10 @@ exports.getPatientHistory = async (req, res) => {
     const visits = await Appointment.find({
       storeId: req.storeId,
       patient: req.params.patientId,
-      status:  'Completed',
+      status: 'Completed',
     })
       .populate('linkedPrescription', 'rxNumber')
-      .populate('linkedBill',         'billNumber totalAmount')
+      .populate('linkedBill', 'billNumber totalAmount')
       .sort({ date: -1 });
 
     res.json({ success: true, visits });
@@ -236,10 +246,10 @@ exports.getPatientHistory = async (req, res) => {
 /* ── Stats ── */
 exports.getStats = async (req, res) => {
   try {
-    const today     = new Date(); today.setHours(0,0,0,0);
-    const todayEnd  = new Date(); todayEnd.setHours(23,59,59,999);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
     const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    weekStart.setHours(0,0,0,0);
+    weekStart.setHours(0, 0, 0, 0);
 
     const [todayTotal, todayCompleted, weekTotal, totalPatients] = await Promise.all([
       Appointment.countDocuments({ storeId: req.storeId, date: { $gte: today, $lte: todayEnd } }),

@@ -24,12 +24,24 @@ exports.getAllBills = async (req, res) => {
       if (endDate) query.createdAt.$lte = new Date(endDate);
     }
 
-    const skip = (Number(page) - 1) * Number(limit);
-    const [bills, total] = await Promise.all([
-      Bill.find(query).populate('patient', 'patientId phone').populate('createdBy', 'name').sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
-      Bill.countDocuments(query),
-    ]);
-    res.json({ success: true, bills, total, page: Number(page), totalPages: Math.ceil(total / limit) });
+    const result = await Bill.paginate(query, {
+      page: Number(page),
+      limit: Number(limit),
+      sort: { createdAt: -1 },
+      populate: { path: 'patient', select: 'patientId phone' },
+      lean: true,
+      leanWithId: false,
+    });
+
+    res.json({
+      success: true,
+      bills: result.docs,
+      total: result.totalDocs,
+      totalPages: result.totalPages,
+      page: result.page,
+      hasNext: result.hasNextPage,
+      hasPrev: result.hasPrevPage,
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

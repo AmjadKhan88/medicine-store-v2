@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
+
 
 const visitMedicineSchema = new mongoose.Schema({
   medicine:     { type: mongoose.Schema.Types.ObjectId, ref: 'Medicine' },
@@ -44,4 +46,5 @@ const appointmentSchema = new mongoose.Schema({
 appointmentSchema.index({ storeId: 1, date: 1 });
 appointmentSchema.index({ storeId: 1, patient: 1 });
 
+appointmentSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model('Appointment', appointmentSchema);

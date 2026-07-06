@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
+
 
 const patientSchema = new mongoose.Schema({
   patientId: { type: String, unique: true },
@@ -39,4 +41,5 @@ patientSchema.pre('save', async function (next) {
 patientSchema.set('toJSON', { virtuals: true });
 patientSchema.set('toObject', { virtuals: true });
 
+patientSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model('Patient', patientSchema);

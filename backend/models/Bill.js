@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
+
 
 const billItemSchema = new mongoose.Schema({
   medicine: { type: mongoose.Schema.Types.ObjectId, ref: 'Medicine', required: true },
@@ -42,4 +44,5 @@ billSchema.pre('save', async function (next) {
 
 billSchema.set('toJSON', { virtuals: true });
 
+billSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model('Bill', billSchema);

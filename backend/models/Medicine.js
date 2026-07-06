@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
+
 
 const medicineSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
@@ -48,4 +50,5 @@ medicineSchema.virtual('isLowStock').get(function () {
 medicineSchema.set('toJSON', { virtuals: true });
 medicineSchema.set('toObject', { virtuals: true });
 
+medicineSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model('Medicine', medicineSchema);

@@ -59,14 +59,14 @@ export default function Dashboard() {
   const fmtPKR = (n) => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;
 
   const statCards = [
-    { label: 'Total Medicines', value: stats.totalMedicines, icon: <MdMedicalServices />, cls: 'blue', sub: `${stats.lowStockMedicines} low stock`, link: '/medicines' },
-    { label: 'Total Patients', value: stats.totalPatients, icon: <MdPeople />, cls: 'green', sub: 'Registered patients', link: '/patients' },
-    { label: 'Expired Medicines', value: stats.expiredMedicines, icon: <MdWarning />, cls: 'red', sub: `${stats.expiringSoon} expiring soon`, link: '/expiry-alerts' },
-    { label: "Today's Revenue", value: fmtPKR(stats.todaySales?.total), icon: <MdTrendingUp />, cls: 'blue', sub: `${stats.todaySales?.count || 0} bills today`, link: '/billing' },
-    { label: 'Monthly Revenue', value: fmtPKR(stats.monthlySales?.total), icon: <MdBarChart2 />, cls: 'green', sub: `${stats.monthlySales?.count || 0} bills this month`, link: '/reports' },
-    { label: 'Pending Balance', value: fmtPKR(stats.totalOutstanding), icon: <MdAccountBalance />, cls: 'yellow', sub: `${stats.pendingBills} pending bills`, link: '/patient-balance' },
-    { label: 'Low Stock Items', value: stats.lowStockMedicines, icon: <MdInventory />, cls: 'red', sub: 'Need restocking', link: '/medicines?status=lowstock' },
-    { label: 'Pending Bills', value: stats.pendingBills, icon: <MdReceipt />, cls: 'yellow', sub: 'Awaiting payment', link: '/billing?status=Pending' },
+    { label: 'Total Medicines', value: stats.totalMedicines, icon: <MdMedicalServices />, cls: 'blue', sub: `${stats.lowStockMedicines} low stock`, link: '/app/medicines' },
+    { label: 'Total Patients', value: stats.totalPatients, icon: <MdPeople />, cls: 'green', sub: 'Registered patients', link: '/app/patients' },
+    { label: 'Expired Medicines', value: stats.expiredMedicines, icon: <MdWarning />, cls: 'red', sub: `${stats.expiringSoon} expiring soon`, link: '/app/expiry-alerts' },
+    { label: "Today's Revenue", value: fmtPKR(stats.todaySales?.total), icon: <MdTrendingUp />, cls: 'blue', sub: `${stats.todaySales?.count || 0} bills today`, link: '/app/billing' },
+    { label: 'Monthly Revenue', value: fmtPKR(stats.monthlySales?.total), icon: <MdBarChart2 />, cls: 'green', sub: `${stats.monthlySales?.count || 0} bills this month`, link: '/app/reports' },
+    { label: 'Pending Balance', value: fmtPKR(stats.totalOutstanding), icon: <MdAccountBalance />, cls: 'yellow', sub: `${stats.pendingBills} pending bills`, link: '/app/patient-balance' },
+    { label: 'Low Stock Items', value: stats.lowStockMedicines, icon: <MdInventory />, cls: 'red', sub: 'Need restocking', link: '/app/medicines?status=lowstock' },
+    { label: 'Pending Bills', value: stats.pendingBills, icon: <MdReceipt />, cls: 'yellow', sub: 'Awaiting payment', link: '/app/billing?status=Pending' },
   ];
 
   return (
@@ -76,13 +76,13 @@ export default function Dashboard() {
           <h1>Dashboard</h1>
           <p>Overview of your medicine store operations</p>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate('/billing/create')}>
+        <button className="btn btn-primary" onClick={() => navigate('/app/billing/create')}>
           <MdReceipt /> New Invoice
         </button>
       </div>
 
       {(stats.expiredMedicines > 0 || stats.expiringSoon > 0) && (
-        <div className={`alert ${stats.expiredMedicines > 0 ? 'alert-danger' : 'alert-warning'}`} style={{ cursor: 'pointer' }} onClick={() => navigate('/expiry-alerts')}>
+        <div className={`alert ${stats.expiredMedicines > 0 ? 'alert-danger' : 'alert-warning'}`} style={{ cursor: 'pointer' }} onClick={() => navigate('/app/expiry-alerts')}>
           <MdWarning size={20} />
           <div className="alert-text">
             <strong>{stats.expiredMedicines > 0 ? `${stats.expiredMedicines} expired medicines!` : `${stats.expiringSoon} medicines expiring soon!`}</strong>

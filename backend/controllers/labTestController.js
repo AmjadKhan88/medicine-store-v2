@@ -9,29 +9,40 @@ exports.getAll = async (req, res) => {
     const { patientId, status, category, search, page = 1, limit = 20 } = req.query;
     const query = { storeId: req.storeId };
 
-    if (patientId) query.patient     = patientId;
-    if (status)    query.status      = status;
-    if (category)  query.testCategory= category;
-    if (search)    query.$or         = [
-      { testName:   { $regex: search, $options: 'i' } },
-      { patientName:{ $regex: search, $options: 'i' } },
-      { orderedBy:  { $regex: search, $options: 'i' } },
-      { lab:        { $regex: search, $options: 'i' } },
+    if (patientId) query.patient = patientId;
+    if (status) query.status = status;
+    if (category) query.testCategory = category;
+    if (search) query.$or = [
+      { testName: { $regex: search, $options: 'i' } },
+      { patientName: { $regex: search, $options: 'i' } },
+      { orderedBy: { $regex: search, $options: 'i' } },
+      { lab: { $regex: search, $options: 'i' } },
     ];
 
-    const skip = (Number(page) - 1) * Number(limit);
-    const [tests, total] = await Promise.all([
-      LabTest.find(query)
-        .populate('patient',            'patientId phone age gender')
-        .populate('linkedPrescription', 'rxNumber')
-        .populate('linkedAppointment',  'date timeSlot')
-        .populate('createdBy',          'name')
-        .sort({ createdAt: -1 })
-        .skip(skip).limit(Number(limit)),
-      LabTest.countDocuments(query),
-    ]);
+    const result = await LabTest.paginate(query, {
+      page: Number(page),
+      limit: Number(limit),
+      sort: { createdAt: -1 },
+      select: '-file.data',
+      populate: [
+        { path: 'patient', select: 'patientId phone age gender' },
+        { path: 'linkedPrescription', select: 'rxNumber' },
+        { path: 'linkedAppointment', select: 'date timeSlot' },
+        { path: 'createdBy', select: 'name' },
+      ],
+      lean: true,
+      leanWithId: false,
+    });
 
-    res.json({ success: true, tests, total, totalPages: Math.ceil(total / Number(limit)) });
+    res.json({
+      success: true,
+      tests: result.docs,
+      total: result.totalDocs,
+      totalPages: result.totalPages,
+      page: result.page,
+      hasNext: result.hasNextPage,
+      hasPrev: result.hasPrevPage,
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -41,10 +52,10 @@ exports.getAll = async (req, res) => {
 exports.getOne = async (req, res) => {
   try {
     const test = await LabTest.findOne({ _id: req.params.id, storeId: req.storeId })
-      .populate('patient',            'name patientId phone age gender bloodGroup')
+      .populate('patient', 'name patientId phone age gender bloodGroup')
       .populate('linkedPrescription', 'rxNumber doctorName')
-      .populate('linkedAppointment',  'date timeSlot type')
-      .populate('createdBy',          'name');
+      .populate('linkedAppointment', 'date timeSlot type')
+      .populate('createdBy', 'name');
 
     if (!test)
       return res.status(404).json({ success: false, message: 'Lab test not found' });
@@ -68,17 +79,17 @@ exports.create = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Patient not found' });
 
     const test = await LabTest.create({
-      storeId:     req.storeId,
-      patient:     patientId,
+      storeId: req.storeId,
+      patient: patientId,
       patientName: patient.name,
       testName,
       testCategory: testCategory || 'Blood Test',
       orderedBy,
       lab,
-      orderedDate:  orderedDate ? new Date(orderedDate) : new Date(),
+      orderedDate: orderedDate ? new Date(orderedDate) : new Date(),
       notes,
       linkedPrescription: linkedPrescription || null,
-      linkedAppointment:  linkedAppointment  || null,
+      linkedAppointment: linkedAppointment || null,
       createdBy: req.user._id,
     });
 
@@ -99,16 +110,16 @@ exports.update = async (req, res) => {
     } = req.body;
 
     const updateData = {};
-    if (status)             updateData.status     = status;
-    if (result)             updateData.result     = result;
-    if (resultRows)         updateData.resultRows = resultRows;
-    if (collectedDate)      updateData.collectedDate = new Date(collectedDate);
-    if (resultDate)         updateData.resultDate    = new Date(resultDate);
+    if (status) updateData.status = status;
+    if (result) updateData.result = result;
+    if (resultRows) updateData.resultRows = resultRows;
+    if (collectedDate) updateData.collectedDate = new Date(collectedDate);
+    if (resultDate) updateData.resultDate = new Date(resultDate);
     if (orderedBy !== undefined) updateData.orderedBy = orderedBy;
-    if (lab       !== undefined) updateData.lab        = lab;
-    if (notes     !== undefined) updateData.notes      = notes;
+    if (lab !== undefined) updateData.lab = lab;
+    if (notes !== undefined) updateData.notes = notes;
     if (linkedPrescription !== undefined) updateData.linkedPrescription = linkedPrescription || null;
-    if (linkedAppointment  !== undefined) updateData.linkedAppointment  = linkedAppointment  || null;
+    if (linkedAppointment !== undefined) updateData.linkedAppointment = linkedAppointment || null;
 
     const test = await LabTest.findOneAndUpdate(
       { _id: req.params.id, storeId: req.storeId },
@@ -119,7 +130,7 @@ exports.update = async (req, res) => {
     if (!test)
       return res.status(404).json({ success: false, message: 'Lab test not found' });
 
-    try { emitLabTestUpdated(req.storeId, test); } catch {}
+    try { emitLabTestUpdated(req.storeId, test); } catch { }
 
     res.json({ success: true, test, message: 'Lab test updated' });
   } catch (err) {
@@ -144,7 +155,7 @@ exports.uploadFile = async (req, res) => {
 
     // Build a clean filename for Cloudinary
     const safeName = `${test._id}_${Date.now()}`;
-    const folder   = `medistore/${req.storeId}/lab-tests`;
+    const folder = `medistore/${req.storeId}/lab-tests`;
 
     // Upload buffer to Cloudinary
     const result = await cloudinaryUtil.uploadBuffer(
@@ -157,25 +168,25 @@ exports.uploadFile = async (req, res) => {
     // Save Cloudinary metadata to test (no file binary)
     test.file = {
       originalName: req.file.originalname,
-      mimetype:     req.file.mimetype,
-      size:         req.file.size,
-      url:          result.secure_url,
-      publicId:     result.public_id,
-      uploadedAt:   new Date(),
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      url: result.secure_url,
+      publicId: result.public_id,
+      uploadedAt: new Date(),
     };
     test.status = 'Completed';
     await test.save();
 
-    try { emitLabTestUpdated(req.storeId, test); } catch {}
+    try { emitLabTestUpdated(req.storeId, test); } catch { }
 
     res.json({
-      success:  true,
+      success: true,
       test,
       fileInfo: {
         originalName: req.file.originalname,
-        mimetype:     req.file.mimetype,
-        size:         req.file.size,
-        url:          result.secure_url,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        url: result.secure_url,
       },
       message: 'File uploaded to Cloudinary successfully',
     });

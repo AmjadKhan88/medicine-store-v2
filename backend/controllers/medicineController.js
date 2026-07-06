@@ -21,13 +21,24 @@ exports.getAllMedicines = async (req, res) => {
     else if (status === 'expiring') query.expiryDate = { $gte: now, $lte: thirtyDays };
     else if (status === 'lowstock') query.$expr = { $lte: ['$stock', '$minStock'] };
 
-    const skip = (Number(page) - 1) * Number(limit);
-    const [medicines, total] = await Promise.all([
-      Medicine.find(query).populate('addedBy', 'name').populate('substitutes', 'name genericName stock salePrice unit dosageForm').sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
-      Medicine.countDocuments(query),
-    ]);
+    const result = await Medicine.paginate(query, {
+      page: Number(page),
+      limit: Number(limit),
+      sort: { name: 1 },
+      lean: true,     // returns plain objects — faster
+      leanWithId: false,
+    });
 
-    res.json({ success: true, medicines, total, page: Number(page), totalPages: Math.ceil(total / limit) });
+    res.json({
+      success: true,
+      medicines: result.docs,
+      total: result.totalDocs,
+      totalPages: result.totalPages,
+      page: result.page,
+      hasNext: result.hasNextPage,
+      hasPrev: result.hasPrevPage,
+    });
+
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

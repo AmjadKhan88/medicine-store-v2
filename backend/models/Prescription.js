@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
+
 
 const prescriptionItemSchema = new mongoose.Schema({
   medicine:     { type: mongoose.Schema.Types.ObjectId, ref: 'Medicine' },
@@ -40,4 +42,5 @@ prescriptionSchema.pre('save', async function (next) {
   next();
 });
 
+prescriptionSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model('Prescription', prescriptionSchema);

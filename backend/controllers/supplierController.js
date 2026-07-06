@@ -1,6 +1,6 @@
-const Supplier       = require('../models/Supplier');
-const PurchaseOrder  = require('../models/PurchaseOrder');
-const Medicine       = require('../models/Medicine');
+const Supplier = require('../models/Supplier');
+const PurchaseOrder = require('../models/PurchaseOrder');
+const Medicine = require('../models/Medicine');
 
 /* ── Get all suppliers ── */
 exports.getAll = async (req, res) => {
@@ -8,24 +8,32 @@ exports.getAll = async (req, res) => {
     const { search, city, page = 1, limit = 20 } = req.query;
     const query = { storeId: req.storeId, isActive: true };
 
-    if (city)   query.city = { $regex: city,   $options: 'i' };
-    if (search) query.$or  = [
-      { name:    { $regex: search, $options: 'i' } },
+    if (city) query.city = { $regex: city, $options: 'i' };
+    if (search) query.$or = [
+      { name: { $regex: search, $options: 'i' } },
       { company: { $regex: search, $options: 'i' } },
-      { phone:   { $regex: search, $options: 'i' } },
-      { email:   { $regex: search, $options: 'i' } },
+      { phone: { $regex: search, $options: 'i' } },
+      { email: { $regex: search, $options: 'i' } },
     ];
 
-    const skip = (Number(page) - 1) * Number(limit);
-    const [suppliers, total] = await Promise.all([
-      Supplier.find(query)
-        .select('-medicines')   // exclude medicines array from list for speed
-        .sort({ name: 1 })
-        .skip(skip).limit(Number(limit)),
-      Supplier.countDocuments(query),
-    ]);
+    const result = await Supplier.paginate(query, {
+      page: Number(page),
+      limit: Number(limit),
+      sort: { name: 1 },
+      select: '-medicines',
+      lean: true,
+      leanWithId: false,
+    });
 
-    res.json({ success: true, suppliers, total, totalPages: Math.ceil(total / Number(limit)) });
+    res.json({
+      success: true,
+      suppliers: result.docs,
+      total: result.totalDocs,
+      totalPages: result.totalPages,
+      page: result.page,
+      hasNext: result.hasNextPage,
+      hasPrev: result.hasPrevPage,
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -42,7 +50,7 @@ exports.getOne = async (req, res) => {
 
     // Recent purchase orders from this supplier
     const recentOrders = await PurchaseOrder.find({
-      storeId:       req.storeId,
+      storeId: req.storeId,
       'supplier.name': { $regex: supplier.name, $options: 'i' },
     })
       .select('-items')
@@ -60,7 +68,7 @@ exports.create = async (req, res) => {
   try {
     const supplier = await Supplier.create({
       ...req.body,
-      storeId:   req.storeId,
+      storeId: req.storeId,
       createdBy: req.user._id,
     });
     res.status(201).json({ success: true, supplier, message: 'Supplier added' });
@@ -147,10 +155,10 @@ exports.logPerformance = async (req, res) => {
     // event: 'onTime' | 'late' | 'qualityIssue' | 'returned'
 
     const inc = {};
-    if (event === 'onTime')       { inc['performance.totalOrders'] = 1; inc['performance.onTimeDeliveries'] = 1; }
-    if (event === 'late')         { inc['performance.totalOrders'] = 1; inc['performance.lateDeliveries']   = 1; }
-    if (event === 'qualityIssue') { inc['performance.qualityIssues']  = 1; }
-    if (event === 'returned')     { inc['performance.returnedOrders'] = 1; }
+    if (event === 'onTime') { inc['performance.totalOrders'] = 1; inc['performance.onTimeDeliveries'] = 1; }
+    if (event === 'late') { inc['performance.totalOrders'] = 1; inc['performance.lateDeliveries'] = 1; }
+    if (event === 'qualityIssue') { inc['performance.qualityIssues'] = 1; }
+    if (event === 'returned') { inc['performance.returnedOrders'] = 1; }
 
     const update = { $inc: inc };
     if (rating !== undefined)
@@ -178,16 +186,16 @@ exports.getPurchaseHistory = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Supplier not found' });
 
     const orders = await PurchaseOrder.find({
-      storeId:         req.storeId,
+      storeId: req.storeId,
       'supplier.name': { $regex: supplier.name, $options: 'i' },
     })
       .sort({ createdAt: -1 });
 
     const stats = {
-      totalOrders:  orders.length,
-      totalValue:   orders.reduce((s, o) => s + o.totalAmount, 0),
-      totalPaid:    orders.reduce((s, o) => s + o.amountPaid,  0),
-      pending:      orders.filter(o => o.status !== 'Received').length,
+      totalOrders: orders.length,
+      totalValue: orders.reduce((s, o) => s + o.totalAmount, 0),
+      totalPaid: orders.reduce((s, o) => s + o.amountPaid, 0),
+      pending: orders.filter(o => o.status !== 'Received').length,
     };
     stats.outstanding = stats.totalValue - stats.totalPaid;
 
@@ -205,15 +213,15 @@ exports.getOutstandingDashboard = async (req, res) => {
 
     const withBalance = suppliers
       .map(s => ({
-        _id:         s._id,
-        name:        s.name,
-        company:     s.company,
-        phone:       s.phone,
-        city:        s.city,
-        totalOrdered:s.totalOrdered,
-        totalPaid:   s.totalPaid,
+        _id: s._id,
+        name: s.name,
+        company: s.company,
+        phone: s.phone,
+        city: s.city,
+        totalOrdered: s.totalOrdered,
+        totalPaid: s.totalPaid,
         outstanding: Math.max(0, s.totalOrdered - s.totalPaid),
-        rating:      s.performance?.rating || 0,
+        rating: s.performance?.rating || 0,
       }))
       .filter(s => s.outstanding > 0)
       .sort((a, b) => b.outstanding - a.outstanding);
@@ -242,10 +250,10 @@ exports.getStats = async (req, res) => {
     res.json({
       success: true,
       stats: {
-        total:          suppliers.length,
+        total: suppliers.length,
         totalOutstanding,
-        avgRating:      Number(avgRating),
-        withBalance:    suppliers.filter(s => s.totalOrdered > s.totalPaid).length,
+        avgRating: Number(avgRating),
+        withBalance: suppliers.filter(s => s.totalOrdered > s.totalPaid).length,
       },
     });
   } catch (err) {

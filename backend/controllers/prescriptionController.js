@@ -1,7 +1,7 @@
 const Prescription = require('../models/Prescription');
-const Patient      = require('../models/Patient');
-const Medicine     = require('../models/Medicine');
-const Bill         = require('../models/Bill');
+const Patient = require('../models/Patient');
+const Medicine = require('../models/Medicine');
+const Bill = require('../models/Bill');
 
 /* ── Get all prescriptions ── */
 exports.getAll = async (req, res) => {
@@ -9,27 +9,37 @@ exports.getAll = async (req, res) => {
     const { search, status, patientId, page = 1, limit = 20 } = req.query;
     const query = { storeId: req.storeId };
 
-    if (status)    query.status  = status;
+    if (status) query.status = status;
     if (patientId) query.patient = patientId;
-    if (search)    query.$or     = [
-      { rxNumber:    { $regex: search, $options: 'i' } },
+    if (search) query.$or = [
+      { rxNumber: { $regex: search, $options: 'i' } },
       { patientName: { $regex: search, $options: 'i' } },
-      { doctorName:  { $regex: search, $options: 'i' } },
-      { diagnosis:   { $regex: search, $options: 'i' } },
+      { doctorName: { $regex: search, $options: 'i' } },
+      { diagnosis: { $regex: search, $options: 'i' } },
     ];
 
-    const skip = (Number(page) - 1) * Number(limit);
-    const [prescriptions, total] = await Promise.all([
-      Prescription.find(query)
-        .populate('patient',   'patientId phone')
-        .populate('createdBy', 'name')
-        .populate('linkedBill','billNumber')
-        .sort({ createdAt: -1 })
-        .skip(skip).limit(Number(limit)),
-      Prescription.countDocuments(query),
-    ]);
+    const result = await Prescription.paginate(query, {
+      page: Number(page),
+      limit: Number(limit),
+      sort: { createdAt: -1 },
+      populate: [
+        { path: 'patient', select: 'patientId phone' },
+        { path: 'createdBy', select: 'name' },
+        { path: 'linkedBill', select: 'billNumber' },
+      ],
+      lean: true,
+      leanWithId: false,
+    });
 
-    res.json({ success: true, prescriptions, total, totalPages: Math.ceil(total / Number(limit)) });
+    res.json({
+      success: true,
+      prescriptions: result.docs,
+      total: result.totalDocs,
+      totalPages: result.totalPages,
+      page: result.page,
+      hasNext: result.hasNextPage,
+      hasPrev: result.hasPrevPage,
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -39,8 +49,8 @@ exports.getAll = async (req, res) => {
 exports.getOne = async (req, res) => {
   try {
     const rx = await Prescription.findOne({ _id: req.params.id, storeId: req.storeId })
-      .populate('patient',    'name patientId phone age gender bloodGroup city')
-      .populate('createdBy',  'name')
+      .populate('patient', 'name patientId phone age gender bloodGroup city')
+      .populate('createdBy', 'name')
       .populate('linkedBill', 'billNumber totalAmount paymentStatus');
 
     if (!rx)
@@ -73,7 +83,7 @@ exports.create = async (req, res) => {
       let medicineName = item.medicineName;
       if (item.medicine && !medicineName) {
         const med = await Medicine.findById(item.medicine);
-        medicineName  = med?.name || 'Unknown Medicine';
+        medicineName = med?.name || 'Unknown Medicine';
       }
       builtItems.push({ ...item, medicineName });
     }
@@ -82,15 +92,15 @@ exports.create = async (req, res) => {
     validUntil.setDate(validUntil.getDate() + Number(validDays));
 
     const rx = await Prescription.create({
-      storeId:     req.storeId,
-      patient:     patientId,
+      storeId: req.storeId,
+      patient: patientId,
       patientName: patient.name,
       doctorName,
       diagnosis,
-      items:       builtItems,
+      items: builtItems,
       notes,
       validUntil,
-      createdBy:   req.user._id,
+      createdBy: req.user._id,
     });
 
     res.status(201).json({ success: true, prescription: rx, message: 'Prescription created' });
@@ -150,7 +160,7 @@ exports.convertToBill = async (req, res) => {
 
     // Build bill items from prescription — only items with a linked medicine
     const billItems = [];
-    let   subtotal  = 0;
+    let subtotal = 0;
 
     for (const item of rx.items) {
       if (!item.medicine) continue; // skip free-text medicines without DB link
@@ -159,13 +169,13 @@ exports.convertToBill = async (req, res) => {
       if (!medicine || medicine.stock < item.quantity) continue;
 
       const totalPrice = medicine.salePrice * item.quantity;
-      subtotal        += totalPrice;
+      subtotal += totalPrice;
 
       billItems.push({
-        medicine:     medicine._id,
+        medicine: medicine._id,
         medicineName: medicine.name,
-        quantity:     item.quantity,
-        unitPrice:    medicine.salePrice,
+        quantity: item.quantity,
+        unitPrice: medicine.salePrice,
         totalPrice,
       });
 
@@ -181,18 +191,18 @@ exports.convertToBill = async (req, res) => {
       });
 
     const bill = await Bill.create({
-      storeId:     req.storeId,
-      patient:     rx.patient,
+      storeId: req.storeId,
+      patient: rx.patient,
       patientName: rx.patientName,
-      items:       billItems,
+      items: billItems,
       subtotal,
-      discount:    0,
-      tax:         0,
+      discount: 0,
+      tax: 0,
       totalAmount: subtotal,
-      amountPaid:  0,
+      amountPaid: 0,
       paymentMethod: 'Pending',
-      notes:       `Generated from Prescription ${rx.rxNumber}`,
-      createdBy:   req.user._id,
+      notes: `Generated from Prescription ${rx.rxNumber}`,
+      createdBy: req.user._id,
     });
 
     // Update patient totals
@@ -200,7 +210,7 @@ exports.convertToBill = async (req, res) => {
     await patient.save();
 
     // Mark prescription as dispensed + link bill
-    rx.status     = 'Dispensed';
+    rx.status = 'Dispensed';
     rx.linkedBill = bill._id;
     await rx.save();
 
@@ -240,8 +250,8 @@ exports.getStats = async (req, res) => {
       Prescription.countDocuments({ storeId: req.storeId, status: 'Active' }),
       Prescription.countDocuments({ storeId: req.storeId, status: 'Dispensed' }),
       Prescription.countDocuments({
-        storeId:    req.storeId,
-        status:     'Active',
+        storeId: req.storeId,
+        status: 'Active',
         validUntil: { $gte: today, $lte: new Date(today.getTime() + 7 * 86400000) },
       }),
     ]);

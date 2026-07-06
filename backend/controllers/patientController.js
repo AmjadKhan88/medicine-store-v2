@@ -14,13 +14,24 @@ exports.getAllPatients = async (req, res) => {
       { phone: { $regex: search, $options: 'i' } },
     ];
 
-    const skip = (Number(page) - 1) * Number(limit);
-    const [patients, total] = await Promise.all([
-      Patient.find(query).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
-      Patient.countDocuments(query),
-    ]);
+    const result = await Patient.paginate(query, {
+      page: Number(page),
+      limit: Number(limit),
+      sort: { name: 1 },
+      lean: true,
+      leanWithId: false,
+    });
 
-    res.json({ success: true, patients, total, page: Number(page), totalPages: Math.ceil(total / limit) });
+    res.json({
+      success: true,
+      patients: result.docs,
+      total: result.totalDocs,
+      totalPages: result.totalPages,
+      page: result.page,
+      hasNext: result.hasNextPage,
+      hasPrev: result.hasPrevPage,
+    });
+
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

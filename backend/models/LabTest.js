@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
+
 
 const labTestSchema = new mongoose.Schema({
   storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -62,4 +64,5 @@ const labTestSchema = new mongoose.Schema({
 labTestSchema.index({ storeId: 1, patient: 1 });
 labTestSchema.index({ storeId: 1, status: 1 });
 
+labTestSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model('LabTest', labTestSchema);

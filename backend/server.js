@@ -11,6 +11,8 @@ const morgan = require('morgan');
 const { apiLimiter, authLimiter, aiLimiter, speedLimiter } = require('./middleware/rateLimiter');
 const timeout = require('./middleware/timeout');
 const logger     = require('./utils/logger');
+const mongoosePaginate = require('mongoose-paginate-v2');
+
 
 const authRoutes = require('./routes/auth');
 const auditLogRoutes = require('./routes/auditLogs');
@@ -112,6 +114,23 @@ app.get('/api/health', async (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+/* ════════════════════════════════
+   Mongoose Paginate
+════════════════════════════════ */
+
+mongoosePaginate.paginate.options = {
+  lean:           true,
+  leanWithId:     false,
+  customLabels: {
+    docs:       'docs',
+    totalDocs:  'totalDocs',
+    totalPages: 'totalPages',
+    page:       'page',
+    hasNextPage:'hasNextPage',
+    hasPrevPage:'hasPrevPage',
+  },
+};
 
 /* ════════════════════════════════
    ROUTES

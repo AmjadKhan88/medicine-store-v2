@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
+
 
 const supplierSchema = new mongoose.Schema({
   storeId:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -55,4 +57,5 @@ supplierSchema.virtual('deliveryScore').get(function () {
 
 supplierSchema.set('toJSON', { virtuals: true });
 
+supplierSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model('Supplier', supplierSchema);
