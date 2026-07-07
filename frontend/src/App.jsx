@@ -38,11 +38,11 @@ const InvoiceSettings = lazy(()=> import('./Pages/InvoiceSettings'));
 const Documents = lazy(()=> import('./Pages/Documents'));
 
 const PrivateRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading} = useAuth();
   if (loading) return (
     <Loader />
   );
-  return user ? children : <Navigate to="/login" replace />;
+  return user ? children : <Navigate to="/login" />;
 };
 
 export default function App() {
@@ -50,10 +50,10 @@ export default function App() {
   return (
     <Suspense fallback={<Loader />}>
     <Routes>
-      <Route path="/" element={user ? <Navigate to="/app" replace /> :<Landing />} />
+      <Route path="/" element={user ? <Navigate to="/app" /> :<Landing />} />
       <Route path="/portal/:token" element={<PatientPortal />} />
-      <Route path="/login" element={user ? <Navigate to="/app" replace /> : <Login />} />
-      <Route path="/register" element={user ? <Navigate to="/app" replace /> : <Register />} />
+      <Route path="/login" element={user ? <Navigate to="/app" /> : <Login />} />
+      <Route path="/register" element={user ? <Navigate to="/app" /> : <Register />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />

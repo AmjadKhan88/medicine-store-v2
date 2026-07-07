@@ -9,23 +9,29 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem('medistore_token');
-    if (token) {
-      API.get('/auth/me')
-        .then(({ data }) => setUser(data.user))
-        .catch(() => { localStorage.removeItem('medistore_token'); setUser(null); })
-        .finally(() => setLoading(false));
-    } else setLoading(false);
-  }, []);
 
-  // const login = async (email, password) => {
-  //   const { data } = await API.post('/auth/login', { email, password });
-  //   localStorage.setItem('medistore_token', data.token);
-  //   localStorage.setItem('medistore_user', JSON.stringify(data.user));
-  //   setUser(data.user);
-  //   return data;
-  // };
+  useEffect(() => {
+  const token = localStorage.getItem('medistore_token');
+  if (token) {
+    API.get('/auth/me')
+      .then(({ data }) => {
+        setUser(data.user);
+        localStorage.setItem('medistore_user', JSON.stringify(data.user)); // sync if changed
+      })
+      .catch(() => {
+        // CRITICAL FIX: Remove both token AND user from localStorage
+        localStorage.removeItem('medistore_token');
+        localStorage.removeItem('medistore_user');
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
+  } else {
+    // If no token, ensure user is cleared from localStorage to prevent stale reads
+    localStorage.removeItem('medistore_user');
+    setUser(null);
+    setLoading(false);
+  }
+}, []);
 
   const logout = () => {
     localStorage.removeItem('medistore_token');

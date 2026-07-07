@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import {assets} from "../assets/assets"
 import toast from 'react-hot-toast';
 import { MdEmail, MdLock, MdMedicalServices, MdInventory, MdPeople, MdBarChart } from 'react-icons/md';
 import API from '../utils/api';
@@ -44,7 +45,7 @@ export default function Login() {
 
   return (
     <div className="auth-page">
-      <div className="auth-left">
+      <div className="auth-left" style={{background:`linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${assets.medi_img}) center/cover`}}>
         <div style={{ maxWidth: 380, width: '100%' }}>
           <div className="auth-logo">Medi<span>Store</span></div>
           <div className="auth-tagline">Professional Medicine Store Management System</div>
@@ -54,11 +55,7 @@ export default function Login() {
               <span>{f.text}</span>
             </div>
           ))}
-          <div style={{ marginTop: 40, padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: 12, color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
-            <strong style={{ color: 'rgba(255,255,255,0.8)', display: 'block', marginBottom: 6 }}>Demo Credentials</strong>
-            Admin: admin@medistore.com / admin123<br />
-            Doctor: doctor@medistore.com / doctor123
-          </div>
+          
         </div>
       </div>
       <div className="auth-right">

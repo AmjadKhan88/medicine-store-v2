@@ -3,14 +3,13 @@ import { useState, useEffect } from 'react';
 import {
   MdMedicalServices, MdPeople, MdReceipt, MdWarning,
   MdBarChart, MdInventory, MdCheckCircle, MdArrowForward,
-  MdStar, MdWhatsapp, MdMenu, MdClose,
+  MdStar,
 } from 'react-icons/md';
 
 const PKR = (n) => `₨ ${Number(n).toLocaleString('en-PK')}`;
 
 export default function Landing() {
   const navigate     = useNavigate();
-  const [mobileMenu, setMobileMenu] = useState(false);
   const [scrolled, setScrolled]     = useState(false);
 
 
