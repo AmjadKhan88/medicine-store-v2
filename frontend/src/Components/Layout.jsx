@@ -12,8 +12,8 @@ import Loader from './Loader';
 
 export default function Layout() {
   const { user, logout } = useAuth();
-  const { can, isAdmin } = usePermissions();
-  const { isActive, isTrial, daysLeft, plan } = useSubscription();
+  const { can } = usePermissions();
+  const {  isTrial, daysLeft} = useSubscription();
   const { counts } = useNotifications();
   const { theme, setSpecificTheme } = useTheme();
   const navigate = useNavigate();
@@ -71,8 +71,8 @@ export default function Layout() {
     <div className="app-layout">
       <aside className="sidebar" style={{ width: sidebarOpen ? '260px' : '0', overflow: 'scroll' }}>
         <div className="sidebar-logo">
-          <h1>Medi<span>Store</span></h1>
-          <p>Medicine Management System</p>
+          <h1>Elite<span>HMS</span></h1>
+          <p>Hospital Management System</p>
         </div>
 
         {isTrial && daysLeft <= 7 && (

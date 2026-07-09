@@ -346,7 +346,7 @@ export default function Landing() {
         <div style={s.navInner}>
           <Link to="/" style={s.logo}>
             <MdMedicalServices size={22} style={{ color: '#0ea5e9' }} />
-            Medi<span style={s.logoAccent}>Store</span>
+            Elite<span style={s.logoAccent}>HMS</span>
           </Link>
 
           {/* Desktop links */}
@@ -650,7 +650,7 @@ export default function Landing() {
               Start Free Trial <MdArrowForward />
             </Link>
             <a
-              href="https://wa.me/923001234567?text=Hi, I want to learn more about MediStore"
+              href="https://wa.me/923069534618?text=Hi, I want to learn more about MediStore"
               target="_blank"
               rel="noopener noreferrer"
               style={s.btnTransparent}
@@ -676,13 +676,13 @@ export default function Landing() {
                 Trusted by 500+ pharmacies nationwide.
               </p>
               <div style={{ display: 'flex', gap: 16, marginTop: 20 }}>
-                <a href="mailto:support@medistore.pk" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>
+                <a href="mailto:amjadfast87@gmail.com" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>
                   <MdEmail size={20} />
                 </a>
-                <a href="tel:+923001234567" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>
+                <a href="tel:+923069534618" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>
                   <MdPhone size={20} />
                 </a>
-                <a href="https://wa.me/923001234567" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>
+                <a href="https://wa.me/923069534618" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>
                   <MdWhatsapp size={20} />
                 </a>
               </div>
@@ -716,7 +716,7 @@ export default function Landing() {
           </div>
 
           <div style={s.footerBottom}>
-            <span style={s.footerCopy}>© 2026 MediStore. All rights reserved. Made with ❤️ in Peshawar, Pakistan 🇵🇰</span>
+            <span style={s.footerCopy}>© 2026 elitehms. All rights reserved. Made by Amjad Full-Stack Developer in Peshawar, Pakistan 🇵🇰</span>
             <span style={{ ...s.footerCopy }}>
               <a href="/privacy" style={{ color: 'rgba(255,255,255,0.3)', textDecoration: 'none', marginRight: 16 }}>Privacy</a>
               <a href="/terms" style={{ color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}>Terms</a>
