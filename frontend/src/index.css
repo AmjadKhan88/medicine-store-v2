@@ -215,7 +215,7 @@ tbody tr:last-child td { border-bottom:none; }
 .theme-dot.active { border-color:var(--text-primary); transform:scale(1.2); }
 .theme-dot:hover { transform:scale(1.15); }
 
-@media (max-width:768px) { .auth-left { display:none; } .charts-grid { grid-template-columns:1fr; } .stat-grid { grid-template-columns:1fr 1fr; } .page-content { padding:16px; } }
+@media (max-width:768px) { .auth-left { display:none; } .charts-grid { grid-template-columns:1fr; } .stat-grid { grid-template-columns:1fr 1fr; } .page-content { padding:16px; }}
 
 .single-line {white-space: nowrap;}
 /* Container spacing */
