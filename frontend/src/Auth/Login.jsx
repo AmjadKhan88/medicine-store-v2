@@ -10,7 +10,7 @@ export default function Login() {
   const [form, setForm] = useState({});
   const [loading, setLoading] = useState(false);
   const [unverified, setUnverified] = useState('');
-  const [errors,setErrors] = useState({});
+  const [errors,setErrors] = useState(null);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -23,6 +23,7 @@ export default function Login() {
       if (data.success) {
         login(data.token, data.user); // single call — sets localStorage + React state atomically
         toast.success('Welcome back!');
+        setErrors(null);
         navigate('/app');
       }
 
@@ -32,7 +33,7 @@ export default function Login() {
         setUnverified(err.response.data.email);
       } else {
         toast.error(err.response?.data?.message || 'Login failed');
-        setErrors(err?.response?.data?.errors)
+        setErrors(err?.response?.data?.errors || null)
       }
     } finally { setLoading(false); }
   };
@@ -70,7 +71,7 @@ export default function Login() {
                 <MdEmail className="input-icon" />
                 <input className="form-control" type="email" placeholder="doctor@medistore.com"
                   value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} required />
-                {errors.email && <p style={{color:'red',fontSize:'x-small'}}> {errors.email} </p> }
+                {errors?.email && <p style={{color:'red',fontSize:'x-small'}}> {errors.email} </p> }
               </div>
             </div>
             <div className="form-group">
@@ -79,7 +80,7 @@ export default function Login() {
                 <MdLock className="input-icon" />
                 <input className="form-control" type="password" placeholder="••••••••"
                   value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} required />
-                  {errors.password && <p style={{color:'red',fontSize:'x-small'}}> {errors.password} </p> }
+                  {errors?.password && <p style={{color:'red',fontSize:'x-small'}}> {errors.password} </p> }
               </div>
             </div>
             <button className="btn btn-primary btn-lg w-full" type="submit" disabled={loading} style={{ marginTop: 8 }}>

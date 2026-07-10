@@ -10,7 +10,7 @@ export default function Register() {
   const [done, setDone] = useState(false);
   const [resending, setResending] = useState(false);
   const [resentCount, setResentCount] = useState(0); // prevent spam
-  const [errors,setErrors] = useState({});
+  const [errors,setErrors] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,10 +18,11 @@ export default function Register() {
 
     try {
       await API.post('/auth/register', form);
+      setErrors(null);
       setDone(true);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
-      setErrors(err?.response?.data?.errors);
+      setErrors(err?.response?.data?.errors || null);
     } finally { setLoading(false); }
   };
 
@@ -107,23 +108,23 @@ export default function Register() {
               <div className="form-group">
                 <label className="form-label required">Full Name</label>
                 <input className="form-control" placeholder="Dr. Muhammad Ali" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required />
-                {errors.name && <p style={{color:'red',fontSize:'x-small'}}> {errors.name} </p> }
+                {errors?.name && <p style={{color:'red',fontSize:'x-small'}}> {errors.name} </p> }
               </div>
               <div className="form-group">
                 <label className="form-label">Phone</label>
                 <input className="form-control" placeholder="0300-1234567" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
-                {errors.phone && <p style={{color:'red',fontSize:'x-small'}}> {errors.phone} </p> }
+                {errors?.phone && <p style={{color:'red',fontSize:'x-small'}}> {errors.phone} </p> }
               </div>
             </div>
             <div className="form-group">
               <label className="form-label required">Email Address</label>
               <input className="form-control" type="email" placeholder="doctor@pharmacy.com" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} required />
-              {errors.email && <p style={{color:'red',fontSize:'x-small'}}> {errors.email} </p> }
+              {errors?.email && <p style={{color:'red',fontSize:'x-small'}}> {errors.email} </p> }
             </div>
             <div className="form-group">
               <label className="form-label required">Password</label>
               <input className="form-control" type="password" placeholder="Min 6 characters" value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} required minLength={6} />
-              {errors.password && <p style={{color:'red',fontSize:'x-small'}}> {errors.password} </p> }
+              {errors?.password && <p style={{color:'red',fontSize:'x-small'}}> {errors.password} </p> }
             </div>
             <button className="btn btn-primary btn-lg w-full" type="submit" disabled={loading}>
               {loading ? 'Creating Account...' : 'Start Free Trial →'}
