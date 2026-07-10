@@ -10,12 +10,31 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
+// API.interceptors.response.use(
+//   (res) => res,
+//   (err) => {
+//     if (err.response?.status === 401) {
+//       localStorage.removeItem('medistore_token');
+//       localStorage.removeItem('medistore_user');
+//     }
+//     return Promise.reject(err);
+//   }
+// );
+
 API.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
+      const wasLoggedIn = !!localStorage.getItem('medistore_token');
       localStorage.removeItem('medistore_token');
       localStorage.removeItem('medistore_user');
+
+      // Only redirect if user was actually logged in (not on login page itself)
+      if (wasLoggedIn) {
+        // Force a full page reload — clears all React state cleanly
+        // This avoids needing to import AuthContext here (circular dep risk)
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(err);
   }

@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { MdCheckCircle, MdError, MdEmail } from 'react-icons/md';
 import API from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function VerifyEmail() {
   const [params]   = useSearchParams();
   const navigate   = useNavigate();
   const token      = params.get('token');
+  const { login }  = useAuth();
 
   const [status, setStatus]   = useState('verifying'); // verifying | success | error
   const [message, setMessage] = useState('');
@@ -17,12 +19,18 @@ export default function VerifyEmail() {
   useEffect(() => {
     if (!token) { setStatus('error'); setMessage('No verification token found in link.'); return; }
 
+    // API.post('/auth/verify-email', { token })
+    //   .then(({ data }) => {
+    //     localStorage.setItem('medistore_token', data.token);
+    //     localStorage.setItem('medistore_user',  JSON.stringify(data.user));
+    //     setStatus('success');
+    //     setTimeout(() => navigate('/app'), 2500);
+    //   })
     API.post('/auth/verify-email', { token })
       .then(({ data }) => {
-        localStorage.setItem('medistore_token', data.token);
-        localStorage.setItem('medistore_user',  JSON.stringify(data.user));
+        login(data.token, data.user); // sets localStorage + React state in one call
         setStatus('success');
-        setTimeout(() => navigate('/app'), 2500);
+        setTimeout(() => navigate('/onboarding'), 2500); // new users go to onboarding
       })
       .catch(err => {
         setStatus('error');

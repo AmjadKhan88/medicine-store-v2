@@ -46,7 +46,11 @@ const PrivateRoute = ({ children }) => {
 };
 
 export default function App() {
-  const { user } = useAuth();
+    const { user, loading } = useAuth();
+
+  // Don't render any routes until auth is resolved
+  // Prevents flash of login page for already-logged-in users
+  if (loading) return <Loader />;
   return (
     <Suspense fallback={<Loader />}>
     <Routes>
