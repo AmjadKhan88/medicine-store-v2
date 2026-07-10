@@ -136,7 +136,7 @@ mongoosePaginate.paginate.options = {
    ROUTES
 ════════════════════════════════ */
 
-app.use('/api/auth',authLimiter, authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/medicines', medicineRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/billing', billingRoutes);

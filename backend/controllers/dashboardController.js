@@ -4,6 +4,7 @@ const Bill = require('../models/Bill');
 
 exports.getDashboard = async (req, res) => {
   try {
+    const storeId = req.storeId;
     const now = new Date();
     const thirtyDays = new Date(); thirtyDays.setDate(thirtyDays.getDate() + 30);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -14,15 +15,15 @@ exports.getDashboard = async (req, res) => {
       lowStockMedicines, todayBills, monthBills, pendingBills,
       totalOutstanding,
     ] = await Promise.all([
-      Medicine.countDocuments({ isActive: true }),
-      Patient.countDocuments({ isActive: true }),
-      Medicine.countDocuments({ isActive: true, expiryDate: { $lt: now } }),
-      Medicine.countDocuments({ isActive: true, expiryDate: { $gte: now, $lte: thirtyDays } }),
-      Medicine.countDocuments({ isActive: true, $expr: { $lte: ['$stock', '$minStock'] } }),
-      Bill.aggregate([{ $match: { createdAt: { $gte: startOfDay } } }, { $group: { _id: null, count: { $sum: 1 }, total: { $sum: '$totalAmount' } } }]),
-      Bill.aggregate([{ $match: { createdAt: { $gte: startOfMonth } } }, { $group: { _id: null, count: { $sum: 1 }, total: { $sum: '$totalAmount' }, paid: { $sum: '$amountPaid' } } }]),
-      Bill.countDocuments({ paymentStatus: { $in: ['Pending', 'Partial'] } }),
-      Bill.aggregate([{ $match: { paymentStatus: { $in: ['Pending', 'Partial'] } } }, { $group: { _id: null, total: { $sum: { $subtract: ['$totalAmount', '$amountPaid'] } } } }]),
+      Medicine.countDocuments({ isActive: true,storeId }),
+      Patient.countDocuments({ isActive: true, storeId }),
+      Medicine.countDocuments({ isActive: true, storeId, expiryDate: { $lt: now } }),
+      Medicine.countDocuments({ isActive: true, storeId, expiryDate: { $gte: now, $lte: thirtyDays } }),
+      Medicine.countDocuments({ isActive: true, storeId, $expr: { $lte: ['$stock', '$minStock'] } }),
+      Bill.aggregate([{ $match: {storeId, createdAt: { $gte: startOfDay } } }, { $group: { _id: null, count: { $sum: 1 }, total: { $sum: '$totalAmount' } } }]),
+      Bill.aggregate([{ $match: {storeId, createdAt: { $gte: startOfMonth } } }, { $group: { _id: null, count: { $sum: 1 }, total: { $sum: '$totalAmount' }, paid: { $sum: '$amountPaid' } } }]),
+      Bill.countDocuments({storeId, paymentStatus: { $in: ['Pending', 'Partial'] } }),
+      Bill.aggregate([{ $match: {storeId, paymentStatus: { $in: ['Pending', 'Partial'] } } }, { $group: { _id: null, total: { $sum: { $subtract: ['$totalAmount', '$amountPaid'] } } } }]),
     ]);
 
     // Monthly revenue for last 6 months
@@ -30,13 +31,14 @@ exports.getDashboard = async (req, res) => {
     sixMonthsAgo.setDate(1); sixMonthsAgo.setHours(0, 0, 0, 0);
 
     const monthlyRevenue = await Bill.aggregate([
-      { $match: { createdAt: { $gte: sixMonthsAgo } } },
+      { $match: {storeId, createdAt: { $gte: sixMonthsAgo } } },
       { $group: { _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } }, revenue: { $sum: '$totalAmount' }, count: { $sum: 1 } } },
       { $sort: { '_id.year': 1, '_id.month': 1 } },
     ]);
 
     // Top selling medicines
     const topMedicines = await Bill.aggregate([
+      { $match: { storeId } },
       { $unwind: '$items' },
       { $group: { _id: '$items.medicineName', totalQty: { $sum: '$items.quantity' }, totalRevenue: { $sum: '$items.totalPrice' } } },
       { $sort: { totalQty: -1 } },
@@ -45,7 +47,7 @@ exports.getDashboard = async (req, res) => {
 
     // Category distribution
     const categoryDist = await Medicine.aggregate([
-      { $match: { isActive: true } },
+      { $match: { isActive: true, storeId } },
       { $group: { _id: '$category', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
     ]);

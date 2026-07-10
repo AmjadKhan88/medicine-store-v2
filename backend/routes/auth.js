@@ -15,16 +15,23 @@ const {
   changePasswordSchema, updateProfileSchema,
 } = require('../validators/authValidators');
 
-router.post('/register',                        validate(registerSchema),                register);
-router.post('/login',                           validate(loginSchema),                      login);
-router.post('/verify-email',                                                          verifyEmail);
-router.post('/resend-verification',                                            resendVerification);
-router.post('/forgot-password',                 validate(forgotPasswordSchema),    forgotPassword);
-router.post('/reset-password',                  validate(resetPasswordSchema),      resetPassword);
-router.get('/me',                    protect,                                               getMe);
-router.put('/profile',               protect,   validate(updateProfileSchema),      updateProfile);
-router.put('/change-password',       protect,   validate(changePasswordSchema),     changePassword);
-router.patch('/onboarding',          protect,                                     updateOnboarding);
+const { authLimiter } = require('../middleware/rateLimiter');
+
+// Strict rate limit only on login + register (brute force targets)
+router.post('/register',          authLimiter, validate(registerSchema),         register);
+router.post('/login',             authLimiter, validate(loginSchema),            login);
+router.post('/forgot-password',   authLimiter, validate(forgotPasswordSchema),   forgotPassword);
+
+// Relaxed — users need to resend/verify multiple times without hitting limit
+router.post('/verify-email',                                                      verifyEmail);
+router.post('/resend-verification',                                               resendVerification);
+router.post('/reset-password',               validate(resetPasswordSchema),       resetPassword);
+
+// Protected routes
+router.get('/me',                 protect,                                        getMe);
+router.put('/profile',            protect,     validate(updateProfileSchema),     updateProfile);
+router.put('/change-password',    protect,     validate(changePasswordSchema),    changePassword);
+router.patch('/onboarding',       protect,                                        updateOnboarding);
 
 module.exports = router;
 

@@ -12,12 +12,12 @@ const generateRandomToken = () => crypto.randomBytes(32).toString('hex');
 exports.register = async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
-    if (!name || !email || !password)
-      return res.status(400).json({ success: false, message: 'Name, email and password required' });
+
 
     const existing = await User.findOne({ email });
-    if (existing)
+    if (existing){
       return res.status(400).json({ success: false, message: 'Email already registered' });
+    }
 
     const verifyToken   = generateRandomToken();
     const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
@@ -123,15 +123,14 @@ exports.resendVerification = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password)
-      return res.status(400).json({ success: false, message: 'Email and password required' });
+    
 
     const user = await User.findOne({ email }).select('+password');
     if (!user || !(await user.matchPassword(password)))
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res.status(401).json({ success: false, message: 'Invalid email or password',errors: {password:"Invalid email or password"} });
 
     if (!user.isActive)
-      return res.status(403).json({ success: false, message: 'Account deactivated' });
+      return res.status(403).json({ success: false, message: 'Account deactivated',errors: {email: "Account deactivated"} });
 
     if (!user.isEmailVerified)
       return res.status(403).json({
@@ -139,6 +138,7 @@ exports.login = async (req, res) => {
         code:              'EMAIL_NOT_VERIFIED',
         message:           'Please verify your email before logging in.',
         email:             user.email,
+        errors: {email: "Please verify your email before logging in."}
       });
 
     const token = generateToken(user._id);
