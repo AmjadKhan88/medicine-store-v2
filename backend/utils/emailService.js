@@ -1,51 +1,30 @@
-const nodemailer = require('nodemailer');
-const dns = require('dns').promises;
+/* ────────────────────────────────────────────────────
+   SendGrid HTTP API – no SMTP, no timeouts
+   ──────────────────────────────────────────────────── */
 
-let cachedTransporter = null;
-let cachedAt = 0;
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-/* Resolve smtp.gmail.com to a literal IPv4 address and build a transporter
-   pinned to it. Render's resolver sometimes returns ONLY an AAAA (IPv6)
-   record for smtp.gmail.com, and Render has no outbound IPv6 route, which
-   causes ENETUNREACH. Forcing dns.resolve4() guarantees we get (or fail
-   loudly on) a real IPv4 address instead of silently falling through to v6. */
-async function getTransporter() {
-  const FIVE_MIN = 5 * 60 * 1000;
-  if (cachedTransporter && Date.now() - cachedAt < FIVE_MIN) return cachedTransporter;
-
-  let host = 'smtp.gmail.com';
-  try {
-    const addresses = await dns.resolve4('smtp.gmail.com');
-    if (addresses && addresses.length) host = addresses[0];
-  } catch (err) {
-    console.error('[Email] Could not resolve IPv4 for smtp.gmail.com, falling back to hostname:', err.message);
-  }
-
-  cachedTransporter = nodemailer.createTransport({
-    host,
-    port: 587,
-    secure: false,             // STARTTLS on port 587
-    family: 4,                 // force IPv4 if hostname fallback is used
-    tls: {
-      servername: 'smtp.gmail.com', // keep correct cert validation even when connecting by IP
-    },
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS, // Gmail App Password (not your real password)
-    },
-    pool: true,                // use pooled connections
-    maxConnections: 1,
-    rateLimit: 1,              // avoid rate limiting
-    socketTimeout: 30000,      // 30 seconds
-    connectionTimeout: 30000,
-  });
-  cachedAt = Date.now();
-  return cachedTransporter;
-}
-
-const BASE_URL    = process.env.FRONTEND_URL || 'http://localhost:5173';
 const STORE_EMAIL = process.env.EMAIL_USER   || 'amjadfast87@gmail.com';
-const BRAND_COLOR = '#0ea5e9';
+const BASE_URL         = process.env.FRONTEND_URL || 'http://localhost:5173';
+// Use a dedicated sender email verified in SendGrid:
+const BRAND_COLOR      = '#0ea5e9';
+
+
+
+// Remove the fetch-based sendMail and use sgMail.send directly.
+// For example, inside each email function:
+// Helper – so you don't repeat sgMail.send everywhere
+const sendMail = async ({ from, to, subject, html }) => {
+  try {
+    await sgMail.send({ to, from, subject, html });
+  } catch (error) {
+    console.error('[SendGrid] Error sending email:', error.response?.body || error.message);
+    throw error;
+  }
+};
+
+
 
 /* ── Base HTML wrapper ── */
 function baseEmail({ title, preview, body }) {
@@ -122,7 +101,7 @@ exports.sendVerificationEmail = async ({ email, name, token }) => {
       </div>
     </div>`;
 
-  await (await getTransporter()).sendMail({
+  await sendMail({
     from:    `"EliteHMS" <${STORE_EMAIL}>`,
     to:      email,
     subject: '✓ Verify your EliteHMS account',
@@ -145,7 +124,7 @@ exports.sendWelcomeEmail = async ({ email, name }) => {
       </a>
     </div>`;
 
-  await (await getTransporter()).sendMail({
+  await sendMail({
     from:    `"EliteHMS" <${STORE_EMAIL}>`,
     to:      email,
     subject: '🎉 Welcome to EliteHMS — Trial Started!',
@@ -174,7 +153,7 @@ exports.sendPasswordResetEmail = async ({ email, name, token }) => {
       This link expires in <strong>1 hour</strong>. If you didn't request this, ignore this email.
     </p>`;
 
-  await (await getTransporter()).sendMail({
+  await sendMail({
     from:    `"EliteHMS" <${STORE_EMAIL}>`,
     to:      email,
     subject: '🔐 Reset your EliteHMS password',
@@ -268,7 +247,7 @@ exports.sendInvoiceEmail = async ({ email, patientName, bill, storeName, storePh
       ${store}${phone ? ` · ${phone}` : ''}
     </p>`;
 
-  await (await getTransporter()).sendMail({
+  await sendMail({
     from:    `"${store}" <${STORE_EMAIL}>`,
     to:      email,
     subject: `Invoice ${bill.billNumber} from ${store}`,
@@ -338,7 +317,7 @@ exports.sendPaymentConfirmationEmail = async ({ email, patientName, bill, paymen
       ${store}${phone ? ` · ${phone}` : ''}
     </p>`;
 
-  await (await getTransporter()).sendMail({
+  await sendMail({
     from:    `"${store}" <${STORE_EMAIL}>`,
     to:      email,
     subject: `✓ Payment of Rs. ${Number(paymentAmount).toLocaleString()} received — ${bill.billNumber}`,
@@ -407,7 +386,7 @@ exports.sendStaffInvitationEmail = async ({ email, staffName, role, storeName, a
       ${store} is using EliteHMS for pharmacy management.
     </p>`;
 
-  await (await getTransporter()).sendMail({
+  await sendMail({
     from:    `"${store} via EliteHMS" <${STORE_EMAIL}>`,
     to:      email,
     subject: `You've been added to ${store} on EliteHMS`,
@@ -519,7 +498,7 @@ exports.sendExpiryDigestEmail = async ({ email, adminName, storeName, expired, e
       ${store}
     </p>`;
 
-  await (await getTransporter()).sendMail({
+  await sendMail({
     from:    `"MediStore Alerts" <${STORE_EMAIL}>`,
     to:      email,
     subject: `${hasUrgent ? '🚨' : '⚠️'} Weekly Pharmacy Alert — ${totalIssues} issue${totalIssues !== 1 ? 's' : ''} | ${store}`,
@@ -527,4 +506,4 @@ exports.sendExpiryDigestEmail = async ({ email, adminName, storeName, expired, e
   });
 };
 
-exports.getTransporter = getTransporter;
+exports.sendMail = sendMail;

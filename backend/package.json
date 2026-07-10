@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@sendgrid/mail": "^8.1.6",
     "@socket.io/redis-adapter": "^8.3.0",
     "bcryptjs": "^2.4.3",
     "bull": "^4.16.5",
@@ -31,7 +32,6 @@
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
     "node-cron": "^4.5.0",
-    "nodemailer": "^9.0.3",
     "pm2": "^7.0.3",
     "redis": "^6.1.0",
     "rotating-file-stream": "^3.2.9",
