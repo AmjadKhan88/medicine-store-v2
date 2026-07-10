@@ -1,3 +1,6 @@
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first'); // Render has no outbound IPv6 route — prevents ENETUNREACH on SMTP/etc.
+
 const express = require('express');
 const http = require('http');
 require('dotenv').config();

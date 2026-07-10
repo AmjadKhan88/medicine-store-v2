@@ -1,30 +1,18 @@
 const nodemailer = require('nodemailer');
 
-// const transporter = nodemailer.createTransport({
-//   service: 'gmail',
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS, // Gmail App Password (not your real password)
-//   },
-//   pool: true,                // use pooled connections
-//   maxConnections: 1,
-//   rateLimit: 1,              // avoid rate limiting
-//   socketTimeout: 30000,      // 30 seconds
-//   connectionTimeout: 30000,
-// });
-
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
-  secure: false,                 // use SSL
+  secure: false,             // STARTTLS on port 587
+  family: 4,                 // force IPv4 — Render has no outbound IPv6 route
   auth: {
-    user: process.env.EMAIL_USER || "amjadfast87@gmail.com",
-    pass: process.env.EMAIL_PASS || "wlvqfbulgtzqpcxf",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS, // Gmail App Password (not your real password)
   },
-  pool: true,
+  pool: true,                // use pooled connections
   maxConnections: 1,
-  rateLimit: 1,
-  socketTimeout: 30000,
+  rateLimit: 1,              // avoid rate limiting
+  socketTimeout: 30000,      // 30 seconds
   connectionTimeout: 30000,
 });
 
@@ -108,7 +96,7 @@ exports.sendVerificationEmail = async ({ email, name, token }) => {
     </div>`;
 
   await transporter.sendMail({
-    from:    `"EliteHMS " <${STORE_EMAIL}>`,
+    from:    `"EliteHMS" <${STORE_EMAIL}>`,
     to:      email,
     subject: '✓ Verify your EliteHMS account',
     html:    baseEmail({ title: 'Verify Email', preview: 'Activate your EliteHMS account', body }),
