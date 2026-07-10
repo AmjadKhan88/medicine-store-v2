@@ -39,6 +39,7 @@ const invoiceSettingsRoutes = require('./routes/invoiceSettings');
 const documentRoutes = require('./routes/documents');
 
 const app = express();
+app.set('trust proxy', true);
 const httpServer = http.createServer(app);
 // initSocket(httpServer);
 

@@ -6,6 +6,11 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS, // Gmail App Password (not your real password)
   },
+  pool: true,                // use pooled connections
+  maxConnections: 1,
+  rateLimit: 1,              // avoid rate limiting
+  socketTimeout: 30000,      // 30 seconds
+  connectionTimeout: 30000,
 });
 
 const BASE_URL    = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -56,7 +61,7 @@ exports.sendVerificationEmail = async ({ email, name, token }) => {
 
   const body = `
     <h2 style="font-size:22px;font-weight:800;color:#0f172a;margin:0 0 8px;">
-      Welcome to MediStore, ${name}! 👋
+      Welcome to EliteHMS, ${name}! 👋
     </h2>
     <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 24px;">
       You're almost ready to start managing your pharmacy professionally.
@@ -74,7 +79,7 @@ exports.sendVerificationEmail = async ({ email, name, token }) => {
 
     <p style="color:#94a3b8;font-size:13px;text-align:center;">
       This link expires in <strong>24 hours</strong>.<br/>
-      If you did not create a MediStore account, you can ignore this email.
+      If you did not create a EliteHMS account, you can ignore this email.
     </p>
 
     <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:16px;margin-top:24px;">
@@ -88,10 +93,10 @@ exports.sendVerificationEmail = async ({ email, name, token }) => {
     </div>`;
 
   await transporter.sendMail({
-    from:    `"MediStore" <${STORE_EMAIL}>`,
+    from:    `"EliteHMS" <${STORE_EMAIL}>`,
     to:      email,
-    subject: '✓ Verify your MediStore account',
-    html:    baseEmail({ title: 'Verify Email', preview: 'Activate your MediStore account', body }),
+    subject: '✓ Verify your EliteHMS account',
+    html:    baseEmail({ title: 'Verify Email', preview: 'Activate your EliteHMS account', body }),
   });
 };
 
@@ -111,9 +116,9 @@ exports.sendWelcomeEmail = async ({ email, name }) => {
     </div>`;
 
   await transporter.sendMail({
-    from:    `"MediStore" <${STORE_EMAIL}>`,
+    from:    `"EliteHMS" <${STORE_EMAIL}>`,
     to:      email,
-    subject: '🎉 Welcome to MediStore — Trial Started!',
+    subject: '🎉 Welcome to EliteHMS — Trial Started!',
     html:    baseEmail({ title: 'Welcome', preview: 'Your account is ready', body }),
   });
 };
@@ -127,7 +132,7 @@ exports.sendPasswordResetEmail = async ({ email, name, token }) => {
       Reset Your Password
     </h2>
     <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 24px;">
-      Hi ${name}, we received a request to reset your MediStore password.
+      Hi ${name}, we received a request to reset your EliteHMS password.
       Click the button below to set a new password.
     </p>
     <div style="text-align:center;margin:28px 0;">
@@ -140,9 +145,9 @@ exports.sendPasswordResetEmail = async ({ email, name, token }) => {
     </p>`;
 
   await transporter.sendMail({
-    from:    `"MediStore" <${STORE_EMAIL}>`,
+    from:    `"EliteHMS" <${STORE_EMAIL}>`,
     to:      email,
-    subject: '🔐 Reset your MediStore password',
+    subject: '🔐 Reset your EliteHMS password',
     html:    baseEmail({ title: 'Password Reset', preview: 'Reset your password', body }),
   });
 };
@@ -151,7 +156,7 @@ exports.sendPasswordResetEmail = async ({ email, name, token }) => {
    INVOICE EMAIL — send to patient
 ══════════════════════════════════════ */
 exports.sendInvoiceEmail = async ({ email, patientName, bill, storeName, storePhone }) => {
-  const store    = storeName  || 'MediStore Pharmacy';
+  const store    = storeName  || 'EliteHMS Pharmacy';
   const phone    = storePhone || '';
   const balance  = (bill.totalAmount || 0) - (bill.amountPaid || 0);
   const isPaid   = balance <= 0;
@@ -245,7 +250,7 @@ exports.sendInvoiceEmail = async ({ email, patientName, bill, storeName, storePh
    PAYMENT CONFIRMATION EMAIL
 ══════════════════════════════════════ */
 exports.sendPaymentConfirmationEmail = async ({ email, patientName, bill, paymentAmount, paymentMethod, storeName, storePhone }) => {
-  const store   = storeName  || 'MediStore Pharmacy';
+  const store   = storeName  || 'EliteHMS Pharmacy';
   const phone   = storePhone || '';
   const balance = (bill.totalAmount || 0) - (bill.amountPaid || 0);
 
@@ -315,7 +320,7 @@ exports.sendPaymentConfirmationEmail = async ({ email, patientName, bill, paymen
    STAFF INVITATION EMAIL
 ══════════════════════════════════════ */
 exports.sendStaffInvitationEmail = async ({ email, staffName, role, storeName, adminName, tempPassword }) => {
-  const store = storeName || 'MediStore Pharmacy';
+  const store = storeName || 'EliteHMS Pharmacy';
   const link  = `${BASE_URL}/login`;
 
   const rolePerms = {
@@ -369,13 +374,13 @@ exports.sendStaffInvitationEmail = async ({ email, staffName, role, storeName, a
     </div>
 
     <p style="color:#94a3b8;font-size:13px;text-align:center;">
-      ${store} is using MediStore for pharmacy management.
+      ${store} is using EliteHMS for pharmacy management.
     </p>`;
 
   await transporter.sendMail({
-    from:    `"${store} via MediStore" <${STORE_EMAIL}>`,
+    from:    `"${store} via EliteHMS" <${STORE_EMAIL}>`,
     to:      email,
-    subject: `You've been added to ${store} on MediStore`,
+    subject: `You've been added to ${store} on EliteHMS`,
     html:    baseEmail({ title: 'Staff Invitation', preview: `You've been added to ${store}`, body }),
   });
 };
@@ -384,7 +389,7 @@ exports.sendStaffInvitationEmail = async ({ email, staffName, role, storeName, a
    WEEKLY EXPIRY DIGEST — to admin
 ══════════════════════════════════════ */
 exports.sendExpiryDigestEmail = async ({ email, adminName, storeName, expired, expiringSoon, lowStock }) => {
-  const store       = storeName || 'MediStore Pharmacy';
+  const store       = storeName || 'EliteHMS Pharmacy';
   const hasUrgent   = expired.length > 0;
   const totalIssues = expired.length + expiringSoon.length + lowStock.length;
 
@@ -475,12 +480,12 @@ exports.sendExpiryDigestEmail = async ({ email, adminName, storeName, expired, e
 
     <div style="text-align:center;margin:28px 0;">
       <a href="${BASE_URL}/app/expiry-alerts" style="background:${BRAND_COLOR};color:#fff;text-decoration:none;padding:12px 32px;border-radius:10px;font-weight:700;font-size:14px;display:inline-block;">
-        View Full Report in MediStore →
+        View Full Report in EliteHMS →
       </a>
     </div>
 
     <p style="color:#94a3b8;font-size:12px;text-align:center;">
-      This is your automated weekly digest. Log in to MediStore to take action.<br/>
+      This is your automated weekly digest. Log in to EliteHMS to take action.<br/>
       ${store}
     </p>`;
 
