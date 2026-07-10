@@ -10,16 +10,6 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// API.interceptors.response.use(
-//   (res) => res,
-//   (err) => {
-//     if (err.response?.status === 401) {
-//       localStorage.removeItem('medistore_token');
-//       localStorage.removeItem('medistore_user');
-//     }
-//     return Promise.reject(err);
-//   }
-// );
 
 API.interceptors.response.use(
   (res) => res,

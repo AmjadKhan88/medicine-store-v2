@@ -17,14 +17,6 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      // const { data } = await API.post('/auth/login', { email: form.email, password: form.password });
-      // if (data.success) {
-      //   localStorage.setItem('medistore_token', data.token);
-      //   localStorage.setItem('medistore_user', JSON.stringify(data.user));
-      //   setUser(data.user);
-      //   toast.success('Welcome back!');
-      //   navigate('/app');
-      // }
 
       const { data } = await API.post('/auth/login', { email: form.email, password: form.password });
       if (data.success) {

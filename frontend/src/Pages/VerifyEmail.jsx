@@ -19,13 +19,6 @@ export default function VerifyEmail() {
   useEffect(() => {
     if (!token) { setStatus('error'); setMessage('No verification token found in link.'); return; }
 
-    // API.post('/auth/verify-email', { token })
-    //   .then(({ data }) => {
-    //     localStorage.setItem('medistore_token', data.token);
-    //     localStorage.setItem('medistore_user',  JSON.stringify(data.user));
-    //     setStatus('success');
-    //     setTimeout(() => navigate('/app'), 2500);
-    //   })
     API.post('/auth/verify-email', { token })
       .then(({ data }) => {
         login(data.token, data.user); // sets localStorage + React state in one call
