@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   MdMedicalServices, MdPeople, MdReceipt, MdWarning,
   MdBarChart, MdSecurity, MdSmartphone, MdChat,
@@ -78,6 +78,7 @@ const STATS = [
 export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
   const width = useWidth();
   const isMobile = width < 768;
   const isTablet = width < 1024;
@@ -123,7 +124,7 @@ export default function Landing() {
 
     /* hero */
     hero: {
-      minHeight: '100vh', display: 'flex', alignItems: 'center',
+      minHeight: '100vh', display: 'flex', alignItems: isTablet ? 'top' : 'center',
       // background: 'linear-gradient(135deg, #0f172a 0%, #0c1a2e 50%, #0f172a 100%)',
       paddingTop: 80, paddingBottom: 40,
       position: 'relative', overflow: 'hidden',
@@ -499,61 +500,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Pricing ── */}
-      {/* <section id="pricing" style={s.pricingSection}>
-        <div style={s.container}>
-          <div style={{ textAlign: 'center' }}>
-            <span style={{ ...s.sectionBadge, background: 'rgba(14,165,233,0.2)' }}>Pricing</span>
-            <h2 style={s.sectionTitleWhite}>Simple pricing for Pakistani pharmacies</h2>
-            <p style={s.sectionSubWhite}>
-              Pay with JazzCash, EasyPaisa or bank transfer. No hidden fees.
-            </p>
-          </div>
-          <div style={s.pricingGrid}>
-            {PLANS.map(plan => {
-              const card = plan.highlight ? s.pricingCardHighlight : s.pricingCard;
-              const textColor = plan.highlight ? '#fff' : 'rgba(255,255,255,0.9)';
-              const mutedColor = plan.highlight ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.5)';
-              return (
-                <div key={plan.name} style={card}>
-                  {plan.highlight && (
-                    <div style={{
-                      background: 'rgba(255,255,255,0.2)', borderRadius: 99,
-                      padding: '3px 12px', fontSize: 11, fontWeight: 700,
-                      color: '#fff', display: 'inline-block', marginBottom: 12,
-                    }}>
-                      MOST POPULAR
-                    </div>
-                  )}
-                  <div style={{ ...s.pricingName, color: mutedColor }}>{plan.name}</div>
-                  <div style={{ ...s.pricingPrice, color: textColor }}>{plan.price}</div>
-                  <div style={{ ...s.pricingPeriod, color: mutedColor }}>{plan.period}</div>
-                  <div style={{ ...s.pricingDesc, color: mutedColor }}>{plan.desc}</div>
-                  <div style={{ borderTop: plan.highlight ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.08)', paddingTop: 20 }}>
-                    {plan.features.map(f => (
-                      <div key={f} style={s.pricingFeature}>
-                        <MdCheckCircle size={17} style={{ color: plan.highlight ? '#fff' : '#0ea5e9', flexShrink: 0 }} />
-                        <span style={{ color: textColor, fontSize: 14 }}>{f}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Link
-                    to="/register"
-                    style={{
-                      ...s.pricingBtn,
-                      background: plan.highlight ? '#fff' : 'rgba(14,165,233,0.15)',
-                      color: plan.highlight ? '#0ea5e9' : '#fff',
-                      border: plan.highlight ? 'none' : '1px solid rgba(14,165,233,0.4)',
-                    }}
-                  >
-                    {plan.cta}
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section> */}
+ 
             {/* ── Pricing ── */}
       <section id="pricing" style={{ padding: '90px 5%', background: '#f8fafc' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>

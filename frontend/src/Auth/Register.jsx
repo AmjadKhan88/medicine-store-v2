@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { MdCheckCircle, MdEmail } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 
 export default function Register() {
-  const [form, setForm]   = useState({ name: '', email: '', password: '', phone: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' });
   const [loading, setLoading] = useState(false);
-  const [done, setDone]   = useState(false);
-  const navigate          = useNavigate();
+  const [done, setDone] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resentCount, setResentCount] = useState(0); // prevent spam
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.password.length < 6) { toast.error('Min 6 characters'); return; }
+    if (form.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
     setLoading(true);
     try {
       await API.post('/auth/register', form);
@@ -20,6 +21,18 @@ export default function Register() {
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally { setLoading(false); }
+  };
+
+  const handleResend = async () => {
+    if (resentCount >= 3) { toast.error('Too many resend attempts. Check your spam folder.'); return; }
+    setResending(true);
+    try {
+      await API.post('/auth/resend-verification', { email: form.email });
+      setResentCount(c => c + 1);
+      toast.success('Verification email resent! Check your inbox.');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to resend');
+    } finally { setResending(false); }
   };
 
   if (done) return (
@@ -44,12 +57,18 @@ export default function Register() {
             <strong>Didn't get it?</strong> Check your spam folder.<br />
             Link expires in 24 hours.
           </div>
-          <button className="btn btn-secondary w-full" onClick={async () => {
-            try { await API.post('/auth/resend-verification', { email: form.email }); toast.success('Email resent!'); }
-            catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
-          }}>
-            Resend Verification Email
+          <button
+            className="btn btn-secondary w-full"
+            onClick={handleResend}
+            disabled={resending || resentCount >= 3}
+          >
+            {resending ? 'Sending...' : resentCount >= 3 ? 'Max resends reached' : 'Resend Verification Email'}
           </button>
+          {resentCount > 0 && resentCount < 3 && (
+            <p className="text-muted text-sm" style={{ textAlign: 'center', marginTop: 8 }}>
+              Email resent {resentCount} time{resentCount > 1 ? 's' : ''}. Check spam if not received.
+            </p>
+          )}
           <p className="text-muted text-sm" style={{ marginTop: 16 }}>
             Already verified? <Link to="/login" style={{ color: 'var(--accent)', fontWeight: 600 }}>Sign in</Link>
           </p>
