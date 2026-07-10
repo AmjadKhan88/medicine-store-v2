@@ -42,7 +42,7 @@ const invoiceSettingsRoutes = require('./routes/invoiceSettings');
 const documentRoutes = require('./routes/documents');
 
 const app = express();
-app.set('trust proxy', true);
+app.set('trust proxy', 1); // trust only the first hop (Render's load balancer) — 'true' trusts every hop and breaks express-rate-limit's IP detection
 const httpServer = http.createServer(app);
 // initSocket(httpServer);
 
