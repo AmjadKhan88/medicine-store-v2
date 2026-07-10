@@ -108,7 +108,7 @@ exports.sendVerificationEmail = async ({ email, name, token }) => {
     </div>`;
 
   await transporter.sendMail({
-    from:    `"EliteHMS" <${STORE_EMAIL}>`,
+    from:    `"EliteHMS " <${STORE_EMAIL}>`,
     to:      email,
     subject: '✓ Verify your EliteHMS account',
     html:    baseEmail({ title: 'Verify Email', preview: 'Activate your EliteHMS account', body }),

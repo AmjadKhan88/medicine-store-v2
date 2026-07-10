@@ -1,6 +1,6 @@
-const jwt    = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const User   = require('../models/User');
+const User = require('../models/User');
 const emailService = require('../utils/emailService');
 
 const generateToken = (id) =>
@@ -15,19 +15,19 @@ exports.register = async (req, res) => {
 
 
     const existing = await User.findOne({ email });
-    if (existing){
+    if (existing) {
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
 
-    const verifyToken   = generateRandomToken();
+    const verifyToken = generateRandomToken();
     const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
     const user = await User.create({
       name, email, password, phone,
-      role:                'admin',
-      isEmailVerified:     false,
-      emailVerifyToken:    verifyToken,
-      emailVerifyExpires:  verifyExpires,
+      role: 'admin',
+      isEmailVerified: false,
+      emailVerifyToken: verifyToken,
+      emailVerifyExpires: verifyExpires,
     });
 
     user.storeId = user._id;
@@ -39,19 +39,19 @@ exports.register = async (req, res) => {
       const trialEnd = new Date();
       trialEnd.setDate(trialEnd.getDate() + 14);
       await Subscription.create({
-        storeId:     user._id,
-        plan:        'trial',
-        status:      'active',
+        storeId: user._id,
+        plan: 'trial',
+        status: 'active',
         trialEndsAt: trialEnd,
-        limits:      { medicines: 50, patients: 20, staff: 1, billsPerMonth: 50 },
+        limits: { medicines: 50, patients: 20, staff: 1, billsPerMonth: 50 },
       });
-    } catch {}
+    } catch { }
 
     // Send verification email
     try {
       await emailService.sendVerificationEmail({ email, name, token: verifyToken });
     } catch (emailErr) {
-      console.error('[Email] Failed to send verification:', emailErr.message);
+      console.error('[Email] Failed to send verification:', emailErr); // log full object
     }
 
     res.status(201).json({
@@ -72,7 +72,7 @@ exports.verifyEmail = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Verification token required' });
 
     const user = await User.findOne({
-      emailVerifyToken:   token,
+      emailVerifyToken: token,
       emailVerifyExpires: { $gt: new Date() },
     });
 
@@ -82,13 +82,13 @@ exports.verifyEmail = async (req, res) => {
         message: 'Invalid or expired verification link. Please request a new one.',
       });
 
-    user.isEmailVerified    = true;
-    user.emailVerifyToken   = undefined;
+    user.isEmailVerified = true;
+    user.emailVerifyToken = undefined;
     user.emailVerifyExpires = undefined;
     await user.save();
 
     // Send welcome email
-    try { await emailService.sendWelcomeEmail({ email: user.email, name: user.name }); } catch {}
+    try { await emailService.sendWelcomeEmail({ email: user.email, name: user.name }); } catch { }
 
     const jwtToken = generateToken(user._id);
     res.json({ success: true, token: jwtToken, user, message: 'Email verified! Welcome to MediStore.' });
@@ -108,7 +108,7 @@ exports.resendVerification = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email already verified' });
 
     const token = generateRandomToken();
-    user.emailVerifyToken   = token;
+    user.emailVerifyToken = token;
     user.emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await user.save();
 
@@ -123,22 +123,22 @@ exports.resendVerification = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
 
     const user = await User.findOne({ email }).select('+password');
     if (!user || !(await user.matchPassword(password)))
-      return res.status(401).json({ success: false, message: 'Invalid email or password',errors: {password:"Invalid email or password"} });
+      return res.status(401).json({ success: false, message: 'Invalid email or password', errors: { password: "Invalid email or password" } });
 
     if (!user.isActive)
-      return res.status(403).json({ success: false, message: 'Account deactivated',errors: {email: "Account deactivated"} });
+      return res.status(403).json({ success: false, message: 'Account deactivated', errors: { email: "Account deactivated" } });
 
     if (!user.isEmailVerified)
       return res.status(403).json({
-        success:           false,
-        code:              'EMAIL_NOT_VERIFIED',
-        message:           'Please verify your email before logging in.',
-        email:             user.email,
-        errors: {email: "Please verify your email before logging in."}
+        success: false,
+        code: 'EMAIL_NOT_VERIFIED',
+        message: 'Please verify your email before logging in.',
+        email: user.email,
+        errors: { email: "Please verify your email before logging in." }
       });
 
     const token = generateToken(user._id);
@@ -157,7 +157,7 @@ exports.forgotPassword = async (req, res) => {
       return res.status(404).json({ success: false, message: 'No account with this email' });
 
     const token = generateRandomToken();
-    user.passwordResetToken   = token;
+    user.passwordResetToken = token;
     user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1h
     await user.save();
 
@@ -173,14 +173,14 @@ exports.resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
     const user = await User.findOne({
-      passwordResetToken:   token,
+      passwordResetToken: token,
       passwordResetExpires: { $gt: new Date() },
     });
     if (!user)
       return res.status(400).json({ success: false, message: 'Invalid or expired reset link' });
 
-    user.password             = newPassword;
-    user.passwordResetToken   = undefined;
+    user.password = newPassword;
+    user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
 
@@ -230,8 +230,8 @@ exports.updateOnboarding = async (req, res) => {
   try {
     const { step, complete } = req.body;
     const update = {};
-    if (step !== undefined)   update.onboardingStep     = step;
-    if (complete === true)    update.onboardingComplete = true;
+    if (step !== undefined) update.onboardingStep = step;
+    if (complete === true) update.onboardingComplete = true;
     const user = await User.findByIdAndUpdate(req.user._id, update, { new: true });
     res.json({ success: true, user });
   } catch (err) {
