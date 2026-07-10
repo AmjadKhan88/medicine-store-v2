@@ -1,15 +1,30 @@
 const nodemailer = require('nodemailer');
 
+// const transporter = nodemailer.createTransport({
+//   service: 'gmail',
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS, // Gmail App Password (not your real password)
+//   },
+//   pool: true,                // use pooled connections
+//   maxConnections: 1,
+//   rateLimit: 1,              // avoid rate limiting
+//   socketTimeout: 30000,      // 30 seconds
+//   connectionTimeout: 30000,
+// });
+
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,                 // use SSL
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Gmail App Password (not your real password)
+    user: process.env.EMAIL_USER || "amjadfast87@gmail.com",
+    pass: process.env.EMAIL_PASS || "wlvqfbulgtzqpcxf",
   },
-  pool: true,                // use pooled connections
+  pool: true,
   maxConnections: 1,
-  rateLimit: 1,              // avoid rate limiting
-  socketTimeout: 30000,      // 30 seconds
+  rateLimit: 1,
+  socketTimeout: 30000,
   connectionTimeout: 30000,
 });
 
@@ -31,7 +46,7 @@ function baseEmail({ title, preview, body }) {
     <!-- Header -->
     <div style="background:#0f172a;padding:28px 36px;">
       <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;">
-        Medi<span style="color:${BRAND_COLOR};">Store</span>
+        Elite<span style="color:${BRAND_COLOR};">HMS</span>
       </div>
       <div style="font-size:12px;color:#64748b;margin-top:4px;letter-spacing:1px;text-transform:uppercase;">
         Professional Medicine Management
