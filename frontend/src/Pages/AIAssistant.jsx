@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import Markdown from 'react-markdown';
 import {
   MdSend, MdAutoAwesome, MdPerson, MdRefresh,
-  MdLightbulb, MdInventory, MdWarning,
+  MdInventory
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useAI } from '../context/AIContext';
 import AIModelSelector from '../Components/AIModelSelector';
+import {useWindowWidth} from "../hooks/useWindowWidth.js"
 
 const QUICK_QUESTIONS = [
   'What are the side effects of Augmentin 625mg?',
@@ -20,29 +21,6 @@ const QUICK_QUESTIONS = [
   'What is the pediatric dose for Amoxicillin?',
 ];
 
-/* ── Markdown-like formatter ── */
-// function formatMessage(text) {
-//   const lines = text.split('\n');
-//   return lines.map((line, i) => {
-//     if (line.startsWith('## ')) return <div key={i} style={{ fontWeight: 800, fontSize: 16, color: 'var(--text-primary)', margin: '10px 0 4px' }}>{line.slice(3)}</div>;
-//     if (line.startsWith('# '))  return <div key={i} style={{ fontWeight: 800, fontSize: 18, color: 'var(--text-primary)', margin: '12px 0 6px' }}>{line.slice(2)}</div>;
-//     if (line.startsWith('**') && line.endsWith('**')) return <div key={i} style={{ fontWeight: 700, margin: '4px 0' }}>{line.slice(2, -2)}</div>;
-//     if (line.startsWith('- ') || line.startsWith('• ')) return (
-//       <div key={i} style={{ display: 'flex', gap: 8, margin: '3px 0', paddingLeft: 4 }}>
-//         <span style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }}>•</span>
-//         <span>{line.slice(2)}</span>
-//       </div>
-//     );
-//     if (line.match(/^\d+\./)) return (
-//       <div key={i} style={{ display: 'flex', gap: 8, margin: '3px 0', paddingLeft: 4 }}>
-//         <span style={{ color: 'var(--accent)', flexShrink: 0, fontWeight: 700 }}>{line.match(/^\d+/)[0]}.</span>
-//         <span>{line.replace(/^\d+\./, '').trim()}</span>
-//       </div>
-//     );
-//     if (line.trim() === '') return <div key={i} style={{ height: 6 }} />;
-//     return <div key={i} style={{ margin: '2px 0', lineHeight: 1.6 }}>{line}</div>;
-//   });
-// }
 
 /* ── Reorder Suggestions Panel ── */
 function ReorderPanel({ onClose }) {
@@ -160,6 +138,7 @@ export default function AIAssistant() {
   const [showReorder, setShowReorder] = useState(false);
   const bottomRef                 = useRef(null);
   const inputRef                  = useRef(null);
+  const width = useWindowWidth();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -209,22 +188,22 @@ export default function AIAssistant() {
 
       {/* ── Header ── */}
       <div style={{
-        padding:        '16px 24px',
+        padding:   width < 460 ? '8px 5px'   :  '16px 24px',
         borderBottom:   '1px solid var(--border)',
         background:     'var(--bg-secondary)',
         display:        'flex',
         alignItems:     'center',
         justifyContent: 'space-between',
         flexShrink:     0,
-        gap:            16,
+        gap:     width < 460 ? 8 : 16,
         flexWrap:       'wrap',
       }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: width < 460 ? 10 : 18}}>
             <MdAutoAwesome size={22} style={{ color: 'var(--accent)' }} />
             AI Medicine Assistant
           </div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+          <div style={{ fontSize: width < 460 ? 8 : 12, color: 'var(--text-muted)', marginTop: 2 }}>
             Ask about medicines, side effects, interactions and more
           </div>
         </div>
@@ -232,9 +211,10 @@ export default function AIAssistant() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <button
             className="btn btn-secondary btn-sm"
+            style={{fontSize: width < 460 ? 8 : 12}}
             onClick={() => setShowReorder(p => !p)}
           >
-            <MdInventory size={15} />
+            <MdInventory size={width < 460 ? 10 : 15} />
             {showReorder ? 'Hide' : 'Smart'} Reorder
           </button>
           <AIModelSelector compact />
@@ -254,24 +234,24 @@ export default function AIAssistant() {
         {/* Welcome */}
         {messages.length === 0 && (
           <div style={{ maxWidth: 640, margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{ textAlign: 'center', marginBottom:width < 460 ? 15 : 32 }}>
               <div style={{
-                width: 72, height: 72, borderRadius: '50%',
+                width: width < 460 ? 50 : 72, height: width < 460 ? 50 : 72, borderRadius: '50%',
                 background: 'var(--accent-light)', color: 'var(--accent)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 32, margin: '0 auto 16px',
+                fontSize: width < 460 ? 20 : 32, margin: '0 auto 16px',
               }}>
                 💊
               </div>
-              <div style={{ fontWeight: 800, fontSize: 20, marginBottom: 6 }}>How can I help you today?</div>
-              <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+              <div style={{ fontWeight: width < 460 ? 600 : 800, fontSize: width < 460 ? 13 : 20, marginBottom: 6 }}>How can I help you today?</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: width < 460 ? 9 : 14 }}>
                 Using <strong>{modelLabel}</strong> — ask about medicines, side effects, interactions or dosages
               </div>
             </div>
 
             {/* Quick question chips */}
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>
+            <div style={{ marginBottom: width < 460 ? 12 : 24 }}>
+              <div style={{ fontSize: width < 460 ? 8 : 12, fontWeight:width < 460 ? 500 : 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>
                 Quick Questions
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -283,7 +263,7 @@ export default function AIAssistant() {
                       border:       '1.5px solid var(--border)',
                       background:   'var(--card-bg)',
                       color:        'var(--text-secondary)',
-                      fontSize:     13,
+                      fontSize: width < 460 ? 9 :    13,
                       cursor:       'pointer',
                       transition:   'var(--transition)',
                       fontFamily:   'var(--font-main)',
@@ -306,9 +286,9 @@ export default function AIAssistant() {
                 { icon: '🔍', title: 'Generic Alternatives', desc: 'Find cheaper or available substitutes' },
               ].map((f, i) => (
                 <div key={i} style={{ background: 'var(--bg-tertiary)', borderRadius: 12, padding: '14px 16px', border: '1px solid var(--border)' }}>
-                  <div style={{ fontSize: 22, marginBottom: 6 }}>{f.icon}</div>
-                  <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 3 }}>{f.title}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{f.desc}</div>
+                  <div style={{ fontSize:width < 460 ? 18 : 22, marginBottom: 6 }}>{f.icon}</div>
+                  <div style={{ fontWeight:width < 460 ? 500 : 700, fontSize: width < 460 ? 10 : 14, marginBottom: 3 }}>{f.title}</div>
+                  <div style={{ fontSize: width < 460 ? 9 : 12, color: 'var(--text-muted)' }}>{f.desc}</div>
                 </div>
               ))}
             </div>
@@ -405,7 +385,7 @@ export default function AIAssistant() {
 
       {/* ── Input area ── */}
       <div style={{
-        padding:      '16px 24px',
+        padding:  width < 460 ? '8px 10px'  :  '16px 24px',
         borderTop:    '1px solid var(--border)',
         background:   'var(--bg-secondary)',
         flexShrink:   0,
@@ -416,24 +396,24 @@ export default function AIAssistant() {
               onClick={() => setMessages([])}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
-                fontSize: 12, color: 'var(--text-muted)', marginBottom: 8,
+                fontSize: width < 460 ? 8 : 12, color: 'var(--text-muted)', marginBottom: 8,
                 fontFamily: 'var(--font-main)', display: 'flex', alignItems: 'center', gap: 4,
               }}
             >
-              <MdRefresh size={13} /> Clear conversation
+              <MdRefresh size={width < 460 ? 10 : 13} /> Clear conversation
             </button>
           )}
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
             <textarea
               ref={inputRef}
-              rows={2}
+              rows={width < 460 ? 1 : 2}
               className="form-control"
               placeholder={`Ask about medicines... (using ${modelLabel})`}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKey}
               disabled={loading}
-              style={{ resize: 'none', lineHeight: 1.5, flex: 1 }}
+              style={{ resize: 'none', lineHeight: width < 460 ? 1.3 : 1.5, flex: 1, minHeight: width < 460 ? 70 : 90, fontSize: width < 460 ? 10 : 14 }}
             />
             <button
               className="btn btn-primary btn-icon"
@@ -441,7 +421,7 @@ export default function AIAssistant() {
               onClick={() => send()}
               disabled={!input.trim() || loading}
             >
-              {loading ? <span className="spin" style={{ display: 'inline-block', fontSize: 12 }}>⏳</span> : <MdSend size={18} />}
+              {loading ? <span className="spin" style={{ display: 'inline-block', fontSize: width < 460 ? 10 : 12 }}>⏳</span> : <MdSend size={width < 460 ? 13 : 18} />}
             </button>
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, textAlign: 'center' }}>

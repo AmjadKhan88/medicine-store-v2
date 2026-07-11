@@ -9,6 +9,7 @@ import { MdDashboard,MdReceipt,MdFolderOpen, MdSupportAgent,MdAutoAwesome,MdCale
 import NotificationCenter from './NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
+import { useWindowWidth } from '../hooks/useWindowWidth';
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -17,7 +18,8 @@ export default function Layout() {
   const { counts } = useNotifications();
   const { theme, setSpecificTheme } = useTheme();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const width = useWindowWidth();
+  const [sidebarOpen, setSidebarOpen] = useState(width < 800 ? false : true);
 
 
   const handleLogout = () => { logout(); navigate('/login'); };
@@ -93,7 +95,7 @@ export default function Layout() {
           <div className="nav-section">
             <div className="nav-section-title">Main Menu</div>
             {navItems.map(item => (
-              <NavLink key={item.to} to={item.to} end={item.exact} className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+              <NavLink key={item.to}  onClick={() => width < 900 ? setSidebarOpen(p => !p) : null} to={item.to} end={item.exact} className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
                 {item.icon}{item.label}
               </NavLink>
             ))}
@@ -101,7 +103,7 @@ export default function Layout() {
           <div className="nav-section">
             <div className="nav-section-title">Management</div>
             {alertItems.filter(item => item.show).map(item => (
-              <NavLink key={item.to} to={item.to}
+              <NavLink key={item.to} onClick={() => width < 900 ? setSidebarOpen(p => !p) : null} to={item.to}
                 className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
                 {item.icon}{item.label}
                 {item.badge ? <span className={`nav-badge ${item.badgeClass || ''}`}>{item.badge}</span> : null}
@@ -133,7 +135,7 @@ export default function Layout() {
               {sidebarOpen ? <MdClose /> : <MdMenu />}
             </button>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>Welcome back, {user?.name?.split(' ')[0]} 👋</div>
+             {width > 460 && <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>Welcome back, {user?.name?.split(' ')[0]} 👋</div>}
               <div className="text-muted text-sm">{new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { useAI } from '../context/AIContext';
 import { MdAutoAwesome } from 'react-icons/md';
+import {useWindowWidth} from "../hooks/useWindowWidth";
 
 const PROVIDER_COLORS = {
   gemini: { color: '#4285F4', bg: '#e8f0fe', label: 'Google' },
@@ -8,6 +9,7 @@ const PROVIDER_COLORS = {
 
 export default function AIModelSelector({ compact = false }) {
   const { selectedModel, changeModel, models } = useAI();
+  const width = useWindowWidth();
 
   const grouped = Object.entries(models).reduce((acc, [key, m]) => {
     const provider = key.startsWith('gemini') ? 'gemini' : 'groq';
@@ -22,7 +24,7 @@ export default function AIModelSelector({ compact = false }) {
         <MdAutoAwesome size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} />
         <select
           className="form-control"
-          style={{ fontSize: 12, padding: '5px 10px', width: 'auto', minWidth: 180 }}
+          style={{ fontSize: width < 460 ? 8 : 12, padding: '5px 10px', width: 'auto', minWidth: 180 }}
           value={selectedModel}
           onChange={e => changeModel(e.target.value)}
         >
