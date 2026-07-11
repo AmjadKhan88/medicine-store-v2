@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import API from '../utils/api';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
@@ -7,6 +8,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // always start null — never read stale localStorage here
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('medistore_token');
@@ -23,6 +25,12 @@ export const AuthProvider = ({ children }) => {
     API.get('/auth/me')
       .then(({ data }) => {
         // Always use fresh data from server, not localStorage
+        if(!data.user.isEmailVerified){
+          localStorage.removeItem('medistore_token');
+          localStorage.removeItem('medistore_user');
+          setUser(null);
+          navigate("/login");
+        }
         setUser(data.user);
         // Keep localStorage in sync with latest user data
         localStorage.setItem('medistore_user', JSON.stringify(data.user));
