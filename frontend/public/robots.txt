@@ -1,0 +1,4 @@
+# public/robots.txt
+User-agent: *
+Allow: /
+Sitemap: https://app.elitehms.online/sitemap.xml
