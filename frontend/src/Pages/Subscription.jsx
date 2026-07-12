@@ -7,6 +7,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import {useWindowWidth} from '../hooks/useWindowWidth';
 
 const PKR = (n) => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;
 
@@ -249,6 +250,8 @@ export default function SubscriptionPage() {
     usagePercent, pendingRequest, refresh,
   } = useSubscription();
 
+  const width = useWindowWidth();
+
   const [upgradeTarget, setUpgradeTarget] = useState(null);
 
   const handleCancelRequest = async () => {
@@ -266,8 +269,8 @@ export default function SubscriptionPage() {
     <div style={{ maxWidth: 860 }}>
       <div className="page-header">
         <div className="page-header-left">
-          <h1>Subscription & Billing</h1>
-          <p>Manage your plan, view usage and upgrade</p>
+          <h1 style={{fontSize: width < 460 ? 14 : 'normal'}}>Subscription & Billing</h1>
+          <p style={{fontSize: width < 460 ? 11 : 'normal'}}>Manage your plan, view usage and upgrade</p>
         </div>
         <button className="btn btn-ghost btn-sm" onClick={refresh}><MdRefresh /> Refresh</button>
       </div>
@@ -277,16 +280,16 @@ export default function SubscriptionPage() {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-              <MdStar size={22} style={{ color: clr.accent }} />
-              <div style={{ fontWeight: 800, fontSize: 20, color: clr.accent }}>
+              <MdStar size={width < 460 ? 18 :22} style={{ color: clr.accent }} />
+              <div style={{ fontWeight: width < 460 ? 600 : 800, fontSize: width < 460 ? 14 : 20, color: clr.accent }}>
                 {plans[plan]?.name || 'Free Trial'} Plan
               </div>
-              <span style={{ background: clr.accent, color: '#fff', fontSize: 11, fontWeight: 700, padding: '2px 10px', borderRadius: 99 }}>
+              <span style={{ background: clr.accent, color: '#fff', fontSize: width < 460 ? 9 : 11, fontWeight: width < 460 ? 500 : 700, padding: '2px 10px', borderRadius: 99 }}>
                 {isActive ? 'ACTIVE' : 'EXPIRED'}
               </span>
             </div>
             {isTrial && (
-              <div style={{ fontSize: 14, color: daysLeft <= 3 ? 'var(--danger)' : 'var(--text-secondary)' }}>
+              <div style={{ fontSize: width < 460 ? 11 : 14, color: daysLeft <= 3 ? 'var(--danger)' : 'var(--text-secondary)' }}>
                 {daysLeft > 0
                   ? <><strong>{daysLeft} days</strong> remaining in your free trial</>
                   : <span style={{ color: 'var(--danger)', fontWeight: 700 }}>Trial expired — please upgrade</span>}
@@ -304,6 +307,7 @@ export default function SubscriptionPage() {
             <button
               className="btn btn-primary"
               onClick={() => setUpgradeTarget(plan === 'basic' ? 'pro' : 'basic')}
+              style={{fontSize: width < 460 ? 10 : 14}}
             >
               <MdArrowUpward /> Upgrade Now
             </button>
