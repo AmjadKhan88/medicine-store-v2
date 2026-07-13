@@ -12,6 +12,7 @@ const { medicineQuerySchema }             = require('../validators/queryValidato
 router.use(protect);
 router.use(requireSubscription);
 router.get('/',   validateQuery(medicineQuerySchema),   cache(10),         ctrl.getAllMedicines);
+router.get('/barcode/:barcode', protect, ctrl.getByBarcode);
 router.get('/expiry-alerts', cache(60),  ctrl.getExpiryAlert);
 router.get('/low-stock',       ctrl.getLowStock);
 router.get('/find-alternatives', ctrl.findAlternativesByName);

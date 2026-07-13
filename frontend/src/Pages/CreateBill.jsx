@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MdAdd, MdDelete, MdSearch, MdArrowBack, MdReceipt, MdSwapHoriz } from 'react-icons/md';
+import { MdAdd, MdDelete, MdSearch, MdArrowBack, MdReceipt, MdQrCodeScanner } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import SubstitutesPanel from '../Components/SubstitutesPanel';
 import DrugInteractionChecker from '../Components/DrugInteractionChecker';
+import BarcodeScanner from '../Components/BarcodeScanner';
 
 export default function CreateBill() {
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ export default function CreateBill() {
   const [showPatList, setShowPatList] = useState(false);
   const [showMedList, setShowMedList] = useState(false);
   const [outOfStockMed, setOutOfStockMed] = useState(null); // medicine clicked but qty exceeded
+  const [showScanner, setShowScanner] = useState(false);
+  const [scanLoading, setScanLoading] = useState(false);
 
   useEffect(() => {
     if (patSearch.length > 1) {
@@ -57,6 +60,21 @@ export default function CreateBill() {
   };
 
   const removeItem = (id) => setItems(prev => prev.filter(i => i.medicine !== id));
+
+  const handleBarcodeScan = async (barcode) => {
+    setShowScanner(false);
+    setScanLoading(true);
+    try {
+      const { data } = await API.get(`/medicines/barcode/${encodeURIComponent(barcode)}`);
+      const med = data.medicine;
+      if (!med) { toast.error('Medicine not found for this barcode'); return; }
+      addItem(med);
+      toast.success(`${med.name} added from scan!`);
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Medicine not found';
+      toast.error(msg);
+    } finally { setScanLoading(false); }
+  };
 
   const subtotal = items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
   const total = subtotal - Number(discount) + Number(tax);
@@ -133,6 +151,19 @@ export default function CreateBill() {
                 <MdSearch className="input-icon" />
                 <input className="form-control" placeholder="Search medicine to add..." value={medSearch} onChange={e => setMedSearch(e.target.value)} onFocus={() => medSearch.length > 1 && setShowMedList(true)} />
               </div>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowScanner(true)}
+                title="Scan barcode"
+                disabled={scanLoading}
+                style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                {scanLoading
+                  ? <span style={{ fontSize: 12 }}>Searching...</span>
+                  : <><MdQrCodeScanner size={18} /> Scan</>
+                }
+              </button>
               {showMedList && medicines.length > 0 && (
                 <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 10, zIndex: 100, boxShadow: 'var(--shadow-lg)', marginTop: 4 }}>
                   {medicines.map(m => (
@@ -239,6 +270,16 @@ export default function CreateBill() {
           </div>
         </div>
       </div>
+
+      {/* Barcode Scanner Modal */}
+      {showScanner && (
+        <BarcodeScanner
+          title="Scan Medicine Barcode"
+          onScanned={handleBarcodeScan}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
+
       {/* Out of Stock — Show Substitutes */}
       {outOfStockMed && (
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setOutOfStockMed(null)}>

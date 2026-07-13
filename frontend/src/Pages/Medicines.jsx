@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import PermissionGate from '../Components/PermissionGate';
 import { useAI } from '../context/AIContext';
-import { MdAdd, MdAutoAwesome, MdEdit, MdDelete, MdSearch, MdMedicalServices, MdWarning, MdSwapHoriz } from 'react-icons/md';
+import { MdAdd, MdAutoAwesome, MdEdit, MdDelete, MdSearch, MdMedicalServices, MdWarning, MdSwapHoriz, MdQrCodeScanner } from 'react-icons/md';
+import BarcodeScanner from '../Components/BarcodeScanner';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useSocketEvent } from '../hooks/useSocketEvent';
-import {useWindowWidth} from '../hooks/useWindowWidth';
+import { useWindowWidth } from '../hooks/useWindowWidth';
 
 
 const CATEGORIES = ['All', 'Antibiotic', 'Analgesic', 'Antiviral', 'Antifungal', 'Cardiovascular', 'Diabetes', 'Respiratory', 'Gastrointestinal', 'Neurological', 'Vitamin & Supplement', 'Dermatological', 'Other'];
@@ -41,6 +42,7 @@ export default function Medicines() {
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [showScanner, setShowScanner] = useState(false);
 
   const [subsModal, setSubsModal] = useState(null); // medicine being edited for substitutes
   const [allMeds, setAllMeds] = useState([]);
@@ -96,6 +98,24 @@ export default function Medicines() {
       const { data } = await API.get('/medicines', { params: { limit: 200 } });
       setAllMeds(data.medicines.filter(m => m._id !== med._id));
     } catch { toast.error('Failed to load medicines'); }
+  };
+
+  // Open edit modal pre-filled with scanned barcode
+  const handleBarcodeScan = async (barcode) => {
+    setShowScanner(false);
+    try {
+      const { data } = await API.get(`/medicines/barcode/${encodeURIComponent(barcode)}`);
+      if (data.medicine) {
+        openEdit(data.medicine);
+        toast.success(`Found: ${data.medicine.name}`);
+      }
+    } catch {
+      // Medicine not found — open add modal with barcode pre-filled
+      toast('Medicine not found — add it now', { icon: '➕' });
+      setForm({ ...empty, barcode });
+      setEditing(null);
+      setModal(true);
+    }
   };
 
   const toggleSub = (id) => {
@@ -159,10 +179,15 @@ export default function Medicines() {
     <div>
       <div className="page-header">
         <div className="page-header-left">
-          <h1 style={{fontSize: width < 460 ? 16 : 24}}>Medicines</h1>
-          <p style={{fontSize: width < 460 ? 11 : 14}}>{total} medicines in inventory</p>
+          <h1 style={{ fontSize: width < 460 ? 16 : 24 }}>Medicines</h1>
+          <p style={{ fontSize: width < 460 ? 11 : 14 }}>{total} medicines in inventory</p>
         </div>
-        <button className="btn btn-primary" onClick={openAdd} style={{fontSize: width < 460 ? 11 : 14}}><MdAdd /> Add Medicine</button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button className="btn btn-secondary" onClick={() => setShowScanner(true)}>
+            <MdQrCodeScanner /> Scan Barcode
+          </button>
+          <button className="btn btn-primary" onClick={openAdd}><MdAdd /> Add Medicine</button>
+        </div>
       </div>
 
       <div className="card" style={{ marginBottom: 16, padding: width < 350 ? 12 : 24 }}>
@@ -171,18 +196,18 @@ export default function Medicines() {
             <MdSearch className="search-icon" />
             <input placeholder="Search by name, generic name, batch..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <select className="form-control" style={{ width: 160, padding: width < 460 ? '6px 10px': '10px 14px', fontSize: width < 460 ? 11 : 14 }} value={category} onChange={e => setCategory(e.target.value)}>
+          <select className="form-control" style={{ width: 160, padding: width < 460 ? '6px 10px' : '10px 14px', fontSize: width < 460 ? 11 : 14 }} value={category} onChange={e => setCategory(e.target.value)}>
             {CATEGORIES.map(c => <option key={c} value={c === 'All' ? '' : c}>{c}</option>)}
           </select>
           <div className="flex gap-2">
             {STATUSES.map(s => (
-              <button key={s.id} className={`pill${status === s.id ? ' active' : ''}`} style={{padding: width < 460 ? '5px 10px' : '5px 14px', fontSize: width < 460 ? 9 : 13}} onClick={() => setStatus(s.id)}>{s.label}</button>
+              <button key={s.id} className={`pill${status === s.id ? ' active' : ''}`} style={{ padding: width < 460 ? '5px 10px' : '5px 14px', fontSize: width < 460 ? 9 : 13 }} onClick={() => setStatus(s.id)}>{s.label}</button>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="card" style={{padding: width < 460 ? 10 : 24}}>
+      <div className="card" style={{ padding: width < 460 ? 10 : 24 }}>
         {loading ? (
           <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading...</div></div>
         ) : medicines.length === 0 ? (
@@ -197,17 +222,17 @@ export default function Medicines() {
                 {medicines.map(m => (
                   <tr key={m._id}>
                     <td>
-                      <div style={{ fontWeight:width < 460 ? 500 : 600 }}>{m.name}</div>
-                      <div className="text-muted text-sm" style={{ fontSize:width < 460 ? 9 : 13 }}>{m.genericName} · {m.dosageForm} {m.strength}</div>
+                      <div style={{ fontWeight: width < 460 ? 500 : 600 }}>{m.name}</div>
+                      <div className="text-muted text-sm" style={{ fontSize: width < 460 ? 9 : 13 }}>{m.genericName} · {m.dosageForm} {m.strength}</div>
                       {m.requiresPrescription && <span className="badge badge-info" style={{ marginTop: 2, fontSize: 10 }}>Rx</span>}
                     </td>
-                    <td><span className="badge badge-default" style={{ fontSize:width < 460 ? 9 : 12 }}>{m.category}</span></td>
+                    <td><span className="badge badge-default" style={{ fontSize: width < 460 ? 9 : 12 }}>{m.category}</span></td>
                     <td>
                       <div style={{ fontWeight: m.isLowStock ? 700 : 400, color: m.isLowStock ? 'var(--danger)' : 'var(--text-primary)' }}>
                         {m.stock} {m.unit}
                         {m.isLowStock && <MdWarning style={{ marginLeft: 4, color: 'var(--warning)' }} />}
                       </div>
-                      <div className="text-muted text-sm" style={{ fontSize:width < 460 ? 9 : 13 }}>Min: {m.minStock}</div>
+                      <div className="text-muted text-sm" style={{ fontSize: width < 460 ? 9 : 13 }}>Min: {m.minStock}</div>
                     </td>
                     <td>₨ {m.purchasePrice?.toLocaleString()}</td>
                     <td className="fw-semibold text-success">₨ {m.salePrice?.toLocaleString()}</td>
@@ -295,6 +320,29 @@ export default function Medicines() {
                 <div className="form-group"><label className="form-label">Strength</label><input className="form-control" value={form.strength} onChange={fld('strength')} placeholder="500mg" /></div>
               </div>
               <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Barcode</label>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input
+                      className="form-control"
+                      value={form.barcode || ''}
+                      onChange={fld('barcode')}
+                      placeholder="Scan or type barcode number"
+                      style={{ flex: 1 }}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-icon"
+                      title="Scan barcode"
+                      onClick={() => setShowScanner(true)}
+                    >
+                      <MdQrCodeScanner size={18} />
+                    </button>
+                  </div>
+                  <div className="form-hint">Scan the barcode on the medicine box to auto-fill this field</div>
+                </div>
+              </div>
+              <div className="form-row">
                 <div className="form-group"><label className="form-label required">Purchase Price (₨)</label><input className="form-control" type="number" value={form.purchasePrice} onChange={fld('purchasePrice')} required min="0" /></div>
                 <div className="form-group"><label className="form-label required">Sale Price (₨)</label><input className="form-control" type="number" value={form.salePrice} onChange={fld('salePrice')} required min="0" /></div>
               </div>
@@ -378,6 +426,25 @@ export default function Medicines() {
             </div>
           </div>
         </div>
+      )}
+
+            {/* Barcode Scanner — in Medicines page */}
+      {showScanner && (
+        <BarcodeScanner
+          title={modal ? 'Scan to fill Barcode' : 'Scan Medicine Barcode'}
+          onScanned={(code) => {
+            if (modal) {
+              // Filling barcode field in add/edit form
+              setForm(p => ({ ...p, barcode: code }));
+              setShowScanner(false);
+              toast.success('Barcode filled!');
+            } else {
+              // Looking up medicine from inventory
+              handleBarcodeScan(code);
+            }
+          }}
+          onClose={() => setShowScanner(false)}
+        />
       )}
 
       {/* Delete Confirm */}

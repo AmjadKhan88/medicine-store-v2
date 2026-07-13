@@ -317,3 +317,30 @@ exports.findAlternativesByName = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+/* ── Get medicine by barcode ── */
+exports.getByBarcode = async (req, res) => {
+  try {
+    const { barcode } = req.params;
+    if (!barcode?.trim()) {
+      return res.status(400).json({ success: false, message: 'Barcode is required' });
+    }
+
+    const medicine = await Medicine.findOne({
+      storeId: req.storeId,
+      barcode:  barcode.trim(),
+      isActive: true,
+    }).lean();
+
+    if (!medicine) {
+      return res.status(404).json({
+        success: false,
+        message: `No medicine found with barcode "${barcode}"`,
+      });
+    }
+
+    res.json({ success: true, medicine });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
