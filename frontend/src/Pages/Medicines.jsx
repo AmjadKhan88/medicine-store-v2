@@ -5,6 +5,8 @@ import { MdAdd, MdAutoAwesome, MdEdit, MdDelete, MdSearch, MdMedicalServices, Md
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useSocketEvent } from '../hooks/useSocketEvent';
+import {useWindowWidth} from '../hooks/useWindowWidth';
+
 
 const CATEGORIES = ['All', 'Antibiotic', 'Analgesic', 'Antiviral', 'Antifungal', 'Cardiovascular', 'Diabetes', 'Respiratory', 'Gastrointestinal', 'Neurological', 'Vitamin & Supplement', 'Dermatological', 'Other'];
 const FORMS = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Inhaler', 'Patch', 'Other'];
@@ -46,6 +48,8 @@ export default function Medicines() {
 
   const { selectedModel } = useAI();
   const [suggesting, setSuggesting] = useState(false);
+
+  const width = useWindowWidth();
 
   const fetchMedicines = useCallback(async () => {
     setLoading(true);
@@ -155,30 +159,30 @@ export default function Medicines() {
     <div>
       <div className="page-header">
         <div className="page-header-left">
-          <h1>Medicines</h1>
-          <p>{total} medicines in inventory</p>
+          <h1 style={{fontSize: width < 460 ? 16 : 24}}>Medicines</h1>
+          <p style={{fontSize: width < 460 ? 11 : 14}}>{total} medicines in inventory</p>
         </div>
-        <button className="btn btn-primary" onClick={openAdd}><MdAdd /> Add Medicine</button>
+        <button className="btn btn-primary" onClick={openAdd} style={{fontSize: width < 460 ? 11 : 14}}><MdAdd /> Add Medicine</button>
       </div>
 
-      <div className="card" style={{ marginBottom: 16 }}>
+      <div className="card" style={{ marginBottom: 16, padding: width < 350 ? 12 : 24 }}>
         <div className="toolbar" style={{ marginBottom: 0 }}>
           <div className="search-box">
             <MdSearch className="search-icon" />
             <input placeholder="Search by name, generic name, batch..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <select className="form-control" style={{ width: 160 }} value={category} onChange={e => setCategory(e.target.value)}>
+          <select className="form-control" style={{ width: 160, padding: width < 460 ? '6px 10px': '10px 14px', fontSize: width < 460 ? 11 : 14 }} value={category} onChange={e => setCategory(e.target.value)}>
             {CATEGORIES.map(c => <option key={c} value={c === 'All' ? '' : c}>{c}</option>)}
           </select>
           <div className="flex gap-2">
             {STATUSES.map(s => (
-              <button key={s.id} className={`pill${status === s.id ? ' active' : ''}`} onClick={() => setStatus(s.id)}>{s.label}</button>
+              <button key={s.id} className={`pill${status === s.id ? ' active' : ''}`} style={{padding: width < 460 ? '5px 10px' : '5px 14px', fontSize: width < 460 ? 9 : 13}} onClick={() => setStatus(s.id)}>{s.label}</button>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="card">
+      <div className="card" style={{padding: width < 460 ? 10 : 24}}>
         {loading ? (
           <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading...</div></div>
         ) : medicines.length === 0 ? (
@@ -187,23 +191,23 @@ export default function Medicines() {
           <div className="table-container">
             <table>
               <thead>
-                <tr><th>Medicine</th><th>Category</th><th>Stock</th><th>Purchase</th><th>Sale Price</th><th>Expiry</th><th>Status</th><th>Actions</th></tr>
+                <tr ><th>Medicine</th><th>Category</th><th>Stock</th><th>Purchase</th><th>Sale Price</th><th>Expiry</th><th>Status</th><th>Actions</th></tr>
               </thead>
               <tbody>
                 {medicines.map(m => (
                   <tr key={m._id}>
                     <td>
-                      <div style={{ fontWeight: 600 }}>{m.name}</div>
-                      <div className="text-muted text-sm">{m.genericName} · {m.dosageForm} {m.strength}</div>
+                      <div style={{ fontWeight:width < 460 ? 500 : 600 }}>{m.name}</div>
+                      <div className="text-muted text-sm" style={{ fontSize:width < 460 ? 9 : 13 }}>{m.genericName} · {m.dosageForm} {m.strength}</div>
                       {m.requiresPrescription && <span className="badge badge-info" style={{ marginTop: 2, fontSize: 10 }}>Rx</span>}
                     </td>
-                    <td><span className="badge badge-default">{m.category}</span></td>
+                    <td><span className="badge badge-default" style={{ fontSize:width < 460 ? 9 : 12 }}>{m.category}</span></td>
                     <td>
                       <div style={{ fontWeight: m.isLowStock ? 700 : 400, color: m.isLowStock ? 'var(--danger)' : 'var(--text-primary)' }}>
                         {m.stock} {m.unit}
                         {m.isLowStock && <MdWarning style={{ marginLeft: 4, color: 'var(--warning)' }} />}
                       </div>
-                      <div className="text-muted text-sm">Min: {m.minStock}</div>
+                      <div className="text-muted text-sm" style={{ fontSize:width < 460 ? 9 : 13 }}>Min: {m.minStock}</div>
                     </td>
                     <td>₨ {m.purchasePrice?.toLocaleString()}</td>
                     <td className="fw-semibold text-success">₨ {m.salePrice?.toLocaleString()}</td>

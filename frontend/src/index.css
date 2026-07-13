@@ -226,3 +226,11 @@ tbody tr:last-child td { border-bottom:none; }
 .ai-content ul {list-style-type: disc;}
 .ai-content ol {list-style-type: decimal;}
 .ai-content strong {font-weight: 700;}
+
+@media (max-width:460px){
+thead th { font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:0.4px; color:var(--text-muted); padding:6px 8px; border-bottom:1px solid var(--border); text-align:left; background:var(--bg-tertiary); }
+tbody td { padding:6px 8px; border-bottom:1px solid var(--border-light); font-size:10px; color:var(--text-primary); vertical-align:middle; }
+tbody tr:hover td { background:var(--bg-hover); }
+tbody tr:last-child td { border-bottom:none; }
+.table-actions { display:flex; gap:6px; }
+}

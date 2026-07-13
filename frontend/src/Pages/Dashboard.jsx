@@ -4,6 +4,7 @@ import { MdMedicalServices, MdPeople, MdWarning, MdTrendingUp, MdAccountBalance,
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import API from '../utils/api';
 import { useSocketEvent } from '../hooks/useSocketEvent';
+import {useWindowWidth} from '../hooks/useWindowWidth';
 
 const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#ec4899', '#14b8a6'];
 
@@ -14,6 +15,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [liveStats, setLiveStats] = useState({});
   const navigate = useNavigate();
+  const width = useWindowWidth();
 
   useEffect(() => {
     API.get('/dashboard').then(({ data }) => { setData(data); setLoading(false); }).catch(() => setLoading(false));
@@ -36,14 +38,12 @@ export default function Dashboard() {
     setLiveStats(prev => ({ ...prev, lowStockCount: (prev.lowStockCount || 0) + 1 }));
   }, []);
 
-  // When rendering stats cards — merge liveStats over fetched stats:
+  
   // Example: Instead of showing stats.todayRevenue, show liveStats.todayRevenue ?? stats.todayRevenue
   // Add a helper:
   const getStat = (key, fetchedValue) => liveStats[key] ?? fetchedValue;
 
-  // Usage in cards:
-  // value={getStat('totalPatients', stats.totalPatients)}
-  // value={getStat('lowStockCount', stats.lowStock)}
+ 
 
   if (loading) return <div className="flex-center" style={{ height: 300 }}><div className="text-muted">Loading dashboard...</div></div>;
   if (!data) return null;
@@ -73,18 +73,18 @@ export default function Dashboard() {
     <div>
       <div className="page-header">
         <div className="page-header-left">
-          <h1>Dashboard</h1>
-          <p>Overview of your medicine store operations</p>
+          <h1 style={{fontSize: width < 460 ? 13 : 16}}>Dashboard</h1>
+          <p style={{fontSize: width < 460 ? 10 : 13}}>Overview of your medicine store operations</p>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate('/app/billing/create')}>
+        <button className="btn btn-primary" style={{fontSize: width < 460 ? 10 : 14}} onClick={() => navigate('/app/billing/create')}>
           <MdReceipt /> New Invoice
         </button>
       </div>
 
       {(stats.expiredMedicines > 0 || stats.expiringSoon > 0) && (
         <div className={`alert ${stats.expiredMedicines > 0 ? 'alert-danger' : 'alert-warning'}`} style={{ cursor: 'pointer' }} onClick={() => navigate('/app/expiry-alerts')}>
-          <MdWarning size={20} />
-          <div className="alert-text">
+          <MdWarning size={width < 460 ? 15 :20} />
+          <div className="alert-text" style={{fontSize: width < 460 ? 11 : ''}}>
             <strong>{stats.expiredMedicines > 0 ? `${stats.expiredMedicines} expired medicines!` : `${stats.expiringSoon} medicines expiring soon!`}</strong>
             Click to review and take action immediately.
           </div>
@@ -92,14 +92,14 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="stat-grid">
+      <div className="stat-grid" style={{padding: width < 460 ? 10 : 20}}>
         {statCards.map((s, i) => (
           <div key={i} className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate(s.link)}>
-            <div className={`stat-icon ${s.cls}`}>{s.icon}</div>
+            <div className={`stat-icon ${s.cls}`} >{s.icon}</div>
             <div>
-              <div className="stat-value">{s.value}</div>
-              <div className="stat-label">{s.label}</div>
-              <div className="stat-sub">{s.sub}</div>
+              <div className="stat-value" style={{fontSize: width < 460 ? 14 : ''}}>{s.value}</div>
+              <div className="stat-label" style={{fontSize: width < 460 ? 11 : ''}}>{s.label}</div>
+              <div className="stat-sub" style={{fontSize: width < 460 ? 11 : ''}}>{s.sub}</div>
             </div>
           </div>
         ))}
