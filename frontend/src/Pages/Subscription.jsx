@@ -42,14 +42,14 @@ function UsageBar({ label, used, limit, percent }) {
         </div>
       )}
       {limit === -1 && (
-        <div style={{ fontSize: 11, color: 'var(--success)', fontWeight: 600 }}>✓ Unlimited</div>
+        <div style={{ fontSize:11, color: 'var(--success)', fontWeight: 600 }}>✓ Unlimited</div>
       )}
     </div>
   );
 }
 
 /* ── Plan card ── */
-function PlanCard({ planKey, plan, currentPlan, onSelect }) {
+function PlanCard({ planKey, plan, currentPlan, onSelect, width }) {
   const clr       = PLAN_COLORS[planKey];
   const isCurrent = planKey === currentPlan;
   const canUpgrade = ['basic', 'pro'].includes(planKey) && !isCurrent;
@@ -57,33 +57,33 @@ function PlanCard({ planKey, plan, currentPlan, onSelect }) {
   return (
     <div style={{
       border: `2px solid ${isCurrent ? clr.accent : 'var(--border)'}`,
-      borderRadius: 16, padding: 24, background: isCurrent ? clr.bg : 'var(--card-bg)',
+      borderRadius: 16, padding: width < 460 ? 18 : 24, background: isCurrent ? clr.bg : 'var(--card-bg)',
       position: 'relative', transition: 'var(--transition)',
     }}>
       {plan.badge && (
         <div style={{
           position: 'absolute', top: -12, right: 16,
           background: clr.badge, color: '#fff',
-          fontSize: 11, fontWeight: 700, padding: '3px 12px', borderRadius: 99,
+          fontSize: width < 460 ? 9 : 11, fontWeight: width < 460 ? 500 : 700, padding: '3px 12px', borderRadius: 99,
         }}>
           {plan.badge}
         </div>
       )}
 
-      <div style={{ fontWeight: 800, fontSize: 18, color: clr.accent, marginBottom: 4 }}>{plan.name}</div>
-      <div style={{ fontWeight: 800, fontSize: 26, color: 'var(--text-primary)', marginBottom: 16 }}>
-        {plan.price === 0 ? 'Free' : `${PKR(plan.price)}/mo`}
+      <div style={{ fontWeight: width < 460 ? 600 : 800, fontSize: width < 460 ? 12 : 18, color: clr.accent, marginBottom: 4 }}>{plan.name}</div>
+      <div style={{ fontWeight: width < 460 ? 600 : 800, fontSize: width < 460 ? 14 : 26, color: 'var(--text-primary)', marginBottom: 16 }}>
+        {plan.price === 0 ? 'RS 0' : `${PKR(plan.price)}/mo`}
       </div>
 
       {plan.features.map((f, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, marginBottom: 6, color: 'var(--text-secondary)' }}>
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize:width < 460 ? 9 : 13, marginBottom: 6, color: 'var(--text-secondary)' }}>
           <MdCheckCircle size={14} style={{ color: clr.accent, flexShrink: 0 }} /> {f}
         </div>
       ))}
 
       <div style={{ marginTop: 20 }}>
         {isCurrent ? (
-          <div style={{ background: clr.bg, color: clr.accent, fontWeight: 700, fontSize: 13, padding: '8px 16px', borderRadius: 8, textAlign: 'center', border: `1px solid ${clr.accent}` }}>
+          <div style={{ background: clr.bg, color: clr.accent, fontWeight:width < 460 ? 600 : 700, fontSize:width < 460 ? 11 : 13, padding: '8px 16px', borderRadius: 8, textAlign: 'center', border: `1px solid ${clr.accent}` }}>
             ✓ Current Plan
           </div>
         ) : canUpgrade ? (
@@ -91,11 +91,11 @@ function PlanCard({ planKey, plan, currentPlan, onSelect }) {
             onClick={() => onSelect(planKey)}
             style={{
               width: '100%', padding: '10px', background: clr.accent, color: '#fff',
-              border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 14,
+              border: 'none', borderRadius: 10, fontWeight: width < 460 ? 600 : 700, fontSize:width < 460 ? 11 : 14,
               cursor: 'pointer', fontFamily: 'var(--font-main)',
             }}
           >
-            <MdArrowUpward size={14} style={{ marginRight: 4 }} />
+            <MdArrowUpward size={width < 460 ? 11 :14} style={{ marginRight: 4 }} />
             Upgrade to {plan.name}
           </button>
         ) : null}
@@ -337,7 +337,7 @@ export default function SubscriptionPage() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: width < 460 ? '1fr' : '1fr 1fr', gap: 20, marginBottom: 20 }}>
         {/* ── Usage meters ── */}
         <div className="card">
           <div className="card-header"><div className="card-title">Current Usage</div></div>
@@ -375,9 +375,9 @@ export default function SubscriptionPage() {
           <div className="card-title">Available Plans</div>
           <div className="text-muted text-sm">All prices in PKR per month</div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: width < 820 ? '1fr' : 'repeat(3, 1fr)', gap: 16 }}>
           {Object.entries(plans).filter(([k]) => k !== 'trial').map(([key, p]) => (
-            <PlanCard key={key} planKey={key} plan={p} currentPlan={plan} onSelect={setUpgradeTarget} />
+            <PlanCard key={key} planKey={key} plan={p} currentPlan={plan} onSelect={setUpgradeTarget} width={width}/>
           ))}
         </div>
       </div>
