@@ -193,9 +193,20 @@ function emitLabTestUpdated(storeId, labTest) {
   });
 }
 
+/* ── OPD Queue events ── */
+function emitOPDUpdate(storeId, data) {
+  emitToStore(storeId, 'opd:update', data);
+}
+
+function emitOPDCalled(storeId, data) {
+  emitToStore(storeId, 'opd:called', data);
+}
+
 module.exports = {
   initSocket,
   emitToStore,
+  emitOPDUpdate,
+  emitOPDCalled,
   emitBillCreated,
   emitPaymentUpdated,
   emitStockUpdated,
