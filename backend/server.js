@@ -41,6 +41,7 @@ const supportRoutes    = require('./routes/support');
 const invoiceSettingsRoutes = require('./routes/invoiceSettings');
 const documentRoutes = require('./routes/documents');
 const wardsRoute     = require('./routes/wards');
+const ipdRoute  =     require('./routes/ipd');
 
 const app = express();
 app.set('trust proxy', 1); // trust only the first hop (Render's load balancer) — 'true' trusts every hop and breaks express-rate-limit's IP detection
@@ -164,6 +165,7 @@ app.use('/api/support',     supportRoutes);
 app.use('/api/invoice-settings', invoiceSettingsRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/wards',   wardsRoute);
+app.use('/api/ipd',  ipdRoute); 
 
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER
