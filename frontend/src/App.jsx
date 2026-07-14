@@ -37,6 +37,7 @@ const SupportCenter = lazy(()=> import('./Pages/SupportCenter'));
 const InvoiceSettings = lazy(()=> import('./Pages/InvoiceSettings'));
 const Documents = lazy(()=> import('./Pages/Documents'));
 const WardManagement = lazy(() => import('./Pages/WardManagement'));
+const IPDManagement   = lazy(() => import('./Pages/IPDManagement'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading} = useAuth();
@@ -71,6 +72,7 @@ export default function App() {
         <Route path="billing" element={<Billing />} />
         <Route path="documents" element={<Documents />} />
         <Route path="wards"      element={<WardManagement />} />
+        <Route path="ipd"        element={<IPDManagement  />} />
         <Route path="billing/create" element={<CreateBill />} />
         <Route path="expiry-alerts" element={<ExpiryAlerts />} />
         <Route path="patient-balance" element={<PatientBalance />} />

@@ -42,6 +42,7 @@ export default function Layout() {
     { to: '/app/appointments', icon: <MdCalendarToday />, label: 'Appointments' },
     { to: '/app/lab-tests', icon: <MdScience />, label: 'Lab Tests' },
     { to: '/app/wards',     icon: <MdLocalHotel />,   label: 'Ward & Beds'       },
+    { to: '/app/ipd',       icon: <MdMedicalServices/>,label: 'IPD Management'   },
   ];
 
   const alertItems = [
