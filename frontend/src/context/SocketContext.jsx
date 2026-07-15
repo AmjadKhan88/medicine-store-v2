@@ -72,6 +72,7 @@ export function SocketProvider({ children }) {
       'dashboard:update',
       'opd:update', 'opd:called', 'opd:tokenAdded',
       'nurse:medicineRequest', 'nurse:medicineDispensed', 'nurse:criticalVitals',
+      'ot:scheduled', 'ot:statusUpdated',
     ];
 
     ALL_EVENTS.forEach(event => {
