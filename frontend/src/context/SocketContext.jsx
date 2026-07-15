@@ -70,6 +70,8 @@ export function SocketProvider({ children }) {
       'labTest:updated',
       'notification:new',
       'dashboard:update',
+      'opd:update', 'opd:called', 'opd:tokenAdded',
+      'nurse:medicineRequest', 'nurse:medicineDispensed', 'nurse:criticalVitals',
     ];
 
     ALL_EVENTS.forEach(event => {

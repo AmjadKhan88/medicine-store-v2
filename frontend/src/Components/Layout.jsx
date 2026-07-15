@@ -44,6 +44,7 @@ export default function Layout() {
     { to: '/app/wards',     icon: <MdLocalHotel />,   label: 'Ward & Beds'       },
     { to: '/app/ipd',       icon: <MdMedicalServices/>,label: 'IPD Management'   },
     { to: '/app/opd',       icon: <MdPeople />,          label: 'OPD Queue'      },
+    { to: '/app/nurse',     icon: <MdMedicalServices />,  label: 'Nurse Station'  },
   ];
 
   const alertItems = [

@@ -40,6 +40,7 @@ const WardManagement = lazy(() => import('./Pages/WardManagement'));
 const IPDManagement   = lazy(() => import('./Pages/IPDManagement'));
 const OPDQueue        = lazy(() => import('./Pages/OPDQueue'));
 const OPDDisplay      = lazy(() => import('./Pages/OPDDisplay'));
+const NurseStation    = lazy(() => import('./Pages/NurseStation'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading} = useAuth();
@@ -77,6 +78,7 @@ export default function App() {
         <Route path="wards"      element={<WardManagement />} />
         <Route path="ipd"        element={<IPDManagement  />} />
         <Route path="opd"        element={<OPDQueue       />} />
+        <Route path="nurse"      element={<NurseStation   />} />
         <Route path="billing/create" element={<CreateBill />} />
         <Route path="expiry-alerts" element={<ExpiryAlerts />} />
         <Route path="patient-balance" element={<PatientBalance />} />
