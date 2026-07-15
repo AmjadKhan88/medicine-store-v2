@@ -169,6 +169,7 @@ app.use('/api/wards',   wardsRoute);
 app.use('/api/ipd',  ipdRoute);
 app.use('/api/opd', opdRoutes);
 app.use('/api/nurse',            require('./routes/nurse'));
+app.use('/api/ot',               require('./routes/ot'));
 
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER
