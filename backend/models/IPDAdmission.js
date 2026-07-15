@@ -77,6 +77,19 @@ const ipdAdmissionSchema = new mongoose.Schema({
 
   admittedBy:     { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   dischargedBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    // Vitals history — recorded by nurses
+  vitalsHistory: [{
+    recordedAt:      { type: Date, default: Date.now },
+    recordedBy:      { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    recordedByName:  { type: String },
+    bp:              { type: String },          // "120/80"
+    pulse:           { type: Number },          // bpm
+    temperature:     { type: Number },          // °C
+    spo2:            { type: Number },          // %
+    rbs:             { type: Number },          // blood sugar mg/dL
+    weight:          { type: Number },          // kg
+    notes:           { type: String },
+  }],
 }, { timestamps: true });
 
 /* ── Auto-generate admission number ── */

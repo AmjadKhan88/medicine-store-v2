@@ -202,11 +202,27 @@ function emitOPDCalled(storeId, data) {
   emitToStore(storeId, 'opd:called', data);
 }
 
+/* ── Nurse Station events ── */
+function emitMedicineRequest(storeId, data) {
+  emitToStore(storeId, 'nurse:medicineRequest', data);
+}
+
+function emitMedicineDispensed(storeId, data) {
+  emitToStore(storeId, 'nurse:medicineDispensed', data);
+}
+
+function emitCriticalVitals(storeId, data) {
+  emitToStore(storeId, 'nurse:criticalVitals', data);
+}
+
 module.exports = {
   initSocket,
   emitToStore,
   emitOPDUpdate,
   emitOPDCalled,
+  emitMedicineRequest,
+  emitMedicineDispensed,
+  emitCriticalVitals,
   emitBillCreated,
   emitPaymentUpdated,
   emitStockUpdated,
