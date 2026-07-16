@@ -12,20 +12,67 @@ export function useBarcodeScanner({ onDetected, enabled = false }) {
   const [scanning, setScanning] = useState(false);
 
   // List available cameras on mount
+  // useEffect(() => {
+  //   BrowserMultiFormatReader.listVideoInputDevices()
+  //     .then((devices) => {
+  //       setCameras(devices);
+  //       // Prefer back camera on mobile
+  //       const back = devices.find(d =>
+  //         d.label.toLowerCase().includes('back') ||
+  //         d.label.toLowerCase().includes('rear') ||
+  //         d.label.toLowerCase().includes('environment')
+  //       );
+  //       setCameraId(back?.deviceId || devices[0]?.deviceId || null);
+  //     })
+  //     .catch(() => setError('Camera access denied. Allow camera permission and try again.'));
+  // }, []);
+
   useEffect(() => {
-    BrowserMultiFormatReader.listVideoInputDevices()
-      .then((devices) => {
-        setCameras(devices);
-        // Prefer back camera on mobile
-        const back = devices.find(d =>
-          d.label.toLowerCase().includes('back') ||
-          d.label.toLowerCase().includes('rear') ||
-          d.label.toLowerCase().includes('environment')
-        );
-        setCameraId(back?.deviceId || devices[0]?.deviceId || null);
-      })
-      .catch(() => setError('Camera access denied. Allow camera permission and try again.'));
-  }, []);
+  if (!enabled) return;
+
+  const initCamera = async () => {
+    try {
+      setError(null);
+
+      // Step 1: Trigger browser permission popup
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment",
+        },
+      });
+
+      // Stop temporary stream
+      stream.getTracks().forEach(track => track.stop());
+
+      // Step 2: Now enumerate cameras
+      const devices =
+        await BrowserMultiFormatReader.listVideoInputDevices();
+
+      setCameras(devices);
+
+      const rear =
+        devices.find(device =>
+          /back|rear|environment/i.test(device.label)
+        ) || devices[0];
+
+      setCameraId(rear?.deviceId ?? null);
+
+    } catch (err) {
+      console.error(err);
+
+      if (err.name === "NotAllowedError") {
+        setError("Camera permission denied.");
+      } else if (err.name === "NotFoundError") {
+        setError("No camera found.");
+      } else {
+        setError(err.message);
+      }
+    }
+  };
+
+  initCamera();
+
+}, [enabled]);
 
   const startScanning = useCallback(async () => {
     if (!videoRef.current || !cameraId) return;

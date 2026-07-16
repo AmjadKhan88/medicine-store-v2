@@ -14,8 +14,10 @@ import toast from 'react-hot-toast';
 export default function BarcodeScanner({ onScanned, onClose, title = 'Scan Barcode' }) {
   const [manualMode, setManualMode] = useState(false);
   const [manualCode, setManualCode] = useState('');
-  const [lastCode, setLastCode]     = useState(null);
-  const [cooldown, setCooldown]     = useState(false);  // prevent double-fire
+  const [lastCode, setLastCode] = useState(null);
+  const [cooldown, setCooldown] = useState(false);  // prevent double-fire
+
+
 
   const handleDetected = useCallback((code) => {
     if (cooldown || code === lastCode) return;
@@ -30,7 +32,7 @@ export default function BarcodeScanner({ onScanned, onClose, title = 'Scan Barco
       osc.frequency.value = 1000;
       osc.start();
       osc.stop(ctx.currentTime + 0.08);
-    } catch {}
+    } catch { }
 
     toast.success(`Scanned: ${code}`, { duration: 1500 });
     onScanned(code);
@@ -44,7 +46,7 @@ export default function BarcodeScanner({ onScanned, onClose, title = 'Scan Barco
 
   const { videoRef, error, cameras, cameraId, setCameraId } = useBarcodeScanner({
     onDetected: handleDetected,
-    enabled:    !manualMode,
+    enabled: !manualMode,
   });
 
   const handleManualSubmit = () => {
@@ -113,7 +115,7 @@ export default function BarcodeScanner({ onScanned, onClose, title = 'Scan Barco
             }}>
               {/* Corner brackets */}
               {[
-                { top: '25%', left: '20%', borderTop: '3px solid #0ea5e9', borderLeft:  '3px solid #0ea5e9', borderRadius: '4px 0 0 0' },
+                { top: '25%', left: '20%', borderTop: '3px solid #0ea5e9', borderLeft: '3px solid #0ea5e9', borderRadius: '4px 0 0 0' },
                 { top: '25%', right: '20%', borderTop: '3px solid #0ea5e9', borderRight: '3px solid #0ea5e9', borderRadius: '0 4px 0 0' },
                 { bottom: '25%', left: '20%', borderBottom: '3px solid #0ea5e9', borderLeft: '3px solid #0ea5e9', borderRadius: '0 0 0 4px' },
                 { bottom: '25%', right: '20%', borderBottom: '3px solid #0ea5e9', borderRight: '3px solid #0ea5e9', borderRadius: '0 0 4px 0' },

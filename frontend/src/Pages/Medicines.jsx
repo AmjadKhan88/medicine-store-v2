@@ -186,6 +186,7 @@ export default function Medicines() {
           <button className="btn btn-secondary" onClick={() => setShowScanner(true)}>
             <MdQrCodeScanner /> Scan Barcode
           </button>
+
           <button className="btn btn-primary" onClick={openAdd}><MdAdd /> Add Medicine</button>
         </div>
       </div>
