@@ -1,48 +1,52 @@
 const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first'); // Render has no outbound IPv6 route — prevents ENETUNREACH on SMTP/etc.
 
-const express = require('express');
-const http = require('http');
+const express           = require('express');
+const http              = require('http');
 require('dotenv').config();
-const { initSocket } = require('./socket');
-const helmet     = require('helmet');
-const compression= require('compression');
-const { connectRedis } = require('./config/redis');
-const connectDB = require('./config/db');
-const cors = require('cors');
-const morgan = require('morgan');
-const { apiLimiter, authLimiter, aiLimiter, speedLimiter } = require('./middleware/rateLimiter');
-const timeout = require('./middleware/timeout');
-const logger     = require('./utils/logger');
-const mongoosePaginate = require('mongoose-paginate-v2');
+const { initSocket }    = require('./socket');
+const helmet            = require('helmet');
+const compression       = require('compression');
+const { connectRedis }  = require('./config/redis');
+const connectDB         = require('./config/db');
+const cors              = require('cors');
+const morgan            = require('morgan');
+const { apiLimiter, aiLimiter, speedLimiter } = require('./middleware/rateLimiter');
+const timeout           = require('./middleware/timeout');
+const logger            = require('./utils/logger');
+const mongoosePaginate  = require('mongoose-paginate-v2');
 
 
-const authRoutes = require('./routes/auth');
-const auditLogRoutes = require('./routes/auditLogs');
-const medicineRoutes = require('./routes/medicines');
-const patientRoutes = require('./routes/patients');
-const billingRoutes = require('./routes/billing');
-const dashboardRoutes = require('./routes/dashboard');
-const saleRoutes = require('./routes/sales');
-const purchaseOrderRoutes = require('./routes/purchaseOrders');
-const staffRoutes = require('./routes/staff');
-const backupRoutes = require('./routes/backup');
-const subscriptionRoutes = require('./routes/subscription');
-const { startExpiryDigestJob } = require('./jobs/expiryDigest');
-const prescriptionRoutes = require('./routes/prescriptions');
-const appointmentRoutes = require('./routes/appointments');
-const labTestRoutes = require('./routes/labTests');
-const supplierRoutes = require('./routes/suppliers');
-const pushRoutes = require('./routes/push');
-const portalRoutes = require('./routes/portal');
-const aiRoutes = require('./routes/ai');
-const superAdminRoutes = require('./routes/superAdmin');
-const supportRoutes    = require('./routes/support');
-const invoiceSettingsRoutes = require('./routes/invoiceSettings');
-const documentRoutes = require('./routes/documents');
-const wardsRoute     = require('./routes/wards');
-const ipdRoute  =     require('./routes/ipd');
-const opdRoutes =        require('./routes/opd');
+const authRoutes               =   require('./routes/auth');
+const auditLogRoutes           =   require('./routes/auditLogs');
+const medicineRoutes           =   require('./routes/medicines');
+const patientRoutes            =   require('./routes/patients');
+const billingRoutes            =   require('./routes/billing');
+const dashboardRoutes          =   require('./routes/dashboard');
+const saleRoutes               =   require('./routes/sales');
+const purchaseOrderRoutes      =   require('./routes/purchaseOrders');
+const staffRoutes              =   require('./routes/staff');
+const backupRoutes             =   require('./routes/backup');
+const subscriptionRoutes       =   require('./routes/subscription');
+const prescriptionRoutes       =   require('./routes/prescriptions');
+const appointmentRoutes        =   require('./routes/appointments');
+const labTestRoutes            =   require('./routes/labTests');
+const supplierRoutes           =   require('./routes/suppliers');
+const pushRoutes               =   require('./routes/push');
+const portalRoutes             =   require('./routes/portal');
+const aiRoutes                 =   require('./routes/ai');
+const superAdminRoutes         =   require('./routes/superAdmin');
+const supportRoutes            =   require('./routes/support');
+const invoiceSettingsRoutes    =   require('./routes/invoiceSettings');
+const documentRoutes           =   require('./routes/documents');
+const wardsRoute               =   require('./routes/wards');
+const ipdRoute                 =   require('./routes/ipd');
+const opdRoutes                =   require('./routes/opd');
+const nurseRoutes              =   require('./routes/nurse');
+const otRoutes                 =   require('./routes/ot');
+const bloodbankRoutes          =   require('./routes/bloodBank');
+const { startExpiryDigestJob } =   require('./jobs/expiryDigest');
+
 
 const app = express();
 app.set('trust proxy', 1); // trust only the first hop (Render's load balancer) — 'true' trusts every hop and breaks express-rate-limit's IP detection
@@ -143,34 +147,34 @@ mongoosePaginate.paginate.options = {
    ROUTES
 ════════════════════════════════ */
 
-app.use('/api/auth', authRoutes);
-app.use('/api/medicines', medicineRoutes);
-app.use('/api/patients', patientRoutes);
-app.use('/api/billing', billingRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/sales', saleRoutes);
-app.use('/api/purchase-orders', purchaseOrderRoutes);
-app.use('/api/audit-logs', auditLogRoutes);
-app.use('/api/staff', staffRoutes);
-app.use('/api/backup', backupRoutes);
-app.use('/api/subscription', subscriptionRoutes);
-app.use('/api/prescriptions', prescriptionRoutes);
-app.use('/api/appointments', appointmentRoutes);
-app.use('/api/lab-tests', labTestRoutes);
-app.use('/api/suppliers', supplierRoutes);
-app.use('/api/push', pushRoutes);
-app.use('/api/portal', portalRoutes);
-app.use('/api/ai',aiLimiter, aiRoutes);
-app.use('/api/super-admin', superAdminRoutes);
-app.use('/api/support',     supportRoutes);
-app.use('/api/invoice-settings', invoiceSettingsRoutes);
-app.use('/api/documents', documentRoutes);
-app.use('/api/wards',   wardsRoute);
-app.use('/api/ipd',  ipdRoute);
-app.use('/api/opd', opdRoutes);
-app.use('/api/nurse',            require('./routes/nurse'));
-app.use('/api/ot',               require('./routes/ot'));
-app.use('/api/blood-bank',       require('./routes/bloodBank'));
+app.use('/api/auth',              authRoutes);
+app.use('/api/medicines',         medicineRoutes);
+app.use('/api/patients',          patientRoutes);
+app.use('/api/billing',           billingRoutes);
+app.use('/api/dashboard',         dashboardRoutes);
+app.use('/api/sales',             saleRoutes);
+app.use('/api/purchase-orders',   purchaseOrderRoutes);
+app.use('/api/audit-logs',        auditLogRoutes);
+app.use('/api/staff',             staffRoutes);
+app.use('/api/backup',            backupRoutes);
+app.use('/api/subscription',      subscriptionRoutes);
+app.use('/api/prescriptions',     prescriptionRoutes);
+app.use('/api/appointments',      appointmentRoutes);
+app.use('/api/lab-tests',         labTestRoutes);
+app.use('/api/suppliers',         supplierRoutes);
+app.use('/api/push',              pushRoutes);
+app.use('/api/portal',            portalRoutes);
+app.use('/api/ai',aiLimiter,      aiRoutes);
+app.use('/api/super-admin',       superAdminRoutes);
+app.use('/api/support',           supportRoutes);
+app.use('/api/invoice-settings',  invoiceSettingsRoutes);
+app.use('/api/documents',         documentRoutes);
+app.use('/api/wards',             wardsRoute);
+app.use('/api/ipd',               ipdRoute);
+app.use('/api/opd',               opdRoutes);
+app.use('/api/nurse',             nurseRoutes);
+app.use('/api/ot',                otRoutes);
+app.use('/api/blood-bank',        bloodbankRoutes);
 
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER
