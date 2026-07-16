@@ -73,6 +73,7 @@ export function SocketProvider({ children }) {
       'opd:update', 'opd:called', 'opd:tokenAdded',
       'nurse:medicineRequest', 'nurse:medicineDispensed', 'nurse:criticalVitals',
       'ot:scheduled', 'ot:statusUpdated',
+      'bloodBank:unitAdded', 'bloodBank:unitIssued', 'bloodBank:criticalStock',
     ];
 
     ALL_EVENTS.forEach(event => {
