@@ -170,6 +170,7 @@ app.use('/api/ipd',  ipdRoute);
 app.use('/api/opd', opdRoutes);
 app.use('/api/nurse',            require('./routes/nurse'));
 app.use('/api/ot',               require('./routes/ot'));
+app.use('/api/blood-bank',       require('./routes/bloodBank'));
 
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER

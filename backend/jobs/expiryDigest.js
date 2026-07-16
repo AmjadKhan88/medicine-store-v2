@@ -2,6 +2,8 @@ const cron = require('node-cron');
 const User = require('../models/User');
 const Medicine = require('../models/Medicine');
 const emailService = require('../utils/emailService');
+const BloodUnit = require('../models/BloodUnit');
+
 
 /**
  * Runs every Monday at 8:00 AM Pakistan time (UTC+5 = 03:00 UTC)
@@ -24,14 +26,31 @@ function startExpiryDigestJob() {
         try {
           const storeId = admin.storeId || admin._id;
 
-          const [expired, expiringSoon, lowStock] = await Promise.all([
-            Medicine.find({ storeId, isActive: true, expiryDate: { $lt: now } })
-              .select('name stock unit expiryDate').lean(),
-            Medicine.find({ storeId, isActive: true, expiryDate: { $gte: now, $lte: in30Days } })
-              .select('name stock unit expiryDate').lean(),
-            Medicine.find({ storeId, isActive: true, $expr: { $lte: ['$stock', '$minStock'] } })
-              .select('name stock unit minStock').lean(),
-          ]);
+          const in7Days = new Date(); in7Days.setDate(in7Days.getDate() + 7);
+
+          const [expired, expiringSoon, lowStock,
+            bloodExpired, bloodExpiringSoon] = await Promise.all([
+              Medicine.find({ storeId, isActive: true, expiryDate: { $lt: now } })
+                .select('name stock unit expiryDate').lean(),
+              Medicine.find({ storeId, isActive: true, expiryDate: { $gte: now, $lte: in30Days } })
+                .select('name stock unit expiryDate').lean(),
+              Medicine.find({ storeId, isActive: true, $expr: { $lte: ['$stock', '$minStock'] } })
+                .select('name stock unit minStock').lean(),
+              // Blood units expired
+              BloodUnit.find({ storeId, status: 'Available', expiryDate: { $lt: now } })
+                .select('bagId bloodGroup component expiryDate').lean(),
+              // Blood units expiring in 7 days
+              BloodUnit.find({ storeId, status: 'Available', expiryDate: { $gte: now, $lte: in7Days } })
+                .select('bagId bloodGroup component expiryDate').lean(),
+            ]);
+
+          // Auto-mark expired blood units
+          if (bloodExpired.length > 0) {
+            await BloodUnit.updateMany(
+              { storeId, status: 'Available', expiryDate: { $lt: now } },
+              { $set: { status: 'Expired' } }
+            );
+          }
 
           // Only send if there's something to report
           if (expired.length + expiringSoon.length + lowStock.length === 0) {
