@@ -15,6 +15,7 @@ exports.createMedicineSchema = z.object({
   batchNumber:         z.string().trim().max(100).optional(),
   dosageForm:          z.enum(FORMS).default('Tablet'),
   strength:            z.string().trim().max(100).optional(),
+  barcode:             z.string().trim().max(200).optional(),
   unit:                z.enum(UNITS).default('Strip'),
   purchasePrice:       z.coerce.number().min(0,'Purchase price cannot be negative').max(1000000),
   salePrice:           z.coerce.number().min(0,'Sale price cannot be negative').max(1000000),

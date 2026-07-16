@@ -304,10 +304,6 @@ export default function Medicines() {
                     </div>
                   )}
                 </div>
-                {/* <div className="form-group">
-                  <label className="form-label required">Medicine Name</label>
-                  <input className="form-control" value={form.name} onChange={fld('name')} required placeholder="e.g. Panadol Extra" />
-                </div> */}
                 <div className="form-group"><label className="form-label">Generic Name</label><input className="form-control" value={form.genericName} onChange={fld('genericName')} placeholder="e.g. Paracetamol" /></div>
               </div>
               <div className="form-row">
