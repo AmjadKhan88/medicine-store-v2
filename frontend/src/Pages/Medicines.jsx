@@ -95,7 +95,7 @@ export default function Medicines() {
     setSubsModal(med);
     setSelectedSubs((med.substitutes || []).map(s => typeof s === 'object' ? s._id : s));
     try {
-      const { data } = await API.get('/medicines', { params: { limit: 200 } });
+      const { data } = await API.get('/medicines', { params: { limit: 100 } });
       setAllMeds(data.medicines.filter(m => m._id !== med._id));
     } catch { toast.error('Failed to load medicines'); }
   };
