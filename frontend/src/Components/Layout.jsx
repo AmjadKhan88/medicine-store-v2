@@ -5,7 +5,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import RealTimeIndicator from './RealTimeIndicator';
 import { useState, Suspense } from 'react';
-import { MdDashboard,MdReceipt,MdFolderOpen, MdSupportAgent,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning, MdLocalHotel, MdLocalHospital, MdBloodtype } from 'react-icons/md';
+import { MdDashboard,MdReceipt,MdFolderOpen, MdSupportAgent,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning, MdLocalHotel, MdLocalHospital, MdBloodtype, MdImage } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
@@ -25,29 +25,30 @@ export default function Layout() {
   const handleLogout = () => { logout(); navigate('/login'); };
 
   const themes = [
-    { id: 'light', color: '#e2e8f0' },
-    { id: 'dark', color: '#111827' },
-    { id: 'teal', color: '#0d9488' },
-    { id: 'purple', color: '#7c3aed' },
+    { id: 'light',  color: '#e2e8f0'  },
+    { id: 'dark',   color: '#111827'  },
+    { id: 'teal',   color: '#0d9488'  },
+    { id: 'purple', color: '#7c3aed'  },
   ];
 
   const navItems = [
-    { to: '/app/subscription', icon: <MdStar />, label: 'My Subscription', show: true },
-    { to: '/app', icon: <MdDashboard />, label: 'Dashboard', exact: true },
-    { to: '/app/ai-assistant', icon: <MdAutoAwesome />, label: 'AI Assistant', show: true },
-    { to: '/app/medicines', icon: <MdMedicalServices />, label: 'Medicines' },
-    { to: '/app/patients', icon: <MdPeople />, label: 'Patients' },
-    { to: '/app/billing', icon: <MdReceipt />, label: 'Billing & Invoices' },
-    { to: '/app/prescriptions', icon: <MdAssignment />, label: 'Prescriptions' },
-    { to: '/app/appointments', icon: <MdCalendarToday />, label: 'Appointments' },
-    { to: '/app/lab-tests', icon: <MdScience />, label: 'Lab Tests' },
-    { to: '/app/wards',     icon: <MdLocalHotel />,   label: 'Ward & Beds'       },
-    { to: '/app/ipd',       icon: <MdMedicalServices/>,label: 'IPD Management'   },
-    { to: '/app/opd',       icon: <MdPeople />,          label: 'OPD Queue'      },
-    { to: '/app/nurse',     icon: <MdMedicalServices />,  label: 'Nurse Station'  },
-    { to: '/app/ot',        icon: <MdLocalHospital />,    label: 'OT Scheduling'    },
-    { to: '/app/blood-bank',  icon: <MdBloodtype />,      label: 'Blood Bank'      },
-    { to: '/app/doctor-orders', icon: <MdAssignment />,       label: 'Orders & Notes'   },
+    { to: '/app/subscription',    icon: <MdStar />,             label: 'My Subscription', show: true },
+    { to: '/app',                 icon: <MdDashboard />,        label: 'Dashboard', exact: true      },
+    { to: '/app/ai-assistant',    icon: <MdAutoAwesome />,      label: 'AI Assistant', show: true    },
+    { to: '/app/medicines',       icon: <MdMedicalServices />,  label: 'Medicines' },
+    { to: '/app/patients',        icon: <MdPeople />,           label: 'Patients'  },
+    { to: '/app/billing',         icon: <MdReceipt />,          label: 'Billing & Invoices' },
+    { to: '/app/prescriptions',   icon: <MdAssignment />,       label: 'Prescriptions'   },
+    { to: '/app/appointments',    icon: <MdCalendarToday />,    label: 'Appointments'    },
+    { to: '/app/lab-tests',       icon: <MdScience />,          label: 'Lab Tests'       },
+    { to: '/app/wards',           icon: <MdLocalHotel />,       label: 'Ward & Beds'     },
+    { to: '/app/ipd',             icon: <MdMedicalServices/>,   label: 'IPD Management'  },
+    { to: '/app/opd',             icon: <MdPeople />,           label: 'OPD Queue'       },
+    { to: '/app/nurse',           icon: <MdMedicalServices />,  label: 'Nurse Station'   },
+    { to: '/app/ot',              icon: <MdLocalHospital />,    label: 'OT Scheduling'   },
+    { to: '/app/blood-bank',      icon: <MdBloodtype />,        label: 'Blood Bank'      },
+    { to: '/app/doctor-orders',   icon: <MdAssignment />,       label: 'Orders & Notes'  },
+    { to: '/app/radiology',       icon: <MdImage />,            label: 'Radiology'       },
   ];
 
   const alertItems = [

@@ -76,6 +76,7 @@ export function SocketProvider({ children }) {
       'bloodBank:unitAdded', 'bloodBank:unitIssued', 'bloodBank:criticalStock',
       'orders:new', 'orders:updated', 'orders:acknowledged', 'orders:completed', 'orders:cancelled',
       'nursing:handover', 'nursing:incident',
+      'radiology:urgent', 'radiology:imagesUploaded', 'radiology:critical',
     ];
 
     ALL_EVENTS.forEach(event => {
