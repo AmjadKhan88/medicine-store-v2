@@ -45,6 +45,7 @@ const opdRoutes                =   require('./routes/opd');
 const nurseRoutes              =   require('./routes/nurse');
 const otRoutes                 =   require('./routes/ot');
 const bloodbankRoutes          =   require('./routes/bloodBank');
+const doctorOrdersRoutes       =  require('./routes/doctorOrders');
 const { startExpiryDigestJob } =   require('./jobs/expiryDigest');
 
 
@@ -175,6 +176,7 @@ app.use('/api/opd',               opdRoutes);
 app.use('/api/nurse',             nurseRoutes);
 app.use('/api/ot',                otRoutes);
 app.use('/api/blood-bank',        bloodbankRoutes);
+app.use('/api/clinical',          doctorOrdersRoutes) ;
 
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER
