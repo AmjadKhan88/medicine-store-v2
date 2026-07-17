@@ -47,6 +47,7 @@ export default function Layout() {
     { to: '/app/nurse',     icon: <MdMedicalServices />,  label: 'Nurse Station'  },
     { to: '/app/ot',        icon: <MdLocalHospital />,    label: 'OT Scheduling'    },
     { to: '/app/blood-bank',  icon: <MdBloodtype />,      label: 'Blood Bank'      },
+    { to: '/app/doctor-orders', icon: <MdAssignment />,       label: 'Orders & Notes'   },
   ];
 
   const alertItems = [

@@ -74,6 +74,8 @@ export function SocketProvider({ children }) {
       'nurse:medicineRequest', 'nurse:medicineDispensed', 'nurse:criticalVitals',
       'ot:scheduled', 'ot:statusUpdated',
       'bloodBank:unitAdded', 'bloodBank:unitIssued', 'bloodBank:criticalStock',
+      'orders:new', 'orders:updated', 'orders:acknowledged', 'orders:completed', 'orders:cancelled',
+      'nursing:handover', 'nursing:incident',
     ];
 
     ALL_EVENTS.forEach(event => {
