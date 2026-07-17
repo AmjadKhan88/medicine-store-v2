@@ -47,6 +47,7 @@ const BloodBank           = lazy(() => import('./Pages/BloodBank'));
 const DoctorOrders        = lazy(() => import('./Pages/DoctorOrders'));
 const Radiology           = lazy(() => import('./Pages/Radiology'));
 const RadiologyViewer     = lazy(() => import('./Pages/RadiologyViewer'));
+const VitalSigns          = lazy(() => import('./Pages/VitalSigns'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading} = useAuth();
@@ -90,6 +91,7 @@ export default function App() {
         <Route path="blood-bank"           element={<BloodBank      />} />
         <Route path="doctor-orders"        element={<DoctorOrders />} />
         <Route path="radiology"            element={<Radiology    />} />
+        <Route path="vitals"               element={<VitalSigns   />} />
         <Route path="billing/create"       element={<CreateBill />} />
         <Route path="expiry-alerts"        element={<ExpiryAlerts />} />
         <Route path="patient-balance"      element={<PatientBalance />} />

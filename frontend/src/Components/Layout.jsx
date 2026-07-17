@@ -5,7 +5,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import RealTimeIndicator from './RealTimeIndicator';
 import { useState, Suspense } from 'react';
-import { MdDashboard,MdReceipt,MdFolderOpen, MdSupportAgent,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning, MdLocalHotel, MdLocalHospital, MdBloodtype, MdImage } from 'react-icons/md';
+import { MdDashboard,MdReceipt,MdFolderOpen, MdSupportAgent,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning, MdLocalHotel, MdLocalHospital, MdBloodtype, MdImage, MdFavorite } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
@@ -49,6 +49,7 @@ export default function Layout() {
     { to: '/app/blood-bank',      icon: <MdBloodtype />,        label: 'Blood Bank'      },
     { to: '/app/doctor-orders',   icon: <MdAssignment />,       label: 'Orders & Notes'  },
     { to: '/app/radiology',       icon: <MdImage />,            label: 'Radiology'       },
+    { to: '/app/vitals',          icon: <MdFavorite />,         label: 'Vital Signs'     },
   ];
 
   const alertItems = [
@@ -68,7 +69,6 @@ export default function Layout() {
     { to: '/app/audit-log', icon: <MdHistory />, label: 'Audit Log', show: can.viewAuditLog },
     { to: '/app/staff', icon: <MdPeople />, label: 'Staff Management', show: can.manageStaff },
     { to: '/app/backup', icon: <MdBackup />, label: 'Backup & Restore', show: can.storeSettings },
-    // { to: '/app/super-admin', icon: <MdAdminPanelSettings />, label: 'Super Admin Panel', show: user?.email === import.meta.env.VITE_SUPER_ADMIN_EMAIL },
     { to: '/app/super-admin', icon: <MdAdminPanelSettings />, label: 'Super Admin', show: user?.email === import.meta.env.VITE_SUPER_ADMIN_EMAIL },
     { to: '/app/invoice-settings', icon: <MdReceipt />, label: 'Invoice Templates', show: can.settings },
     { to: '/app/documents', icon: <MdFolderOpen />, label: 'Documents', show: true },
