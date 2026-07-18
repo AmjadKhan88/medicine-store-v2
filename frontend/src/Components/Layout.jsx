@@ -50,6 +50,7 @@ export default function Layout() {
     { to: '/app/doctor-orders',   icon: <MdAssignment />,       label: 'Orders & Notes'  },
     { to: '/app/radiology',       icon: <MdImage />,            label: 'Radiology'       },
     { to: '/app/vitals',          icon: <MdFavorite />,         label: 'Vital Signs'     },
+    { to: '/app/emr',             icon: <MdMedicalServices />,  label: 'EMR'             },
   ];
 
   const alertItems = [
