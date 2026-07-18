@@ -51,6 +51,7 @@ export default function Layout() {
     { to: '/app/radiology',       icon: <MdImage />,            label: 'Radiology'       },
     { to: '/app/vitals',          icon: <MdFavorite />,         label: 'Vital Signs'     },
     { to: '/app/emr',             icon: <MdMedicalServices />,  label: 'EMR'             },
+    { to: '/app/accounting',      icon: <MdAttachMoney />,      label: 'Accounting'      },
   ];
 
   const alertItems = [
