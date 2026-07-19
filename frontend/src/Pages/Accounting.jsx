@@ -6,9 +6,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import {
-  MdAdd, MdClose, MdRefresh, MdDownload,
+  MdAdd, MdClose, MdDownload,
   MdEdit, MdDelete, MdBarChart, MdReceipt,
-  MdTrendingUp, MdTrendingDown, MdAttachMoney,
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';

@@ -50,6 +50,7 @@ const radiology                =   require('./routes/radiology');
 const vitalsRoutes             =   require('./routes/vitals');
 const emrRoutes                =   require('./routes/emr');
 const accountingRoutes         =   require('./routes/accounting');
+const insuranceRoutes          =   require('./routes/insurance');
 const { startExpiryDigestJob } =   require('./jobs/expiryDigest');
 
 
@@ -185,6 +186,7 @@ app.use('/api/radiology',         radiology);
 app.use('/api/vitals' ,           vitalsRoutes);
 app.use('/api/emr',               emrRoutes);
 app.use('/api/accounting' ,       accountingRoutes);
+app.use('/api/insurance' ,        insuranceRoutes);
 
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER

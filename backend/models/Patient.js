@@ -24,6 +24,13 @@ const patientSchema = new mongoose.Schema({
   portalLastViewed: { type: Date },
   addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    /* ── Insurance / Panel ── */
+  insurancePanel:      { type: mongoose.Schema.Types.ObjectId, ref: 'InsurancePanel', default: null },
+  insurancePanelName:  { type: String },
+  insurancePolicyNo:   { type: String, trim: true },
+  insuranceCoveragePercent:{ type: Number, default: 0 },
+  insuranceExpiryDate: { type: Date },
+  isInsured:           { type: Boolean, default: false },
 }, { timestamps: true });
 
 patientSchema.virtual('remainingBalance').get(function () {
