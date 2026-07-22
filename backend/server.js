@@ -51,6 +51,7 @@ const vitalsRoutes             =   require('./routes/vitals');
 const emrRoutes                =   require('./routes/emr');
 const accountingRoutes         =   require('./routes/accounting');
 const insuranceRoutes          =   require('./routes/insurance');
+const payrollRoutes            =   require('./routes/payroll');
 const { startExpiryDigestJob } =   require('./jobs/expiryDigest');
 
 
@@ -187,6 +188,7 @@ app.use('/api/vitals' ,           vitalsRoutes);
 app.use('/api/emr',               emrRoutes);
 app.use('/api/accounting' ,       accountingRoutes);
 app.use('/api/insurance' ,        insuranceRoutes);
+app.use('/api/payroll',           payrollRoutes);
 
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER
