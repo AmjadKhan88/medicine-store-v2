@@ -51,6 +51,7 @@ const VitalSigns          = lazy(() => import('./Pages/VitalSigns'));
 const EMRPage             = lazy(() => import('./Pages/EMR'));
 const Accounting          = lazy(() => import('./Pages/Accounting'));
 const Insurance           = lazy(() => import('./Pages/Insurance'));
+const Payroll             = lazy(() => import('./Pages/Payroll'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading} = useAuth();
@@ -98,6 +99,7 @@ export default function App() {
         <Route path="emr"                  element={<EMRPage      />} />
         <Route path="accounting"           element={<Accounting   />} />
         <Route path="insurance"            element={<Insurance    />} />
+        <Route path="payroll"              element={<Payroll      />} />
         <Route path="billing/create"       element={<CreateBill />} />
         <Route path="expiry-alerts"        element={<ExpiryAlerts />} />
         <Route path="patient-balance"      element={<PatientBalance />} />

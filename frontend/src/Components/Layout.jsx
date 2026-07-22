@@ -5,7 +5,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import RealTimeIndicator from './RealTimeIndicator';
 import { useState, Suspense } from 'react';
-import { MdDashboard,MdReceipt,MdFolderOpen, MdSupportAgent,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning, MdLocalHotel, MdLocalHospital, MdBloodtype, MdImage, MdFavorite, MdAccountBox, MdShield } from 'react-icons/md';
+import { MdDashboard,MdReceipt,MdFolderOpen, MdSupportAgent,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning, MdLocalHotel, MdLocalHospital, MdBloodtype, MdImage, MdFavorite, MdAccountBox, MdShield, MdAttachMoney } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
@@ -53,6 +53,7 @@ export default function Layout() {
     { to: '/app/emr',             icon: <MdMedicalServices />,  label: 'EMR'             },
     { to: '/app/accounting',      icon: < MdAccountBox/>,       label: 'Accounting'      },
     { to: '/app/insurance',       icon: <MdShield />,           label: 'Insurance'       },
+    { to: '/app/payroll',         icon: <MdAttachMoney />,      label: 'Payroll'         },
   ];
 
   const alertItems = [
