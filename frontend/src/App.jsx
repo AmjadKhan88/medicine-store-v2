@@ -52,6 +52,7 @@ const EMRPage             = lazy(() => import('./Pages/EMR'));
 const Accounting          = lazy(() => import('./Pages/Accounting'));
 const Insurance           = lazy(() => import('./Pages/Insurance'));
 const Payroll             = lazy(() => import('./Pages/Payroll'));
+const BroadcastPage       = lazy(() => import('./Pages/Broadcast'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading} = useAuth();
@@ -71,54 +72,55 @@ export default function App() {
     <Suspense fallback={<Loader />}>
     <Routes>
       <Route path="/" element={user ? <Navigate to="/app" /> :<Landing />} />
-      <Route path="/portal/:token"        element={<PatientPortal />} />
-      <Route path="/radiology/:token"     element={<RadiologyViewer  />} />
-      <Route path="/opd-display/:storeId" element={<OPDDisplay />} />
-      <Route path="/login"                element={user ? <Navigate to="/app" /> : <Login />} />
+      <Route path="/portal/:token"        element={<PatientPortal      />} />
+      <Route path="/radiology/:token"     element={<RadiologyViewer    />} />
+      <Route path="/opd-display/:storeId" element={<OPDDisplay         />} />
+      <Route path="/login"                element={user ? <Navigate to="/app" /> : <Login    />} />
       <Route path="/register"             element={user ? <Navigate to="/app" /> : <Register />} />
-      <Route path="/verify-email"         element={<VerifyEmail />} />
-      <Route path="/forgot-password"      element={<ForgotPassword />} />
-      <Route path="/reset-password"       element={<ResetPassword />} />
+      <Route path="/verify-email"         element={<VerifyEmail        />} />
+      <Route path="/forgot-password"      element={<ForgotPassword     />} />
+      <Route path="/reset-password"       element={<ResetPassword      />} />
       <Route path="/onboarding"           element={<PrivateRoute><Onboarding /></PrivateRoute>} />
 
-      <Route path="/app" element={<PrivateRoute><Layout /></PrivateRoute>}>
-        <Route index                       element={<Dashboard />} />
-        <Route path="medicines"            element={<Medicines />} />
-        <Route path="patients"             element={<Patients />} />
-        <Route path="billing"              element={<Billing />} />
-        <Route path="documents"            element={<Documents />} />
-        <Route path="wards"                element={<WardManagement />} />
-        <Route path="ipd"                  element={<IPDManagement  />} />
-        <Route path="opd"                  element={<OPDQueue       />} />
-        <Route path="nurse"                element={<NurseStation   />} />
-        <Route path="ot"                   element={<OTScheduling   />} />
-        <Route path="blood-bank"           element={<BloodBank      />} />
-        <Route path="doctor-orders"        element={<DoctorOrders />} />
-        <Route path="radiology"            element={<Radiology    />} />
-        <Route path="vitals"               element={<VitalSigns   />} />
-        <Route path="emr"                  element={<EMRPage      />} />
-        <Route path="accounting"           element={<Accounting   />} />
-        <Route path="insurance"            element={<Insurance    />} />
-        <Route path="payroll"              element={<Payroll      />} />
-        <Route path="billing/create"       element={<CreateBill />} />
-        <Route path="expiry-alerts"        element={<ExpiryAlerts />} />
-        <Route path="patient-balance"      element={<PatientBalance />} />
-        <Route path="reports"              element={<Reports />} />
-        <Route path="purchase-orders"      element={<PurchaseOrders />} />
-        <Route path="audit-log"            element={<AuditLog />} />
-        <Route path="staff"                element={<StaffManagement />} />
-        <Route path="backup"               element={<Backup />} />
-        <Route path="subscription"         element={<SubscriptionPage />} />
-        <Route path="prescriptions"        element={<Prescriptions />} />
-        <Route path="appointments"         element={<Appointments />} />
-        <Route path="prescriptions/create" element={<CreatePrescription />} />
-        <Route path="lab-tests"            element={<LabTests />} />
-        <Route path="suppliers"            element={<Suppliers />} />
-        <Route path="ai-assistant"         element={<AIAssistant />} />
-        <Route path="invoice-settings"     element={<InvoiceSettings />} />
+      <Route path="/app" element={<PrivateRoute><Layout /></PrivateRoute>  }>
+        <Route index                       element={<Dashboard           />} />
+        <Route path="medicines"            element={<Medicines           />} />
+        <Route path="patients"             element={<Patients            />} />
+        <Route path="billing"              element={<Billing             />} />
+        <Route path="documents"            element={<Documents           />} />
+        <Route path="wards"                element={<WardManagement      />} />
+        <Route path="ipd"                  element={<IPDManagement       />} />
+        <Route path="opd"                  element={<OPDQueue            />} />
+        <Route path="nurse"                element={<NurseStation        />} />
+        <Route path="ot"                   element={<OTScheduling        />} />
+        <Route path="blood-bank"           element={<BloodBank           />} />
+        <Route path="doctor-orders"        element={<DoctorOrders        />} />
+        <Route path="radiology"            element={<Radiology           />} />
+        <Route path="vitals"               element={<VitalSigns          />} />
+        <Route path="emr"                  element={<EMRPage             />} />
+        <Route path="accounting"           element={<Accounting          />} />
+        <Route path="insurance"            element={<Insurance           />} />
+        <Route path="payroll"              element={<Payroll             />} />
+        <Route path="broadcast"            element={<BroadcastPage       />} />
+        <Route path="billing/create"       element={<CreateBill          />} />
+        <Route path="expiry-alerts"        element={<ExpiryAlerts        />} />
+        <Route path="patient-balance"      element={<PatientBalance      />} />
+        <Route path="reports"              element={<Reports             />} />
+        <Route path="purchase-orders"      element={<PurchaseOrders      />} />
+        <Route path="audit-log"            element={<AuditLog            />} />
+        <Route path="staff"                element={<StaffManagement     />} />
+        <Route path="backup"               element={<Backup              />} />
+        <Route path="subscription"         element={<SubscriptionPage    />} />
+        <Route path="prescriptions"        element={<Prescriptions       />} />
+        <Route path="appointments"         element={<Appointments        />} />
+        <Route path="prescriptions/create" element={<CreatePrescription  />} />
+        <Route path="lab-tests"            element={<LabTests            />} />
+        <Route path="suppliers"            element={<Suppliers           />} />
+        <Route path="ai-assistant"         element={<AIAssistant         />} />
+        <Route path="invoice-settings"     element={<InvoiceSettings     />} />
         <Route path="super-admin"          element={<SuperAdminDashboard />} />
-        <Route path="support"              element={<SupportCenter />} />
-        <Route path="settings"             element={<Settings />} />
+        <Route path="support"              element={<SupportCenter       />} />
+        <Route path="settings"             element={<Settings            />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
 
