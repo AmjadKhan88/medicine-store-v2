@@ -52,6 +52,7 @@ const emrRoutes                =   require('./routes/emr');
 const accountingRoutes         =   require('./routes/accounting');
 const insuranceRoutes          =   require('./routes/insurance');
 const payrollRoutes            =   require('./routes/payroll');
+const broadcastRoutes          =   require('./routes/broadcast');
 const { startExpiryDigestJob } =   require('./jobs/expiryDigest');
 
 
@@ -189,6 +190,7 @@ app.use('/api/emr',               emrRoutes);
 app.use('/api/accounting' ,       accountingRoutes);
 app.use('/api/insurance' ,        insuranceRoutes);
 app.use('/api/payroll',           payrollRoutes);
+app.use('/api/broadcast',         broadcastRoutes);
 
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER
