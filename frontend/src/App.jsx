@@ -53,6 +53,8 @@ const Accounting          = lazy(() => import('./Pages/Accounting'));
 const Insurance           = lazy(() => import('./Pages/Insurance'));
 const Payroll             = lazy(() => import('./Pages/Payroll'));
 const BroadcastPage       = lazy(() => import('./Pages/Broadcast'));
+const FeedbackManagement  = lazy(() => import('./Pages/Feedback'));
+const FeedbackForm        = lazy(() => import('./Pages/FeedbackForm'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading} = useAuth();
@@ -73,6 +75,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={user ? <Navigate to="/app" /> :<Landing />} />
       <Route path="/portal/:token"        element={<PatientPortal      />} />
+      <Route path="/feedback/:token"      element={<FeedbackForm       />} />
       <Route path="/radiology/:token"     element={<RadiologyViewer    />} />
       <Route path="/opd-display/:storeId" element={<OPDDisplay         />} />
       <Route path="/login"                element={user ? <Navigate to="/app" /> : <Login    />} />
@@ -102,6 +105,7 @@ export default function App() {
         <Route path="insurance"            element={<Insurance           />} />
         <Route path="payroll"              element={<Payroll             />} />
         <Route path="broadcast"            element={<BroadcastPage       />} />
+        <Route path="feedback"             element={<FeedbackManagement  />} />
         <Route path="billing/create"       element={<CreateBill          />} />
         <Route path="expiry-alerts"        element={<ExpiryAlerts        />} />
         <Route path="patient-balance"      element={<PatientBalance      />} />

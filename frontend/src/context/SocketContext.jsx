@@ -78,6 +78,7 @@ export function SocketProvider({ children }) {
       'nursing:handover', 'nursing:incident',
       'radiology:urgent', 'radiology:imagesUploaded', 'radiology:critical',
       'vitals:critical',
+      'feedback:negative',
     ];
 
     ALL_EVENTS.forEach(event => {
