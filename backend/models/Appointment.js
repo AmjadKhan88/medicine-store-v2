@@ -41,6 +41,15 @@ const appointmentSchema = new mongoose.Schema({
   linkedPrescription: { type: mongoose.Schema.Types.ObjectId, ref: 'Prescription', default: null },
   linkedBill:         { type: mongoose.Schema.Types.ObjectId, ref: 'Bill',         default: null },
   createdBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    /* ── Online booking fields ── */
+  isOnlineBooking: { type: Boolean, default: false },
+  bookerName:      { type: String, trim: true },    // name entered on public form
+  bookerPhone:     { type: String, trim: true },    // phone entered on public form
+  bookingToken:    { type: String },                // unique token for this booking
+  cancelToken:     { type: String },                // separate token to cancel
+  cancelledAt:     { type: Date },
+  cancelledReason: { type: String },
+  appointmentNotes:{ type: String },                // patient's note at booking time
 }, { timestamps: true });
 
 appointmentSchema.index({ storeId: 1, date: 1 });
