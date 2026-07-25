@@ -57,6 +57,7 @@ export default function Layout() {
     { to: '/app/broadcast',       icon: <MdWhatsapp />,         label: 'Broadcast'       },
     { to: '/app/feedback',        icon: <MdStar />,             label: 'Feedback'        },
     { to: '/app/booking',         icon: <MdCalendarToday />,    label: 'Online Booking'  },
+    { to: '/app/patient-matching',icon: <MdMergeType />,        label: 'Deduplication'   },
   ];
 
   const alertItems = [
