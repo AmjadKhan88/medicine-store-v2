@@ -55,6 +55,8 @@ const Payroll             = lazy(() => import('./Pages/Payroll'));
 const BroadcastPage       = lazy(() => import('./Pages/Broadcast'));
 const FeedbackManagement  = lazy(() => import('./Pages/Feedback'));
 const FeedbackForm        = lazy(() => import('./Pages/FeedbackForm'));
+const BookingPage         = lazy(() => import('./Pages/BookingPage'));
+const BookingConfig       = lazy(() => import('./Pages/BookingConfig'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading} = useAuth();
@@ -74,8 +76,10 @@ export default function App() {
     <Suspense fallback={<Loader />}>
     <Routes>
       <Route path="/" element={user ? <Navigate to="/app" /> :<Landing />} />
-      <Route path="/portal/:token"        element={<PatientPortal      />} />
-      <Route path="/feedback/:token"      element={<FeedbackForm       />} />
+      <Route path="/portal/:token"                      element={<PatientPortal      />} />
+      <Route path="/feedback/:token"                    element={<FeedbackForm       />} />
+      <Route path="/book/:slug"                         element={<BookingPage        />} />
+      <Route path="/book/:slug/cancel/:cancelToken"     element={<BookingPage        />} />
       <Route path="/radiology/:token"     element={<RadiologyViewer    />} />
       <Route path="/opd-display/:storeId" element={<OPDDisplay         />} />
       <Route path="/login"                element={user ? <Navigate to="/app" /> : <Login    />} />
@@ -106,6 +110,7 @@ export default function App() {
         <Route path="payroll"              element={<Payroll             />} />
         <Route path="broadcast"            element={<BroadcastPage       />} />
         <Route path="feedback"             element={<FeedbackManagement  />} />
+        <Route path="booking"              element={<BookingConfig       />} />
         <Route path="billing/create"       element={<CreateBill          />} />
         <Route path="expiry-alerts"        element={<ExpiryAlerts        />} />
         <Route path="patient-balance"      element={<PatientBalance      />} />

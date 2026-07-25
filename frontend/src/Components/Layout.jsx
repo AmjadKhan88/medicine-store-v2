@@ -56,6 +56,7 @@ export default function Layout() {
     { to: '/app/payroll',         icon: <MdAttachMoney />,      label: 'Payroll'         },
     { to: '/app/broadcast',       icon: <MdWhatsapp />,         label: 'Broadcast'       },
     { to: '/app/feedback',        icon: <MdStar />,             label: 'Feedback'        },
+    { to: '/app/booking',         icon: <MdCalendarToday />,    label: 'Online Booking'  },
   ];
 
   const alertItems = [
