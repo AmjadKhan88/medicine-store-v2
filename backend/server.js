@@ -56,6 +56,9 @@ const broadcastRoutes          =   require('./routes/broadcast');
 const feedbackRoutes           =   require('./routes/feedback');
 const bookingRoutes            =   require('./routes/booking');
 const { startExpiryDigestJob } =   require('./jobs/expiryDigest');
+const { protect }              =   require('./middleware/auth');
+const { requireSubscription }  =   require('./middleware/checkSubscription');
+const matchCtrl                =   require('./controllers/patientMatchController');
 
 
 const app = express();
@@ -195,6 +198,11 @@ app.use('/api/payroll',           payrollRoutes);
 app.use('/api/broadcast',         broadcastRoutes);
 app.use('/api/feedback',          feedbackRoutes);
 app.use('/api/booking',           bookingRoutes);
+
+/* ── Patient matching (inline routes — no separate file needed) ── */
+app.get('/api/patient-match',             protect, requireSubscription, matchCtrl.findDuplicates);
+app.get('/api/patient-match/:patientId',  protect, requireSubscription, matchCtrl.findForPatient);
+app.post('/api/patient-match/merge',      protect, requireSubscription, matchCtrl.merge);
 
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER
