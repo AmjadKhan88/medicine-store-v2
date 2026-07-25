@@ -58,6 +58,7 @@ const FeedbackForm        = lazy(() => import('./Pages/FeedbackForm'));
 const BookingPage         = lazy(() => import('./Pages/BookingPage'));
 const BookingConfig       = lazy(() => import('./Pages/BookingConfig'));
 const PatientMatching     = lazy(() => import('./Pages/PatientMatching'));
+const PrescriptionOCR     = lazy(() => import('./Pages/PrescriptionOCR'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading} = useAuth();
@@ -113,6 +114,7 @@ export default function App() {
         <Route path="feedback"             element={<FeedbackManagement  />} />
         <Route path="booking"              element={<BookingConfig       />} />
         <Route path="patient-matching"     element={<PatientMatching     />} />
+        <Route path="prescription-ocr"     element={<PrescriptionOCR     />} />
         <Route path="billing/create"       element={<CreateBill          />} />
         <Route path="expiry-alerts"        element={<ExpiryAlerts        />} />
         <Route path="patient-balance"      element={<PatientBalance      />} />

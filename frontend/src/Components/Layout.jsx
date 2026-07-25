@@ -5,7 +5,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import RealTimeIndicator from './RealTimeIndicator';
 import { useState, Suspense } from 'react';
-import { MdDashboard,MdReceipt,MdFolderOpen, MdSupportAgent,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning, MdLocalHotel, MdLocalHospital, MdBloodtype, MdImage, MdFavorite, MdAccountBox, MdShield, MdAttachMoney, MdWhatsapp } from 'react-icons/md';
+import { MdDashboard,MdReceipt,MdFolderOpen, MdSupportAgent,MdAutoAwesome,MdCalendarToday,MdStorefront,MdScience, MdMedicalServices,MdAssignment, MdStar, MdAdminPanelSettings, MdPeople, MdBackup, MdAccountBalance, MdBarChart, MdSettings, MdLogout, MdSunny, MdDarkMode, MdMenu, MdClose, MdShoppingCart, MdHistory, MdWarning, MdLocalHotel, MdLocalHospital, MdBloodtype, MdImage, MdFavorite, MdAccountBox, MdShield, MdAttachMoney, MdWhatsapp, MdMergeType, MdCameraAlt } from 'react-icons/md';
 import NotificationCenter from './NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import Loader from './Loader';
@@ -58,6 +58,7 @@ export default function Layout() {
     { to: '/app/feedback',        icon: <MdStar />,             label: 'Feedback'        },
     { to: '/app/booking',         icon: <MdCalendarToday />,    label: 'Online Booking'  },
     { to: '/app/patient-matching',icon: <MdMergeType />,        label: 'Deduplication'   },
+    { to: '/app/prescription-ocr',icon: <MdCameraAlt />,        label: 'Rx OCR Scanner'  },
   ];
 
   const alertItems = [
