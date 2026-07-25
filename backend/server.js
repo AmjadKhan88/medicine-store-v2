@@ -59,6 +59,8 @@ const { startExpiryDigestJob } =   require('./jobs/expiryDigest');
 const { protect }              =   require('./middleware/auth');
 const { requireSubscription }  =   require('./middleware/checkSubscription');
 const matchCtrl                =   require('./controllers/patientMatchController');
+const upload                   =   require('./middleware/upload');
+const ocrCtrl                  =   require('./controllers/ocrController');
 
 
 const app = express();
@@ -203,6 +205,9 @@ app.use('/api/booking',           bookingRoutes);
 app.get('/api/patient-match',             protect, requireSubscription, matchCtrl.findDuplicates);
 app.get('/api/patient-match/:patientId',  protect, requireSubscription, matchCtrl.findForPatient);
 app.post('/api/patient-match/merge',      protect, requireSubscription, matchCtrl.merge);
+
+/* ── Prescription OCR ── */
+app.post('/api/ocr/prescription', protect, requireSubscription, upload.single('image'), ocrCtrl.scanPrescription);
 
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER
