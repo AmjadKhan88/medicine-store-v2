@@ -214,7 +214,8 @@ app.post('/api/ocr/prescription', protect, requireSubscription, upload.single('i
 /* ── AI Diagnosis Assistant ── */
 app.get('/api/diagnosis',           protect, requireSubscription, aiLimiter, diagnosisCtrl.getSessions);
 app.get('/api/diagnosis/:id',       protect, requireSubscription, diagnosisCtrl.getSession);
-app.post('/api/diagnosis/analyze',  protect, requireSubscription, aiLimiter, diagnosisCtrl.analyze);
+// app.post('/api/diagnosis/analyze',  protect, requireSubscription, aiLimiter, diagnosisCtrl.analyze);
+app.post('/api/diagnosis/analyze',  protect, requireSubscription, diagnosisCtrl.analyze);
 app.post('/api/diagnosis/followup', protect, requireSubscription, aiLimiter, diagnosisCtrl.followUp);
 app.delete('/api/diagnosis/:id',    protect, requireSubscription, diagnosisCtrl.deleteSession);
 
