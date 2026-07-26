@@ -186,7 +186,7 @@ Return ONLY this JSON structure:
 
     /* ── Call Gemini ── */
     const model = genAI.getGenerativeModel({
-      model:          'gemini-1.5-flash',
+      model:          'gemini-2.5-flash',
       systemInstruction: SYSTEM_PROMPT,
     });
 
@@ -262,7 +262,7 @@ exports.followUp = async (req, res) => {
     if (!session) return res.status(404).json({ success: false, message: 'Session not found' });
 
     const model = genAI.getGenerativeModel({
-      model:             'gemini-1.5-flash',
+      model:             'gemini-2.5-flash',
       systemInstruction: SYSTEM_PROMPT,
     });
 
