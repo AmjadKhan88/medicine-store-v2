@@ -59,6 +59,7 @@ export default function Layout() {
     { to: '/app/booking',         icon: <MdCalendarToday />,    label: 'Online Booking'  },
     { to: '/app/patient-matching',icon: <MdMergeType />,        label: 'Deduplication'   },
     { to: '/app/prescription-ocr',icon: <MdCameraAlt />,        label: 'Rx OCR Scanner'  },
+    { to: '/app/diagnosis',       icon: <MdLocalHospital />,    label: 'AI Diagnosis'    },
   ];
 
   const alertItems = [
