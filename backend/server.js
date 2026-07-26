@@ -61,6 +61,8 @@ const { requireSubscription }  =   require('./middleware/checkSubscription');
 const matchCtrl                =   require('./controllers/patientMatchController');
 const upload                   =   require('./middleware/upload');
 const ocrCtrl                  =   require('./controllers/ocrController');
+const diagnosisCtrl            =   require('./controllers/diagnosisController');
+
 
 
 const app = express();
@@ -208,6 +210,13 @@ app.post('/api/patient-match/merge',      protect, requireSubscription, matchCtr
 
 /* ── Prescription OCR ── */
 app.post('/api/ocr/prescription', protect, requireSubscription, upload.single('image'), ocrCtrl.scanPrescription);
+
+/* ── AI Diagnosis Assistant ── */
+app.get('/api/diagnosis',           protect, requireSubscription, aiLimiter, diagnosisCtrl.getSessions);
+app.get('/api/diagnosis/:id',       protect, requireSubscription, diagnosisCtrl.getSession);
+app.post('/api/diagnosis/analyze',  protect, requireSubscription, aiLimiter, diagnosisCtrl.analyze);
+app.post('/api/diagnosis/followup', protect, requireSubscription, aiLimiter, diagnosisCtrl.followUp);
+app.delete('/api/diagnosis/:id',    protect, requireSubscription, diagnosisCtrl.deleteSession);
 
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER
