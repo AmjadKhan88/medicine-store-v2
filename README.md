@@ -86,7 +86,7 @@ MediStore is a **multi-tenant SaaS pharmacy management system** designed specifi
 - 🔄 **Real-time** updates via Socket.io
 - 🤖 **AI-powered** drug interaction checking and medicine suggestions
 - 🔒 **Multi-tenant** — complete data isolation per store
-- 🇵🇰 **Pakistan-first** — JazzCash, EasyPaisa, Urdu-friendly
+- 🇵🇰 **Pakistan-first** — JazzCash, EasyPaisa, Urdu-friendly,
 
 ---
 
