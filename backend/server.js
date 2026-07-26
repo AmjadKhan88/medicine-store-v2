@@ -212,7 +212,8 @@ app.post('/api/patient-match/merge',      protect, requireSubscription, matchCtr
 app.post('/api/ocr/prescription', protect, requireSubscription, upload.single('image'), ocrCtrl.scanPrescription);
 
 /* ── AI Diagnosis Assistant ── */
-app.get('/api/diagnosis',           protect, requireSubscription, aiLimiter, diagnosisCtrl.getSessions);
+// app.get('/api/diagnosis',           protect, requireSubscription, aiLimiter, diagnosisCtrl.getSessions);
+app.post('/api/diagnosis/analyze',  protect, requireSubscription, diagnosisCtrl.analyze);
 app.get('/api/diagnosis/:id',       protect, requireSubscription, diagnosisCtrl.getSession);
 app.post('/api/diagnosis/analyze',  protect, requireSubscription, aiLimiter, diagnosisCtrl.analyze);
 app.post('/api/diagnosis/followup', protect, requireSubscription, aiLimiter, diagnosisCtrl.followUp);

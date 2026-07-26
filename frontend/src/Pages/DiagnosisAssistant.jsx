@@ -305,6 +305,259 @@ function TreatmentSection({ treatment }) {
 }
 
 /* ════════════════════════════════
+   FOLLOW-UP RESPONSE RENDERER
+════════════════════════════════ */
+function FollowUpRenderer({ text }) {
+  // If it's JSON, parse and render structured
+  let parsed = null;
+  try {
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+  } catch {}
+
+  if (parsed) return <StructuredFollowUp data={parsed} />;
+
+  // Plain text rendering with markdown-lite formatting
+  const lines = text.split('\n');
+  return (
+    <div style={{ fontSize: 13, lineHeight: 1.8, color: 'var(--text-primary)' }}>
+      {lines.map((line, i) => {
+        const trimmed = line.trim();
+        if (!trimmed) return <div key={i} style={{ height: 8 }} />;
+
+        // ## Heading
+        if (trimmed.startsWith('## ')) {
+          return (
+            <div key={i} style={{ fontWeight: 800, fontSize: 15, color: 'var(--accent)', marginTop: 14, marginBottom: 6, paddingBottom: 4, borderBottom: '1px solid var(--border)' }}>
+              {trimmed.slice(3)}
+            </div>
+          );
+        }
+
+        // ### Sub-heading
+        if (trimmed.startsWith('### ')) {
+          return (
+            <div key={i} style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)', marginTop: 10, marginBottom: 4 }}>
+              {trimmed.slice(4)}
+            </div>
+          );
+        }
+
+        // Numbered list: 1. 2. 3.
+        const numbered = trimmed.match(/^(\d+)\.\s+(.+)/);
+        if (numbered) {
+          return (
+            <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 6, alignItems: 'flex-start' }}>
+              <span style={{ background: 'var(--accent)', color: '#fff', borderRadius: '50%', width: 20, height: 20, fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                {numbered[1]}
+              </span>
+              <span>{renderInline(numbered[2])}</span>
+            </div>
+          );
+        }
+
+        // Bullet: • - *
+        if (trimmed.startsWith('• ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+          const content = trimmed.slice(2);
+          return (
+            <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 5, alignItems: 'flex-start', paddingLeft: 8 }}>
+              <span style={{ color: 'var(--accent)', fontWeight: 900, flexShrink: 0, marginTop: 2 }}>•</span>
+              <span>{renderInline(content)}</span>
+            </div>
+          );
+        }
+
+        // Warning/alert line
+        if (trimmed.startsWith('⚠️') || trimmed.startsWith('🚨') || trimmed.startsWith('❗')) {
+          return (
+            <div key={i} style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 8, padding: '8px 12px', marginBottom: 8, fontSize: 13, color: '#92400e' }}>
+              {renderInline(trimmed)}
+            </div>
+          );
+        }
+
+        // Important/note line
+        if (trimmed.startsWith('✅') || trimmed.startsWith('✓') || trimmed.startsWith('Note:') || trimmed.startsWith('NOTE:')) {
+          return (
+            <div key={i} style={{ background: '#f0fdf4', borderRadius: 8, padding: '6px 12px', marginBottom: 6, fontSize: 13, color: '#166534' }}>
+              {renderInline(trimmed)}
+            </div>
+          );
+        }
+
+        // Regular paragraph
+        return (
+          <div key={i} style={{ marginBottom: 6 }}>
+            {renderInline(trimmed)}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ── Inline bold/italic rendering ── */
+function renderInline(text) {
+  // Split on **bold** and *italic* markers
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={i}>{part.slice(1, -1)}</em>;
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
+/* ── Structured JSON follow-up renderer ── */
+function StructuredFollowUp({ data }) {
+  const renderValue = (val, depth = 0) => {
+    if (val === null || val === undefined) return <span className="text-muted">—</span>;
+    if (typeof val === 'boolean') return <span style={{ color: val ? '#10b981' : '#ef4444', fontWeight: 700 }}>{val ? 'Yes' : 'No'}</span>;
+    if (typeof val === 'string') return <span style={{ lineHeight: 1.7 }}>{val}</span>;
+    if (typeof val === 'number') return <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{val}</span>;
+
+    if (Array.isArray(val)) {
+      return (
+        <ul style={{ margin: '4px 0', paddingLeft: depth > 0 ? 16 : 0, listStyle: 'none' }}>
+          {val.map((item, i) => (
+            <li key={i} style={{ display: 'flex', gap: 8, marginBottom: 5, alignItems: 'flex-start' }}>
+              <span style={{ color: 'var(--accent)', fontWeight: 900, flexShrink: 0, marginTop: 2 }}>•</span>
+              <span style={{ fontSize: 13, lineHeight: 1.6 }}>{renderValue(item, depth + 1)}</span>
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    if (typeof val === 'object') {
+      return (
+        <div style={{ paddingLeft: depth > 0 ? 12 : 0 }}>
+          {Object.entries(val).map(([k, v]) => {
+            if (k === 'disclaimer') return null; // render disclaimer separately
+            const label = k
+              .replace(/([A-Z])/g, ' $1')
+              .replace(/_/g, ' ')
+              .replace(/^./, s => s.toUpperCase())
+              .trim();
+
+            const isSection = typeof v === 'object' && !Array.isArray(v) && v !== null;
+            const isArray   = Array.isArray(v);
+
+            return (
+              <div key={k} style={{ marginBottom: isSection ? 14 : 8 }}>
+                <div style={{
+                  fontWeight: 700,
+                  fontSize:   isSection ? 14 : 12,
+                  color:      isSection ? 'var(--accent)' : 'var(--text-muted)',
+                  marginBottom: 4,
+                  textTransform: isSection ? 'none' : 'uppercase',
+                  letterSpacing: isSection ? 0 : 0.5,
+                  paddingBottom: isSection ? 4 : 0,
+                  borderBottom:  isSection ? '1px solid var(--border)' : 'none',
+                }}>
+                  {label}
+                </div>
+                <div style={{ fontSize: 13, lineHeight: 1.7 }}>
+                  {renderValue(v, depth + 1)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+    return <span>{String(val)}</span>;
+  };
+
+  // Special case: dietary advice structure (most common)
+  if (data.dietaryAdvice) {
+    const { whatToEat, whatToIgnoreOrAvoid } = data.dietaryAdvice;
+    return (
+      <div>
+        {whatToEat?.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontWeight: 800, fontSize: 14, color: '#10b981', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ background: '#d1fae5', borderRadius: 8, padding: '4px 10px' }}>✅ What to Eat</span>
+            </div>
+            {whatToEat.map((cat, i) => (
+              <div key={i} style={{ marginBottom: 12, background: '#f0fdf4', borderRadius: 10, padding: '10px 14px' }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: '#166534', marginBottom: 6 }}>🥗 {cat.category}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
+                  {cat.items?.map((item, j) => (
+                    <span key={j} style={{ background: '#dcfce7', color: '#15803d', padding: '3px 10px', borderRadius: 99, fontSize: 12, fontWeight: 600 }}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+                {cat.rationale && (
+                  <div style={{ fontSize: 11, color: '#166534', fontStyle: 'italic', marginTop: 4 }}>
+                    💡 {cat.rationale}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {whatToIgnoreOrAvoid?.length > 0 && (
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontWeight: 800, fontSize: 14, color: '#ef4444', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ background: '#fee2e2', borderRadius: 8, padding: '4px 10px' }}>❌ Foods to Avoid</span>
+            </div>
+            {whatToIgnoreOrAvoid.map((cat, i) => (
+              <div key={i} style={{ marginBottom: 10, background: '#fff5f5', borderRadius: 10, padding: '10px 14px' }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: '#dc2626', marginBottom: 6 }}>🚫 {cat.category}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
+                  {cat.items?.map((item, j) => (
+                    <span key={j} style={{ background: '#fecaca', color: '#dc2626', padding: '3px 10px', borderRadius: 99, fontSize: 12, fontWeight: 600 }}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+                {cat.rationale && (
+                  <div style={{ fontSize: 11, color: '#b91c1c', fontStyle: 'italic', marginTop: 4 }}>
+                    ⚠️ {cat.rationale}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {data.pakistanSpecificNotes && (
+          <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 10, padding: '10px 14px', marginBottom: 10 }}>
+            <div style={{ fontWeight: 700, fontSize: 12, color: '#92400e', marginBottom: 4 }}>🇵🇰 Pakistan-Specific Notes</div>
+            <div style={{ fontSize: 13, color: '#78350f', lineHeight: 1.7 }}>{data.pakistanSpecificNotes}</div>
+          </div>
+        )}
+
+        {data.disclaimer && (
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', marginTop: 8, textAlign: 'center' }}>
+            ⚕️ {data.disclaimer}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Generic structured JSON fallback
+  return (
+    <div style={{ fontSize: 13 }}>
+      {renderValue(data)}
+      {data.disclaimer && (
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--border)', textAlign: 'center' }}>
+          ⚕️ {data.disclaimer}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+/* ════════════════════════════════
    ANALYSIS RESULT VIEW
 ════════════════════════════════ */
 function AnalysisView({ analysis, sessionId, onFollowUp, onNewCase }) {
@@ -396,11 +649,14 @@ function AnalysisView({ analysis, sessionId, onFollowUp, onNewCase }) {
         </div>
 
         {followUpRes && (
-          <div ref={chatRef} style={{ background:'var(--bg-tertiary)', borderRadius:12, padding:'14px 16px', marginBottom:12, fontSize:13, lineHeight:1.8, whiteSpace:'pre-wrap' }}>
-            <div style={{ fontWeight:700, color:'var(--accent)', marginBottom:6 }}>🤖 AI Response:</div>
-            {followUpRes}
+        <div ref={chatRef} style={{ background:'var(--bg-tertiary)', borderRadius:12, padding:'16px 18px', marginBottom:12 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10, paddingBottom:8, borderBottom:'1px solid var(--border)' }}>
+            <span style={{ fontSize:18 }}>🤖</span>
+            <span style={{ fontWeight:700, color:'var(--accent)', fontSize:14 }}>AI Clinical Response</span>
           </div>
-        )}
+          <FollowUpRenderer text={followUpRes} />
+        </div>
+      )}
 
         <div style={{ display:'flex', gap:8 }}>
           <input

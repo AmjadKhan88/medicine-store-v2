@@ -78,19 +78,19 @@ exports.analyze = async (req, res) => {
     /* ── Build clinical context ── */
     const clinicalData = {
       patient: {
-        age:     patientAge,
-        gender:  patientGender || 'Unknown',
-        name:    patientName   || 'Anonymous',
+        age: patientAge,
+        gender: patientGender || 'Unknown',
+        name: patientName || 'Anonymous',
       },
       chiefComplaint,
-      symptoms:            symptoms || [],
-      duration:            duration || '',
-      vitals:              vitals   || {},
-      labResults:          labResults || '',
-      existingConditions:  existingConditions || [],
-      currentMedications:  currentMedications || [],
-      allergies:           allergies || [],
-      additionalHistory:   additionalHistory || '',
+      symptoms: symptoms || [],
+      duration: duration || '',
+      vitals: vitals || {},
+      labResults: labResults || '',
+      existingConditions: existingConditions || [],
+      currentMedications: currentMedications || [],
+      allergies: allergies || [],
+      additionalHistory: additionalHistory || '',
     };
 
     /* ── Build conversation history ── */
@@ -115,7 +115,7 @@ SYMPTOMS:
 ${clinicalData.symptoms.length ? clinicalData.symptoms.map(s => `• ${s}`).join('\n') : '• Not specified'}
 
 VITALS:
-${Object.entries(clinicalData.vitals).filter(([,v])=>v).map(([k,v]) => `• ${k}: ${v}`).join('\n') || '• Not recorded'}
+${Object.entries(clinicalData.vitals).filter(([, v]) => v).map(([k, v]) => `• ${k}: ${v}`).join('\n') || '• Not recorded'}
 
 LAB RESULTS:
 ${clinicalData.labResults || 'None provided'}
@@ -185,28 +185,54 @@ Return ONLY this JSON structure:
 }`;
 
     /* ── Call Gemini ── */
-    const model = genAI.getGenerativeModel({
-      model:          'gemini-2.5-flash',
-      systemInstruction: SYSTEM_PROMPT,
-    });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-    const chat = model.startChat({
-      history: history.map(h => ({
-        role:  h.role,
-        parts: [{ text: h.content }],
-      })),
-    });
+    /* ── Build contents array (system + prior history + new message) ── */
+    const contents = [];
 
-    const result   = await chat.sendMessage(userMessage);
-    const rawText  = result.response.text().trim();
+    // Inject system prompt as first user turn if no history
+    if (history.length === 0) {
+      contents.push({
+        role: 'user',
+        parts: [{ text: `SYSTEM INSTRUCTIONS:\n${SYSTEM_PROMPT}\n\n---\n\n${userMessage}` }],
+      });
+    } else {
+      // Replay prior conversation turns
+      history.forEach(h => {
+        contents.push({ role: h.role, parts: [{ text: h.content }] });
+      });
+      // New user turn (system already injected in first turn)
+      contents.push({ role: 'user', parts: [{ text: userMessage }] });
+    }
 
-    /* ── Parse JSON ── */
-    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('Gemini returned invalid format');
+    const result = await model.generateContent({ contents });
+    const rawText = result.response.text().trim();
 
-    const analysis = JSON.parse(jsonMatch[0]);
+    /* ── Robust JSON extraction (handles ```json ... ``` wrapping) ── */
+    let jsonStr = rawText;
+
+    // Strip markdown code fences if present
+    const fenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fenceMatch) jsonStr = fenceMatch[1].trim();
+
+    // Extract first {...} block
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error('[DiagnosisAI] Raw Gemini response:', rawText.slice(0, 500));
+      throw new Error('AI returned an invalid format. Please try again.');
+    }
+
+    let analysis;
+    try {
+      analysis = JSON.parse(jsonMatch[0]);
+    } catch (parseErr) {
+      console.error('[DiagnosisAI] JSON parse error:', parseErr.message);
+      console.error('[DiagnosisAI] Attempted to parse:', jsonMatch[0].slice(0, 500));
+      throw new Error('AI response could not be parsed. Please try again.');
+    }
 
     /* ── Save / update session ── */
+    // Store only the new turns (not the full rebuilt contents array)
     const newHistory = [
       ...history,
       { role: 'user', content: userMessage, timestamp: new Date() },
@@ -216,30 +242,30 @@ Return ONLY this JSON structure:
     let session;
     if (existingSession) {
       existingSession.conversationHistory = newHistory;
-      existingSession.lastAnalysis        = analysis;
-      existingSession.clinicalData        = clinicalData;
-      existingSession.updatedAt           = new Date();
+      existingSession.lastAnalysis = analysis;
+      existingSession.clinicalData = clinicalData;
+      existingSession.updatedAt = new Date();
       await existingSession.save();
       session = existingSession;
     } else {
       session = await DiagnosisSession.create({
-        storeId:   req.storeId,
-        patient:   patientId || null,
+        storeId: req.storeId,
+        patient: patientId || null,
         patientName: clinicalData.patient.name,
-        patientAge:  clinicalData.patient.age,
+        patientAge: clinicalData.patient.age,
         patientGender: clinicalData.patient.gender,
         chiefComplaint,
         clinicalData,
-        lastAnalysis:        analysis,
+        lastAnalysis: analysis,
         conversationHistory: newHistory,
-        doctorId:            req.user._id,
-        doctorName:          req.user.name,
-        hasRedFlags:         (analysis.redFlags?.length > 0),
-        hasReferral:         (analysis.treatment?.referral?.needed === true),
+        doctorId: req.user._id,
+        doctorName: req.user.name,
+        hasRedFlags: (analysis.redFlags?.length > 0),
+        hasReferral: (analysis.treatment?.referral?.needed === true),
       });
     }
 
-    res.json({ success: true, analysis, sessionId: session._id, message: 'Analysis complete' });
+    res.status(200).json({ success: true, analysis, sessionId: session._id, message: 'Analysis complete' });
   } catch (err) {
     if (err.message?.includes('API_KEY')) {
       return res.status(500).json({ success: false, message: 'Gemini API key not configured' });
@@ -261,24 +287,37 @@ exports.followUp = async (req, res) => {
     const session = await DiagnosisSession.findOne({ _id: sessionId, storeId: req.storeId });
     if (!session) return res.status(404).json({ success: false, message: 'Session not found' });
 
-    const model = genAI.getGenerativeModel({
-      model:             'gemini-2.5-flash',
-      systemInstruction: SYSTEM_PROMPT,
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    // Rebuild conversation as contents array
+    const priorHistory = session.conversationHistory || [];
+    const contents = priorHistory.map(h => ({
+      role: h.role,
+      parts: [{ text: h.content }],
+    }));
+    // Append follow-up with explicit plain-text instruction
+    contents.push({
+      role: 'user',
+      parts: [{
+        text: `${question}
+
+IMPORTANT: For this follow-up question, respond in clear, professional plain text (NOT JSON). 
+Use simple formatting:
+- Use **bold** for important terms or drug names
+- Use bullet points with • for lists
+- Use numbered lists (1. 2. 3.) for steps or priorities
+- Use headings with ## for sections if needed
+- Keep language clear and clinical but readable
+Do NOT wrap the response in JSON or code blocks.`,
+      }],
     });
 
-    const chat = model.startChat({
-      history: (session.conversationHistory || []).map(h => ({
-        role:  h.role,
-        parts: [{ text: h.content }],
-      })),
-    });
-
-    const result  = await chat.sendMessage(question);
+    const result = await model.generateContent({ contents });
     const rawText = result.response.text().trim();
 
     session.conversationHistory.push(
-      { role: 'user',  content: question, timestamp: new Date() },
-      { role: 'model', content: rawText,  timestamp: new Date() }
+      { role: 'user', content: question, timestamp: new Date() },
+      { role: 'model', content: rawText, timestamp: new Date() }
     );
     await session.save();
 
