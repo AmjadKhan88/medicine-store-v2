@@ -7,7 +7,7 @@ exports.scanPrescription = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ success: false, message: 'Image file required' });
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `You are a medical prescription parser for a Pakistani pharmacy management system.
 Analyze this prescription image and extract ALL medicine details.
