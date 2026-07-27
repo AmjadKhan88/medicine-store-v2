@@ -9,23 +9,23 @@ import API from '../utils/api';
 import { useSocket } from '../context/SocketContext';
 
 /* ── helpers ── */
-const todayStr  = () => new Date().toISOString().slice(0, 10);
-const fmtTime   = d  => d ? new Date(d).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' }) : '—';
-const fmtDate   = d  => d ? new Date(d).toLocaleDateString('en-PK', { day: '2-digit', month: 'short' }) : '—';
-const daysSince = d  => d ? Math.floor((new Date() - new Date(d)) / 86400000) : 0;
+const todayStr = () => new Date().toISOString().slice(0, 10);
+const fmtTime = d => d ? new Date(d).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' }) : '—';
+const fmtDate = d => d ? new Date(d).toLocaleDateString('en-PK', { day: '2-digit', month: 'short' }) : '—';
+const daysSince = d => d ? Math.floor((new Date() - new Date(d)) / 86400000) : 0;
 
 const DOSE_CFG = {
   Pending: { bg: '#f1f5f9', color: '#64748b', border: '#cbd5e1' },
-  Given:   { bg: '#d1fae5', color: '#10b981', border: '#6ee7b7' },
+  Given: { bg: '#d1fae5', color: '#10b981', border: '#6ee7b7' },
   Skipped: { bg: '#fef3c7', color: '#f59e0b', border: '#fcd34d' },
   Refused: { bg: '#fee2e2', color: '#ef4444', border: '#fca5a5' },
-  Hold:    { bg: '#f3e8ff', color: '#8b5cf6', border: '#c4b5fd' },
+  Hold: { bg: '#f3e8ff', color: '#8b5cf6', border: '#c4b5fd' },
 };
 
 const URGENCY_CFG = {
   Routine: { color: '#64748b', bg: '#f1f5f9' },
-  Urgent:  { color: '#f59e0b', bg: '#fef3c7' },
-  STAT:    { color: '#ef4444', bg: '#fee2e2' },
+  Urgent: { color: '#f59e0b', bg: '#fef3c7' },
+  STAT: { color: '#ef4444', bg: '#fee2e2' },
 };
 
 /* ── Check if a dose is overdue ── */
@@ -67,12 +67,12 @@ function VitalsForm({ admissionId, patientName, onSaved }) {
   };
 
   const FIELDS = [
-    { key: 'bp',          label: 'Blood Pressure', placeholder: '120/80',   unit: 'mmHg' },
-    { key: 'pulse',       label: 'Pulse',          placeholder: '72',        unit: 'bpm'  },
-    { key: 'temperature', label: 'Temperature',    placeholder: '37.0',      unit: '°C'   },
-    { key: 'spo2',        label: 'SpO2',           placeholder: '98',        unit: '%'    },
-    { key: 'rbs',         label: 'Blood Sugar',    placeholder: '110',       unit: 'mg/dL'},
-    { key: 'weight',      label: 'Weight',         placeholder: '65',        unit: 'kg'   },
+    { key: 'bp', label: 'Blood Pressure', placeholder: '120/80', unit: 'mmHg' },
+    { key: 'pulse', label: 'Pulse', placeholder: '72', unit: 'bpm' },
+    { key: 'temperature', label: 'Temperature', placeholder: '37.0', unit: '°C' },
+    { key: 'spo2', label: 'SpO2', placeholder: '98', unit: '%' },
+    { key: 'rbs', label: 'Blood Sugar', placeholder: '110', unit: 'mg/dL' },
+    { key: 'weight', label: 'Weight', placeholder: '65', unit: 'kg' },
   ];
 
   return (
@@ -106,9 +106,9 @@ function VitalsForm({ admissionId, patientName, onSaved }) {
    MEDICINE REQUEST MODAL
 ════════════════════════════════ */
 function MedRequestModal({ admissionId, patientName, onClose, onRequested }) {
-  const [medicines, setMedicines]   = useState([]);
-  const [mSearch,   setMSearch]     = useState('');
-  const [selected,  setSelected]    = useState(null);
+  const [medicines, setMedicines] = useState([]);
+  const [mSearch, setMSearch] = useState('');
+  const [selected, setSelected] = useState(null);
   const [form, setForm] = useState({
     medicineName: '', genericName: '', quantity: '1',
     dosage: '', route: 'Oral', urgency: 'Routine', notes: '',
@@ -120,7 +120,7 @@ function MedRequestModal({ admissionId, patientName, onClose, onRequested }) {
     if (mSearch.length < 2) { setMedicines([]); return; }
     API.get('/medicines', { params: { search: mSearch, limit: 6 } })
       .then(({ data }) => setMedicines(data.medicines || []))
-      .catch(() => {});
+      .catch(() => { });
   }, [mSearch]);
 
   const handleRequest = async () => {
@@ -167,9 +167,9 @@ function MedRequestModal({ admissionId, patientName, onClose, onRequested }) {
             </div>
           ) : (
             <div style={{ position: 'relative' }}>
-              <div className="input-group">
-                <MdSearch className="input-icon" />
-                <input className="form-control" placeholder="Search inventory or type name..."
+              <div className="search-box">
+                <MdSearch className="search-icon" />
+                <input placeholder="Search inventory or type name..."
                   value={mSearch} onChange={e => setMSearch(e.target.value)} autoFocus />
               </div>
               <input className="form-control" style={{ marginTop: 6 }}
@@ -219,7 +219,7 @@ function MedRequestModal({ admissionId, patientName, onClose, onRequested }) {
                   style={{
                     flex: 1, padding: '10px 0', borderRadius: 10, cursor: 'pointer',
                     background: form.urgency === u ? cfg.color : cfg.bg,
-                    color:      form.urgency === u ? '#fff'    : cfg.color,
+                    color: form.urgency === u ? '#fff' : cfg.color,
                     border: `2px solid ${cfg.color}`,
                     fontWeight: 700, fontSize: 13,
                   }}>
@@ -251,12 +251,12 @@ function MedRequestModal({ admissionId, patientName, onClose, onRequested }) {
    PATIENT DETAIL PANEL
 ════════════════════════════════ */
 function PatientPanel({ admissionId, onClose }) {
-  const [detail,    setDetail]    = useState(null);
-  const [vitals,    setVitals]    = useState([]);
-  const [activeTab, setTab]       = useState('mar');
-  const [marDate,   setMARDate]   = useState(todayStr());
-  const [loading,   setLoading]   = useState(true);
-  const [reqModal,  setReqModal]  = useState(false);
+  const [detail, setDetail] = useState(null);
+  const [vitals, setVitals] = useState([]);
+  const [activeTab, setTab] = useState('mar');
+  const [marDate, setMARDate] = useState(todayStr());
+  const [loading, setLoading] = useState(true);
+  const [reqModal, setReqModal] = useState(false);
 
   const { on } = useSocket() || {};
 
@@ -310,8 +310,8 @@ function PatientPanel({ admissionId, onClose }) {
 
   const { admission, mar, requests = [] } = detail;
   const patient = admission?.patient;
-  const doses   = mar?.doses || [];
-  const now     = new Date();
+  const doses = mar?.doses || [];
+  const now = new Date();
 
   // Group doses by time slot
   const timeGroups = {};
@@ -322,8 +322,8 @@ function PatientPanel({ admissionId, onClose }) {
   });
 
   const TABS = [
-    { id: 'mar',      label: `MAR (${doses.filter(d => d.status === 'Pending').length} pending)` },
-    { id: 'vitals',   label: 'Vitals' },
+    { id: 'mar', label: `MAR (${doses.filter(d => d.status === 'Pending').length} pending)` },
+    { id: 'vitals', label: 'Vitals' },
     { id: 'requests', label: `Requests (${requests.length})` },
   ];
 
@@ -359,7 +359,7 @@ function PatientPanel({ admissionId, onClose }) {
         {vitals.length > 0 && (
           <div style={{ display: 'flex', gap: 12, marginTop: 10, flexWrap: 'wrap' }}>
             {[
-              { label: 'BP',   value: vitals[0].bp },
+              { label: 'BP', value: vitals[0].bp },
               { label: 'Pulse', value: vitals[0].pulse ? `${vitals[0].pulse} bpm` : null },
               { label: 'Temp', value: vitals[0].temperature ? `${vitals[0].temperature}°C` : null },
               { label: 'SpO2', value: vitals[0].spo2 ? `${vitals[0].spo2}%` : null, warn: vitals[0].spo2 < 90 },
@@ -414,7 +414,7 @@ function PatientPanel({ admissionId, onClose }) {
                   const [h, m] = time !== 'PRN' ? time.split(':').map(Number) : [null, null];
                   const scheduled = h !== null ? new Date() : null;
                   if (scheduled) scheduled.setHours(h, m, 0, 0);
-                  const isPast     = scheduled && scheduled < now;
+                  const isPast = scheduled && scheduled < now;
                   const hasOverdue = timeDoses.some(d => d.status === 'Pending') && isPast;
 
                   return (
@@ -425,7 +425,7 @@ function PatientPanel({ admissionId, onClose }) {
                       }}>
                         <div style={{
                           background: hasOverdue ? '#fee2e2' : 'var(--bg-tertiary)',
-                          color:      hasOverdue ? '#ef4444' : 'var(--text-muted)',
+                          color: hasOverdue ? '#ef4444' : 'var(--text-muted)',
                           padding: '3px 10px', borderRadius: 8,
                           fontSize: 12, fontWeight: 700,
                           display: 'flex', alignItems: 'center', gap: 4,
@@ -436,13 +436,13 @@ function PatientPanel({ admissionId, onClose }) {
                       </div>
 
                       {timeDoses.map(dose => {
-                        const cfg      = DOSE_CFG[dose.status] || DOSE_CFG.Pending;
-                        const overdue  = isDoseOverdue(dose);
-                        const isPending= dose.status === 'Pending';
+                        const cfg = DOSE_CFG[dose.status] || DOSE_CFG.Pending;
+                        const overdue = isDoseOverdue(dose);
+                        const isPending = dose.status === 'Pending';
 
                         return (
                           <div key={dose._id} style={{
-                            border:     `1px solid ${overdue ? '#fca5a5' : cfg.border}`,
+                            border: `1px solid ${overdue ? '#fca5a5' : cfg.border}`,
                             borderLeft: `4px solid ${overdue ? '#ef4444' : cfg.color}`,
                             borderRadius: 10, padding: '10px 14px', marginBottom: 6,
                             background: overdue ? '#fff5f5' : cfg.bg,
@@ -516,7 +516,7 @@ function PatientPanel({ admissionId, onClose }) {
                 fetchDetail();
                 API.get(`/nurse/${admissionId}/vitals`)
                   .then(({ data }) => setVitals(data.vitals || []))
-                  .catch(() => {});
+                  .catch(() => { });
               }}
             />
 
@@ -644,13 +644,13 @@ function PatientPanel({ admissionId, onClose }) {
    MAIN PAGE
 ════════════════════════════════ */
 export default function NurseStation() {
-  const [patients,       setPatients]       = useState([]);
-  const [alerts,         setAlerts]         = useState({ overdueDoses: [], pendingRequests: 0, totalOverdue: 0 });
-  const [loading,        setLoading]        = useState(true);
-  const [selectedId,     setSelectedId]     = useState(null);
-  const [search,         setSearch]         = useState('');
-  const [showAlerts,     setShowAlerts]     = useState(false);
-  const [pendingReqCount,setPendingReqCount]= useState(0);
+  const [patients, setPatients] = useState([]);
+  const [alerts, setAlerts] = useState({ overdueDoses: [], pendingRequests: 0, totalOverdue: 0 });
+  const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState(null);
+  const [search, setSearch] = useState('');
+  const [showAlerts, setShowAlerts] = useState(false);
+  const [pendingReqCount, setPendingReqCount] = useState(0);
 
   const { on } = useSocket() || {};
   const timerRef = useRef(null);
@@ -668,7 +668,7 @@ export default function NurseStation() {
       const { data } = await API.get('/nurse/alerts');
       setAlerts(data.alerts || { overdueDoses: [], pendingRequests: 0, totalOverdue: 0 });
       setPendingReqCount(data.alerts?.pendingRequests || 0);
-    } catch {}
+    } catch { }
   }, []);
 
   useEffect(() => {
@@ -706,10 +706,10 @@ export default function NurseStation() {
   const totalOverdue = alerts.totalOverdue || 0;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 0, height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 0, height: 'calc(100vh - 120px)', overflow: 'hidden', margin: '-28px', width: 'calc(100% + 56px)' }}>
 
       {/* ── LEFT: Patient List ── */}
-      <div style={{ borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--bg-secondary)', overflow: 'hidden' }}>
+      <div style={{ borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--bg-secondary)', overflow: 'hidden', minWidth: 0 }}>
         {/* Header */}
         <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -722,7 +722,7 @@ export default function NurseStation() {
                 className="btn btn-sm"
                 style={{
                   background: totalOverdue > 0 ? '#fee2e2' : 'var(--bg-tertiary)',
-                  color:      totalOverdue > 0 ? '#ef4444' : 'var(--text-muted)',
+                  color: totalOverdue > 0 ? '#ef4444' : 'var(--text-muted)',
                   border: `1px solid ${totalOverdue > 0 ? '#fca5a5' : 'var(--border)'}`,
                   display: 'flex', alignItems: 'center', gap: 4, fontSize: 12,
                 }}
@@ -772,9 +772,9 @@ export default function NurseStation() {
           </div>
 
           {/* Search */}
-          <div className="input-group" style={{ marginTop: 10 }}>
-            <MdSearch className="input-icon" style={{ width: 16 }} />
-            <input style={{ fontSize: 13 }} placeholder="Search patient, bed, ward..."
+          <div className="search-box" style={{ marginTop: 10 }}>
+            <MdSearch className="search-icon" size={16} />
+            <input placeholder="Search patient, bed, ward..."
               value={search} onChange={e => setSearch(e.target.value)} />
           </div>
         </div>
@@ -791,8 +791,8 @@ export default function NurseStation() {
             </div>
           ) : (
             filteredPatients.map(p => {
-              const hasOverdue  = p.marSummary?.overdue > 0;
-              const isSelected  = selectedId === p._id;
+              const hasOverdue = p.marSummary?.overdue > 0;
+              const isSelected = selectedId === p._id;
 
               return (
                 <div key={p._id}
@@ -856,7 +856,7 @@ export default function NurseStation() {
       </div>
 
       {/* ── RIGHT: Patient Detail ── */}
-      <div style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', minWidth: 0, background: 'var(--bg-primary)' }}>
         {selectedId ? (
           <PatientPanel
             admissionId={selectedId}
