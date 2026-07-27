@@ -62,6 +62,7 @@ const matchCtrl                =   require('./controllers/patientMatchController
 const upload                   =   require('./middleware/upload');
 const ocrCtrl                  =   require('./controllers/ocrController');
 const diagnosisCtrl            =   require('./controllers/diagnosisController');
+const demandRoutes             =   require('./routes/demand');
 
 
 
@@ -123,7 +124,12 @@ app.use('/api', speedLimiter);
 // Rate limiter — general API
 app.use('/api', apiLimiter);
 
-app.use('/api', timeout(90000)); // 30s max for any request
+// app.use('/api', timeout(90000)); // 30s max for any request
+app.use('/api', (req, res, next) => {
+  // AI routes need more time — Gemini can take 45-90s
+  const isAI = req.path.startsWith('/diagnosis') || req.path.startsWith('/ai') || req.path.startsWith('/ocr');
+  return timeout(isAI ? 120000 : 30000)(req, res, next);
+});
 
 /* ════════════════════════════════
    HEALTH CHECK (no auth/rate limit)
@@ -202,6 +208,7 @@ app.use('/api/payroll',           payrollRoutes);
 app.use('/api/broadcast',         broadcastRoutes);
 app.use('/api/feedback',          feedbackRoutes);
 app.use('/api/booking',           bookingRoutes);
+app.use('/api/demand',            demandRoutes);
 
 /* ── Patient matching (inline routes — no separate file needed) ── */
 app.get('/api/patient-match',             protect, requireSubscription, matchCtrl.findDuplicates);
@@ -214,8 +221,7 @@ app.post('/api/ocr/prescription', protect, requireSubscription, upload.single('i
 /* ── AI Diagnosis Assistant ── */
 app.get('/api/diagnosis',           protect, requireSubscription, aiLimiter, diagnosisCtrl.getSessions);
 app.get('/api/diagnosis/:id',       protect, requireSubscription, diagnosisCtrl.getSession);
-// app.post('/api/diagnosis/analyze',  protect, requireSubscription, aiLimiter, diagnosisCtrl.analyze);
-app.post('/api/diagnosis/analyze',  protect, requireSubscription, diagnosisCtrl.analyze);
+app.post('/api/diagnosis/analyze',  protect, requireSubscription, aiLimiter, diagnosisCtrl.analyze);
 app.post('/api/diagnosis/followup', protect, requireSubscription, aiLimiter, diagnosisCtrl.followUp);
 app.delete('/api/diagnosis/:id',    protect, requireSubscription, diagnosisCtrl.deleteSession);
 
