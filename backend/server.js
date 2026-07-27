@@ -123,7 +123,7 @@ app.use('/api', speedLimiter);
 // Rate limiter — general API
 app.use('/api', apiLimiter);
 
-app.use('/api', timeout(30000)); // 30s max for any request
+app.use('/api', timeout(90000)); // 30s max for any request
 
 /* ════════════════════════════════
    HEALTH CHECK (no auth/rate limit)
