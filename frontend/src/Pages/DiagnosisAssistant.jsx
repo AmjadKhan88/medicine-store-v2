@@ -7,6 +7,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import {useWindowWidth} from '../hooks/useWindowWidth';
 
 /* ── helpers ── */
 const fmtDT = d => d ? new Date(d).toLocaleString('en-PK', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
@@ -85,7 +86,7 @@ function RedFlagsSection({ flags }) {
         {flags.map((f, i) => {
           const cfg = ACTION_CFG[f.action] || ACTION_CFG.Monitor;
           return (
-            <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: '#fff', borderRadius: 10, padding: '10px 14px', border: '1px solid #fda4af' }}>
+            <div key={i} style={{ background: '#fff', borderRadius: 10, padding: '10px 14px', border: '1px solid #fda4af' }}>
               <span style={{ background: cfg.bg, color: cfg.color, padding: '2px 10px', borderRadius: 99, fontSize: 11, fontWeight: 800, flexShrink: 0 }}>
                 {f.action}
               </span>
@@ -566,6 +567,8 @@ function AnalysisView({ analysis, sessionId, onFollowUp, onNewCase }) {
   const [asking, setAsking] = useState(false);
   const chatRef = useRef(null);
 
+  const width = useWindowWidth();
+
   const handleFollowUp = async () => {
     if (!followUpQ.trim()) return;
     setAsking(true);
@@ -609,7 +612,7 @@ function AnalysisView({ analysis, sessionId, onFollowUp, onNewCase }) {
       <RedFlagsSection flags={analysis.redFlags} />
 
       {/* Main grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: width < 801 ? '' : '1fr 1fr', gap: 16 }}>
         <div>
           <DifferentialsSection differentials={analysis.differentials} />
           {analysis.clinicalPearls?.length > 0 && (
