@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   MdAdd, MdClose, MdSearch, MdSkipNext, MdCheck,
-  MdRefresh, MdPeople, MdTimer, MdBarChart,
-  MdPersonOff, MdMedicalServices, MdMonitor,
+  MdRefresh, MdPeople,
+  MdPersonOff, MdMonitor,
   MdPause, MdPlayArrow, MdDelete,
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
-import { useSocket } from '../context/SocketContext';
+// import { useSocket } from '../context/SocketContext';
+import { useSocketEvent } from '../hooks/useSocketEvent';
 
 /* ── helpers ── */
 const todayStr  = () => new Date().toISOString().slice(0, 10);
@@ -307,9 +308,9 @@ export default function OPDQueue() {
   const [showRegister, setShowRegister] = useState(false);
 
   // Sound ref for "called" beep
-  const beepRef = useRef(null);
+  // const beepRef = useRef(null);
 
-  const socket = useSocket?.() || null;
+  // const socket = useSocket?.() || null;
 
   const fetchQueue = useCallback(async () => {
     try {
@@ -328,32 +329,54 @@ export default function OPDQueue() {
   useEffect(() => { fetchQueue(); fetchStats(); }, [fetchQueue, fetchStats]);
 
   // Real-time socket updates
-  useEffect(() => {
-    if (!socket) return;
-    const handleUpdate = (data) => {
-      setQueue(prev => prev ? { ...prev, ...data } : data);
-    };
-    const handleCalled = (data) => {
-      toast(`📢 Calling ${data.displayToken} — ${data.patientName}`, { duration: 4000 });
-      // Play beep
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        [600, 800].forEach((freq, i) => {
-          const o = ctx.createOscillator();
-          o.connect(ctx.destination);
-          o.frequency.value = freq;
-          o.start(ctx.currentTime + i * 0.15);
-          o.stop(ctx.currentTime + i * 0.15 + 0.1);
-        });
-      } catch {}
-    };
-    socket.on('opd:update', handleUpdate);
-    socket.on('opd:called', handleCalled);
-    return () => {
-      socket.off('opd:update', handleUpdate);
-      socket.off('opd:called', handleCalled);
-    };
-  }, [socket]);
+  // useEffect(() => {
+  //   if (!socket) return;
+  //   const handleUpdate = (data) => {
+  //     setQueue(prev => prev ? { ...prev, ...data } : data);
+  //   };
+  //   const handleCalled = (data) => {
+  //     toast(`📢 Calling ${data.displayToken} — ${data.patientName}`, { duration: 4000 });
+  //     // Play beep
+  //     try {
+  //       const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  //       [600, 800].forEach((freq, i) => {
+  //         const o = ctx.createOscillator();
+  //         o.connect(ctx.destination);
+  //         o.frequency.value = freq;
+  //         o.start(ctx.currentTime + i * 0.15);
+  //         o.stop(ctx.currentTime + i * 0.15 + 0.1);
+  //       });
+  //     } catch {}
+  //   };
+  //   socket.on('opd:update', handleUpdate);
+  //   socket.on('opd:called', handleCalled);
+  //   return () => {
+  //     socket.off('opd:update', handleUpdate);
+  //     socket.off('opd:called', handleCalled);
+  //   };
+  // }, [socket]);
+
+
+// Real-time socket updates using the safe hook
+useSocketEvent('opd:update', (data) => {
+  setQueue(prev => prev ? { ...prev, ...data } : data);
+});
+
+useSocketEvent('opd:called', (data) => {
+  toast(`📢 Calling ${data.displayToken} — ${data.patientName}`, { duration: 4000 });
+  // Play beep (copy the AudioContext code from the original)
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [600, 800].forEach((freq, i) => {
+      const o = ctx.createOscillator();
+      o.connect(ctx.destination);
+      o.frequency.value = freq;
+      o.start(ctx.currentTime + i * 0.15);
+      o.stop(ctx.currentTime + i * 0.15 + 0.1);
+    });
+  } catch {}
+});
+
 
   const handleCallNext = async () => {
     try {
