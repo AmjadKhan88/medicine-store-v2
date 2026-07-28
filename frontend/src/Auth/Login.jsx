@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import {assets} from "../assets/assets"
+import { assets } from "../assets/assets"
 import toast from 'react-hot-toast';
 import { MdEmail, MdLock, MdMedicalServices, MdInventory, MdPeople, MdBarChart } from 'react-icons/md';
 import API from '../utils/api';
@@ -10,32 +10,42 @@ export default function Login() {
   const [form, setForm] = useState({});
   const [loading, setLoading] = useState(false);
   const [unverified, setUnverified] = useState('');
-  const [errors,setErrors] = useState(null);
-  const { login } = useAuth();
+  const [errors, setErrors] = useState(null);
+  const [step, setStep] = useState('password');    // 'password' | '2fa'
+  const [tempToken, setTempToken] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const { login, verify2FA } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrors({});
     try {
-
-      const { data } = await API.post('/auth/login', { email: form.email, password: form.password });
-      if (data.success) {
-        login(data.token, data.user); // single call — sets localStorage + React state atomically
-        toast.success('Welcome back!');
-        setErrors(null);
-        navigate('/app');
-      }
-
-    } catch (err) {
-      if (err.response?.data?.code === 'EMAIL_NOT_VERIFIED') {
-        toast.error('Please verify your email first');
-        setUnverified(err.response.data.email);
+      const data = await login(form.email, form.password);
+      if (data.requires2FA) {
+        setTempToken(data.tempToken);
+        setStep('2fa');
       } else {
-        toast.error(err.response?.data?.message || 'Login failed');
-        setErrors(err?.response?.data?.errors || null)
+        navigate('/app/dashboard');
       }
+    } catch (err) {
+      setErrors({ general: err.response?.data?.message || 'Login failed' });
     } finally { setLoading(false); }
+  };
+
+  const handle2FA = async (e) => {
+    e.preventDefault();
+    if (!otpCode.trim()) { setErrors({ otp: 'Enter the 6-digit code' }); return; }
+    setOtpLoading(true);
+    setErrors({});
+    try {
+      await verify2FA(tempToken, otpCode.replace(/\s/g, ''));
+      navigate('/app/dashboard');
+    } catch (err) {
+      setErrors({ otp: err.response?.data?.message || 'Invalid code' });
+    } finally { setOtpLoading(false); }
   };
 
   const features = [
@@ -47,7 +57,7 @@ export default function Login() {
 
   return (
     <div className="auth-page">
-      <div className="auth-left" style={{background:`linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${assets.medi_img}) center/cover`}}>
+      <div className="auth-left" style={{ background: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${assets.medi_img}) center/cover` }}>
         <div style={{ maxWidth: 380, width: '100%' }}>
           <div className="auth-logo">Medi<span>Store</span></div>
           <div className="auth-tagline">Professional Medicine Store Management System</div>
@@ -57,7 +67,7 @@ export default function Login() {
               <span>{f.text}</span>
             </div>
           ))}
-          
+
         </div>
       </div>
       <div className="auth-right">
@@ -71,7 +81,7 @@ export default function Login() {
                 <MdEmail className="input-icon" />
                 <input className="form-control" type="email" placeholder="doctor@medistore.com"
                   value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} required />
-                {errors?.email && <p style={{color:'red',fontSize:'x-small'}}> {errors.email} </p> }
+                {errors?.email && <p style={{ color: 'red', fontSize: 'x-small' }}> {errors.email} </p>}
               </div>
             </div>
             <div className="form-group">
@@ -80,12 +90,56 @@ export default function Login() {
                 <MdLock className="input-icon" />
                 <input className="form-control" type="password" placeholder="••••••••"
                   value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} required />
-                  {errors?.password && <p style={{color:'red',fontSize:'x-small'}}> {errors.password} </p> }
+                {errors?.password && <p style={{ color: 'red', fontSize: 'x-small' }}> {errors.password} </p>}
               </div>
             </div>
-            <button className="btn btn-primary btn-lg w-full" type="submit" disabled={loading} style={{ marginTop: 8 }}>
+            {/* <button className="btn btn-primary btn-lg w-full" type="submit" disabled={loading} style={{ marginTop: 8 }}>
               {loading ? 'Signing in...' : 'Sign In to MediStore'}
-            </button>
+            </button> */}
+            {step === 'password' ? (
+              <button className="btn btn-primary btn-lg w-full" type="submit" disabled={loading} style={{ marginTop: 8 }}>
+                {loading ? 'Logging in...' : 'Login'}
+              </button>
+            ) : (
+              /* ── 2FA Step ── */
+              <div>
+                <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 12, padding: '16px 18px', marginBottom: 16, textAlign: 'center' }}>
+                  <div style={{ fontSize: 32, marginBottom: 6 }}>🔐</div>
+                  <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Two-Factor Authentication</div>
+                  <div style={{ fontSize: 13, color: '#6b7280' }}>
+                    Enter the 6-digit code from your Google Authenticator app, or a recovery code.
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Authenticator Code</label>
+                  <input
+                    className="form-control"
+                    value={otpCode}
+                    onChange={e => setOtpCode(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handle2FA(e)}
+                    placeholder="000 000"
+                    maxLength={10}
+                    autoFocus
+                    style={{ fontSize: 22, textAlign: 'center', letterSpacing: 6, fontWeight: 700 }}
+                  />
+                  {errors.otp && <div className="form-error">{errors.otp}</div>}
+                </div>
+
+                <button
+                  onClick={handle2FA}
+                  disabled={otpLoading || !otpCode.trim()}
+                  style={{ width: '100%', padding: '13px', borderRadius: 12, border: 'none', background: '#0ea5e9', color: '#fff', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10 }}>
+                  {otpLoading ? 'Verifying...' : 'Verify & Login'}
+                </button>
+
+                <button
+                  onClick={() => { setStep('password'); setOtpCode(''); setErrors({}); setTempToken(''); }}
+                  style={{ width: '100%', background: 'none', border: 'none', color: '#6b7280', fontSize: 13, cursor: 'pointer', padding: '6px 0' }}>
+                  ← Back to login
+                </button>
+              </div>
+            )}
           </form>
           {unverified && (
             <div className="alert alert-warning" style={{ marginTop: 12 }}>

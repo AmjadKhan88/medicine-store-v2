@@ -5,6 +5,16 @@ const {
   verifyEmail, resendVerification,
   forgotPassword, resetPassword,
   updateOnboarding,
+  refreshToken,
+  logout,
+  logoutAll,
+  getSessions,
+  setup2FA,
+  confirm2FA,
+  verify2FA,
+  disable2FA,
+  regenRecoveryCodes,
+  get2FAStatus,
 } = require('../controllers/authController');
 
 const { protect } = require('../middleware/auth');
@@ -34,18 +44,18 @@ router.put('/change-password',    protect,     validate(changePasswordSchema),  
 router.patch('/onboarding',       protect,                                        updateOnboarding);
 
 /* ── Refresh & session ── */
-router.post('/refresh',      authController.refreshToken);  // no protect — uses cookie
-router.post('/logout',       protect, authController.logout);
-router.post('/logout-all',   protect, authController.logoutAll);
-router.get('/sessions',      protect, authController.getSessions);
+router.post('/refresh',      refreshToken);  // no protect — uses cookie
+router.post('/logout',       protect, logout);
+router.post('/logout-all',   protect, logoutAll);
+router.get('/sessions',      protect, getSessions);
 
 /* ── 2FA ── */
-router.post('/2fa/setup',    protect, authController.setup2FA);
-router.post('/2fa/confirm',  protect, authController.confirm2FA);
-router.post('/2fa/verify',   authController.verify2FA);        // during login — no protect
-router.post('/2fa/disable',  protect, authController.disable2FA);
-router.post('/2fa/regen',    protect, authController.regenRecoveryCodes);
-router.get('/2fa/status',    protect, authController.get2FAStatus);
+router.post('/2fa/setup',    protect, setup2FA);
+router.post('/2fa/confirm',  protect, confirm2FA);
+router.post('/2fa/verify',   verify2FA);        // during login — no protect
+router.post('/2fa/disable',  protect, disable2FA);
+router.post('/2fa/regen',    protect, regenRecoveryCodes);
+router.get('/2fa/status',    protect, get2FAStatus);
 
 module.exports = router;
 

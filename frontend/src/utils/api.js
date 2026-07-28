@@ -1,31 +1,83 @@
 import axios from 'axios';
 
-const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const API = axios.create({
+  baseURL: `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api`,
+  withCredentials: true,   // send httpOnly cookies automatically
+});
 
-const API = axios.create({ baseURL: `${baseUrl}/api`, timeout: 15000 });
-
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('medistore_token');
+/* ── Request: attach access token ── */
+API.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
+/* ── Track if refresh is in progress (avoid multiple parallel refresh calls) ── */
+let isRefreshing  = false;
+let refreshQueue  = [];
 
+const processQueue = (error, token = null) => {
+  refreshQueue.forEach(cb => error ? cb.reject(error) : cb.resolve(token));
+  refreshQueue = [];
+};
+
+/* ── Response: auto-refresh on 401 ── */
 API.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
-      const wasLoggedIn = !!localStorage.getItem('medistore_token');
-      localStorage.removeItem('medistore_token');
-      localStorage.removeItem('medistore_user');
+  res => res,
+  async err => {
+    const original = err.config;
 
-      // Only redirect if user was actually logged in (not on login page itself)
-      if (wasLoggedIn) {
-        // Force a full page reload — clears all React state cleanly
-        // This avoids needing to import AuthContext here (circular dep risk)
-        window.location.href = '/login';
+    // Only intercept 401 that isn't from the refresh endpoint itself
+    if (
+      err.response?.status === 401 &&
+      !original._retry &&
+      !original.url?.includes('/auth/refresh') &&
+      !original.url?.includes('/auth/login')
+    ) {
+      if (isRefreshing) {
+        // Queue requests while refresh is in progress
+        return new Promise((resolve, reject) => {
+          refreshQueue.push({ resolve, reject });
+        }).then(token => {
+          original.headers.Authorization = `Bearer ${token}`;
+          return API(original);
+        });
+      }
+
+      original._retry  = true;
+      isRefreshing     = true;
+
+      try {
+        const { data } = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/auth/refresh`,
+          {},
+          { withCredentials: true }
+        );
+
+        const newToken = data.token;
+        localStorage.setItem('token', newToken);
+
+        // Update auth context user if provided
+        if (data.user) {
+          localStorage.setItem('medistore_user', JSON.stringify(data.user));
+          window.dispatchEvent(new CustomEvent('auth:refreshed', { detail: { user: data.user, token: newToken } }));
+        }
+
+        processQueue(null, newToken);
+        original.headers.Authorization = `Bearer ${newToken}`;
+        return API(original);
+      } catch (refreshErr) {
+        processQueue(refreshErr);
+        // Refresh failed — clear session and redirect to login
+        localStorage.removeItem('token');
+        localStorage.removeItem('medistore_user');
+        window.dispatchEvent(new CustomEvent('auth:expired'));
+        return Promise.reject(refreshErr);
+      } finally {
+        isRefreshing = false;
       }
     }
+
     return Promise.reject(err);
   }
 );

@@ -15,7 +15,7 @@ const generateAccessToken = (id) =>
 const generateToken = generateAccessToken;
 
 const generateRefreshToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET + '_refresh', { expiresIn: '30d' });
+  jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '30d' });
 
 const generateRandomToken = () => crypto.randomBytes(32).toString('hex');
 
@@ -381,7 +381,7 @@ exports.refreshToken = async (req, res) => {
     /* ── Verify JWT ── */
     let decoded;
     try {
-      decoded = jwt.verify(rawToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET + '_refresh');
+      decoded = jwt.verify(rawToken, process.env.JWT_REFRESH_SECRET);
     } catch (err) {
       res.clearCookie('refreshToken', { path: '/api/auth' });
       return res.status(401).json({ success: false, message: 'Refresh token expired. Please login again.', code: 'REFRESH_EXPIRED' });

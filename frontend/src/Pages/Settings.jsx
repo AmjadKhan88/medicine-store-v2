@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import TwoFactorSetup from './TwoFactorSetup';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { PushNotificationToggle } from '../Components/PWAInstallBanner';
 import { usePWA } from '../hooks/usePWA';
-import { MdSettings, MdGetApp, MdPhoneIphone, MdPerson, MdLock, MdPalette, MdStore, MdSave } from 'react-icons/md';
+import { MdGetApp, MdPhoneIphone, MdPerson, MdLock, MdPalette, MdStore, MdSave } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 
@@ -304,6 +305,9 @@ export default function Settings() {
             {savingPw ? 'Updating...' : 'Change Password'}
           </button>
         </form>
+      </div>
+      <div style={{ marginTop: 24 }}>
+      <TwoFactorSetup />
       </div>
     </div>
   );

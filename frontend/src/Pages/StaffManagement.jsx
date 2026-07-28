@@ -43,8 +43,9 @@ export default function StaffManagement() {
     try {
       const { data } = await API.get('/staff');
       setStaff(data.staff);
-    } catch { toast.error('Failed to load staff'); }
-    finally { setLoading(false); }
+    } catch (error) {
+       toast.error(error?.response?.data?.message || 'Failed to load staff'); 
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { fetchStaff(); }, []);
