@@ -50,7 +50,7 @@ API.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/auth/refresh`,
+          '/api/auth/refresh',
           {},
           { withCredentials: true }
         );
