@@ -9,56 +9,135 @@ const User           = require('../models/User');
 const PLANS = {
   trial: {
     name: 'Free Trial', price: 0, duration: 14, badge: '14 Days Free',
-    limits: { medicines: 50, patients: 20, staff: 1, billsPerMonth: 50 },
+    tier: 'trial', color: '#6b7280',
+    limits: { medicines: 100, patients: 50, staff: 3, billsPerMonth: 100 },
     features: [
-      'All features unlocked',
-      '50 medicines',
-      '20 patients',
-      '1 user account',
-      '50 bills per month',
+      '✅ All features unlocked for 14 days',
+      '100 medicines · 50 patients · 3 staff',
+      '100 bills per month',
       'No credit card required',
     ],
+    featureKeys: ['billing','medicines','patients','prescriptions','labTests','appointments','opd','ipd','wards','nurseStation','otScheduling','bloodBank','radiology','emr','vitals','accounting','insurance','payroll','broadcast','feedback','onlineBooking','drap','aiDiagnosis','demandForecast','prescriptionOCR'],
   },
+
   free: {
     name: 'Free', price: 0, badge: 'Forever Free',
+    tier: 'free', color: '#9ca3af',
     limits: { medicines: 30, patients: 15, staff: 1, billsPerMonth: 20 },
     features: [
-      '30 medicines',
-      '15 patients',
-      '1 user account',
+      '30 medicines · 15 patients · 1 staff',
       '20 bills per month',
-      'Basic features only',
+      'Basic billing & inventory only',
     ],
+    featureKeys: ['billing','medicines','patients'],
   },
+
+  /* ── Legacy plans (existing users keep access) ── */
   basic: {
-    name: 'Basic', price: 2999, badge: 'Most Popular',
-    limits: { medicines: 500, patients: 200, staff: 3, billsPerMonth: -1 },
-    features: [
-      '500 medicines',
-      '200 patients',
-      '3 staff members',
-      'Unlimited bills',
-      'PDF invoice & reports',
-      'WhatsApp reminders',
-      'Expiry alerts',
-      'Purchase orders',
-    ],
+    name: 'Pharmacy Basic (Legacy)', price: 1999, badge: 'Legacy',
+    tier: 'pharmacy', color: '#0ea5e9', legacy: true,
+    limits: { medicines: 500, patients: 300, staff: 3, billsPerMonth: -1 },
+    features: ['Same as Pharmacy Basic'],
+    featureKeys: ['billing','medicines','patients','prescriptions','purchaseOrders','suppliers','staff','reports','barcodeScanner','patientMatching'],
   },
   pro: {
-    name: 'Pro', price: 5999, badge: 'Best Value',
-    limits: { medicines: -1, patients: -1, staff: -1, billsPerMonth: -1 },
+    name: 'Pharmacy Pro (Legacy)', price: 3999, badge: 'Legacy',
+    tier: 'pharmacy', color: '#8b5cf6', legacy: true,
+    limits: { medicines: -1, patients: -1, staff: 5, billsPerMonth: -1 },
+    features: ['Same as Pharmacy Pro'],
+    featureKeys: ['billing','medicines','patients','prescriptions','purchaseOrders','suppliers','staff','reports','barcodeScanner','patientMatching','labTests','appointments','accounting','prescriptionOCR','demandForecast','twoFA'],
+  },
+
+  /* ── New plans ── */
+  pharmacy_basic: {
+    name: 'Pharmacy Basic', price: 1999, badge: 'Best for Pharmacies',
+    tier: 'pharmacy', color: '#0ea5e9',
+    limits: { medicines: 500, patients: 300, staff: 3, billsPerMonth: -1 },
     features: [
-      'Unlimited medicines',
-      'Unlimited patients',
-      'Unlimited staff',
-      'Unlimited bills',
-      'Everything in Basic',
-      'Advanced analytics',
-      'Audit log',
-      'Data backup & restore',
-      'Medicine substitutes',
+      '500 medicines · 300 patients · 3 staff',
+      'Unlimited bills & invoices',
+      'Prescriptions & purchase orders',
+      'Expiry alerts & barcode scanner',
+      'Duplicate patient detection',
+      'Basic reports & PDF export',
+      'WhatsApp payment confirmation',
+    ],
+    featureKeys: ['billing','medicines','patients','prescriptions','purchaseOrders','suppliers','staff','reports','barcodeScanner','patientMatching'],
+  },
+
+  pharmacy_pro: {
+    name: 'Pharmacy Pro', price: 3999, badge: 'Most Popular',
+    tier: 'pharmacy', color: '#8b5cf6',
+    limits: { medicines: -1, patients: -1, staff: 5, billsPerMonth: -1 },
+    features: [
+      'Unlimited medicines & patients',
+      '5 staff members',
+      'Everything in Pharmacy Basic',
+      'Lab test management',
+      'Appointment scheduling',
+      'Advanced accounting & P&L',
+      'AI prescription OCR scanner',
+      'Demand forecasting (AI)',
+      'Two-factor authentication',
       'Priority support',
     ],
+    featureKeys: ['billing','medicines','patients','prescriptions','purchaseOrders','suppliers','staff','reports','barcodeScanner','patientMatching','labTests','appointments','accounting','prescriptionOCR','demandForecast','twoFA'],
+  },
+
+  clinic: {
+    name: 'Clinic', price: 5999, badge: 'For Clinics',
+    tier: 'clinic', color: '#10b981',
+    limits: { medicines: -1, patients: -1, staff: 10, billsPerMonth: -1 },
+    features: [
+      'Unlimited everything',
+      '10 staff members',
+      'Everything in Pharmacy Pro',
+      'OPD queue management (TV display)',
+      'Doctor orders & nursing notes',
+      'Electronic Medical Records (EMR)',
+      'Vital signs monitoring & charts',
+      'Patient feedback & star ratings',
+      'Online appointment booking (public page)',
+      'WhatsApp / SMS broadcast',
+    ],
+    featureKeys: ['billing','medicines','patients','prescriptions','purchaseOrders','suppliers','staff','reports','barcodeScanner','patientMatching','labTests','appointments','accounting','prescriptionOCR','demandForecast','twoFA','opd','doctorOrders','emr','vitals','feedback','onlineBooking','broadcast'],
+  },
+
+  hospital_basic: {
+    name: 'Hospital Basic', price: 10999, badge: 'For Small Hospitals',
+    tier: 'hospital', color: '#f59e0b',
+    limits: { medicines: -1, patients: -1, staff: 20, billsPerMonth: -1 },
+    features: [
+      'Unlimited everything',
+      '20 staff members',
+      'Everything in Clinic',
+      'IPD management (admission, discharge)',
+      'Ward & bed management',
+      'Nurse station module (MAR, vitals)',
+      'OT scheduling & checklists',
+      'Blood bank management',
+      'Radiology (PACS-lite, image sharing)',
+    ],
+    featureKeys: ['billing','medicines','patients','prescriptions','purchaseOrders','suppliers','staff','reports','barcodeScanner','patientMatching','labTests','appointments','accounting','prescriptionOCR','demandForecast','twoFA','opd','doctorOrders','emr','vitals','feedback','onlineBooking','broadcast','ipd','wards','nurseStation','otScheduling','bloodBank','radiology'],
+  },
+
+  hospital_pro: {
+    name: 'Hospital Pro', price: 20999, badge: 'Full Suite',
+    tier: 'hospital', color: '#dc2626',
+    limits: { medicines: -1, patients: -1, staff: -1, billsPerMonth: -1 },
+    features: [
+      'Unlimited staff & everything',
+      'Everything in Hospital Basic',
+      'Insurance & panel management (Jubilee, EFU, EOBI)',
+      'Salary & payroll (Pakistan tax slabs)',
+      'DRAP compliance reports (one-click)',
+      'AI Diagnosis Assistant (Gemini)',
+      'Predictive medicine demand (AI)',
+      'Advanced accounting & FBR tax summary',
+      'Dedicated account manager',
+      'Custom onboarding & training',
+    ],
+    featureKeys: ['billing','medicines','patients','prescriptions','purchaseOrders','suppliers','staff','reports','barcodeScanner','patientMatching','labTests','appointments','accounting','prescriptionOCR','demandForecast','twoFA','opd','doctorOrders','emr','vitals','feedback','onlineBooking','broadcast','ipd','wards','nurseStation','otScheduling','bloodBank','radiology','insurance','payroll','drap','aiDiagnosis'],
   },
 };
 
@@ -119,7 +198,8 @@ exports.submitPaymentRequest = async (req, res) => {
   try {
     const { plan, paymentMethod, transactionId, amount, notes } = req.body;
 
-    if (!['basic', 'pro'].includes(plan))
+    const PAID_PLANS = ['basic','pro','pharmacy_basic','pharmacy_pro','clinic','hospital_basic','hospital_pro'];
+    if (!PAID_PLANS.includes(plan))
       return res.status(400).json({ success: false, message: 'Invalid plan selected' });
     if (!transactionId?.trim())
       return res.status(400).json({ success: false, message: 'Transaction ID is required' });
@@ -258,7 +338,7 @@ exports.manualActivate = async (req, res) => {
         plan, status: 'active',
         currentPeriodStart: now,
         currentPeriodEnd:   end,
-        limits: PLANS[plan]?.limits || PLANS.free.limits,
+        limits: PLANS[plan]?.limits || Subscription.PLAN_LIMITS[plan] || PLANS.free.limits,
       },
       { upsert: true, new: true }
     );

@@ -79,4 +79,61 @@ const checkLimit = (resource) => async (req, res, next) => {
   }
 };
 
-module.exports = { requireSubscription, checkLimit };
+/* ── Check if plan has access to a specific feature ── */
+const checkFeature = (featureName) => async (req, res, next) => {
+  try {
+    const sub = req.subscription;
+    if (!sub) return next();   // no subscription loaded yet — let through (requireSubscription handles it)
+
+    const Subscription = require('../models/Subscription');
+    const allowedPlans = Subscription.PLAN_FEATURES[featureName];
+
+    // If feature not in the map, it's a core feature — allow all
+    if (!allowedPlans) return next();
+
+    // trial gets everything
+    if (sub.plan === 'trial') return next();
+
+    if (!allowedPlans.includes(sub.plan)) {
+      const UPGRADE_MAP = {
+        labTests:       'Pharmacy Pro (₨3,999/month)',
+        appointments:   'Pharmacy Pro (₨3,999/month)',
+        accounting:     'Pharmacy Pro (₨3,999/month)',
+        prescriptionOCR:'Pharmacy Pro (₨3,999/month)',
+        demandForecast: 'Pharmacy Pro (₨3,999/month)',
+        opd:            'Clinic (₨5,999/month)',
+        doctorOrders:   'Clinic (₨5,999/month)',
+        emr:            'Clinic (₨5,999/month)',
+        vitals:         'Clinic (₨5,999/month)',
+        feedback:       'Clinic (₨5,999/month)',
+        onlineBooking:  'Clinic (₨5,999/month)',
+        broadcast:      'Clinic (₨5,999/month)',
+        ipd:            'Hospital Basic (₨10,999/month)',
+        wards:          'Hospital Basic (₨10,999/month)',
+        nurseStation:   'Hospital Basic (₨10,999/month)',
+        otScheduling:   'Hospital Basic (₨10,999/month)',
+        bloodBank:      'Hospital Basic (₨10,999/month)',
+        radiology:      'Hospital Basic (₨10,999/month)',
+        insurance:      'Hospital Pro (₨20,999/month)',
+        payroll:        'Hospital Pro (₨20,999/month)',
+        drap:           'Hospital Pro (₨20,999/month)',
+        aiDiagnosis:    'Hospital Pro (₨20,999/month)',
+      };
+
+      return res.status(403).json({
+        success:  false,
+        code:     'FEATURE_NOT_AVAILABLE',
+        feature:  featureName,
+        plan:     sub.plan,
+        upgradeTo:UPGRADE_MAP[featureName] || 'a higher plan',
+        message:  `${featureName} is not available on your current plan. Upgrade to ${UPGRADE_MAP[featureName] || 'a higher plan'} to access this feature.`,
+      });
+    }
+
+    next();
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = { requireSubscription, checkLimit, checkFeature };

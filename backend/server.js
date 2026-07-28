@@ -56,15 +56,15 @@ const payrollRoutes            =   require('./routes/payroll');
 const broadcastRoutes          =   require('./routes/broadcast');
 const feedbackRoutes           =   require('./routes/feedback');
 const bookingRoutes            =   require('./routes/booking');
-const { startExpiryDigestJob } =   require('./jobs/expiryDigest');
-const { protect }              =   require('./middleware/auth');
-const { requireSubscription }  =   require('./middleware/checkSubscription');
 const matchCtrl                =   require('./controllers/patientMatchController');
 const upload                   =   require('./middleware/upload');
 const ocrCtrl                  =   require('./controllers/ocrController');
 const diagnosisCtrl            =   require('./controllers/diagnosisController');
 const demandRoutes             =   require('./routes/demand');
 const drapRoutes               =   require('./routes/drap');
+const { protect }              =   require('./middleware/auth');
+const { startExpiryDigestJob }              =   require('./jobs/expiryDigest');
+const { requireSubscription,checkFeature }  =   require('./middleware/checkSubscription');
 
 
 
@@ -196,24 +196,24 @@ app.use('/api/super-admin',       superAdminRoutes);
 app.use('/api/support',           supportRoutes);
 app.use('/api/invoice-settings',  invoiceSettingsRoutes);
 app.use('/api/documents',         documentRoutes);
-app.use('/api/wards',             wardsRoute);
-app.use('/api/ipd',               ipdRoute);
-app.use('/api/opd',               opdRoutes);
-app.use('/api/nurse',             nurseRoutes);
-app.use('/api/ot',                otRoutes);
-app.use('/api/blood-bank',        bloodbankRoutes);
-app.use('/api/clinical',          doctorOrdersRoutes) ;
-app.use('/api/radiology',         radiology);
-app.use('/api/vitals' ,           vitalsRoutes);
-app.use('/api/emr',               emrRoutes);
+app.use('/api/wards',checkFeature('wards'), wardsRoute);
+app.use('/api/ipd',  checkFeature('ipd'),   ipdRoute);
+app.use('/api/opd',  checkFeature('opd'),   opdRoutes);
+app.use('/api/nurse',checkFeature('nurseStation'),  nurseRoutes);
+app.use('/api/ot',   checkFeature('otScheduling'),  otRoutes);
+app.use('/api/blood-bank', checkFeature('bloodBank'),        bloodbankRoutes);
+app.use('/api/clinical',   checkFeature('doctorOrders'),       doctorOrdersRoutes) ;
+app.use('/api/radiology',  checkFeature('radiology'),       radiology);
+app.use('/api/vitals' ,    checkFeature('vitals'),       vitalsRoutes);
+app.use('/api/emr',        checkFeature('emr'),       emrRoutes);
 app.use('/api/accounting' ,       accountingRoutes);
-app.use('/api/insurance' ,        insuranceRoutes);
-app.use('/api/payroll',           payrollRoutes);
+app.use('/api/insurance' ,  checkFeature('insurance'),      insuranceRoutes);
+app.use('/api/payroll',     checkFeature('payroll'),      payrollRoutes);
 app.use('/api/broadcast',         broadcastRoutes);
 app.use('/api/feedback',          feedbackRoutes);
 app.use('/api/booking',           bookingRoutes);
 app.use('/api/demand',            demandRoutes);
-app.use('/api/drap',              drapRoutes);
+app.use('/api/drap',       checkFeature('drap'),       drapRoutes);
 
 /* ── Patient matching (inline routes — no separate file needed) ── */
 app.get('/api/patient-match',             protect, requireSubscription, matchCtrl.findDuplicates);
@@ -226,7 +226,7 @@ app.post('/api/ocr/prescription', protect, requireSubscription, upload.single('i
 /* ── AI Diagnosis Assistant ── */
 app.get('/api/diagnosis',           protect, requireSubscription, aiLimiter, diagnosisCtrl.getSessions);
 app.get('/api/diagnosis/:id',       protect, requireSubscription, diagnosisCtrl.getSession);
-app.post('/api/diagnosis/analyze',  protect, requireSubscription, aiLimiter, diagnosisCtrl.analyze);
+app.post('/api/diagnosis/analyze',  protect, requireSubscription, checkFeature('aiDiagnosis'), aiLimiter, diagnosisCtrl.analyze);
 app.post('/api/diagnosis/followup', protect, requireSubscription, aiLimiter, diagnosisCtrl.followUp);
 app.delete('/api/diagnosis/:id',    protect, requireSubscription, diagnosisCtrl.deleteSession);
 
