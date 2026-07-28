@@ -4,7 +4,7 @@ const DiagnosisSession = require('../models/DiagnosisSession');
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /* ── System prompt — Pakistani clinical context ── */
-const SYSTEM_PROMPT = `You are an AI clinical decision support assistant embedded in MediStore, a hospital management system used by doctors in Pakistan (including rural and semi-urban areas).
+const SYSTEM_PROMPT = `You are an AI clinical decision support assistant embedded in EliteHMS, a hospital management system used by doctors in Pakistan (including rural and semi-urban areas).
 
 Your role is to assist doctors — NOT replace them. Always maintain this context:
 - Pakistan's disease burden: TB, typhoid, malaria, dengue, hepatitis B/C, diabetes, hypertension, malnutrition

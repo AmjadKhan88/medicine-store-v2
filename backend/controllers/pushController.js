@@ -81,7 +81,7 @@ async function sendPushToStore(storeId, payload) {
 exports.sendTest = async (req, res) => {
   try {
     await sendPushToStore(req.storeId, {
-      title: '✅ MediStore Notifications Work!',
+      title: '✅ EliteHMS Notifications Work!',
       body:  'You will receive alerts for expiry, low stock and more.',
       icon:  '/icons/icon-192.png',
       badge: '/icons/icon-96.png',

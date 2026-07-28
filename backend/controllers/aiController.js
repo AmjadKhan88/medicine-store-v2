@@ -72,7 +72,7 @@ exports.askAssistant = async (req, res) => {
         ).join('\n')
       : '\nInventory: No medicines in the system yet.';
 
-    const systemPrompt = `You are an expert pharmacy AI assistant for MediStore, a professional medicine store management system used in Pakistan.
+    const systemPrompt = `You are an expert pharmacy AI assistant for EliteHMS, a professional medicine store management system used in Pakistan.
 
 Your role:
 - Answer questions about medicines, dosages, side effects, drug interactions

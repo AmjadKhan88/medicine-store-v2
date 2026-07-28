@@ -166,7 +166,7 @@ exports.createBill = async (req, res) => {
           email: patientFull.email,
           patientName: patient.name,
           bill: { ...bill.toJSON(), billNumber: bill.billNumber, items: billItems, createdAt: bill.createdAt },
-          storeName: storeOwner?.storeName || 'MediStore Pharmacy',
+          storeName: storeOwner?.storeName || 'EliteHMS Pharmacy',
           storePhone: storeOwner?.phone || '',
         });
       }
@@ -263,7 +263,7 @@ exports.updatePayment = async (req, res) => {
           bill,
           paymentAmount: additionalPayment,
           paymentMethod: bill.paymentMethod,
-          storeName: storeOwner?.storeName || 'MediStore Pharmacy',
+          storeName: storeOwner?.storeName || 'EliteHMS Pharmacy',
           storePhone: storeOwner?.phone || '',
         });
       }

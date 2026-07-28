@@ -416,7 +416,7 @@ export async function printThermal80Invoice(bill) {
     } catch {}
   }
 
-  center(store.name || 'MediStore Pharmacy', y, fs + 2, true); y += ls + 1;
+  center(store.name || 'Elitehms Pharmacy', y, fs + 2, true); y += ls + 1;
   if (store.doctor)  { center(store.doctor,  y, fs - 1); y += ls; }
   if (store.address) { center(store.address, y, fs - 1); y += ls; }
   if (store.phone)   { center(store.phone,   y, fs - 1); y += ls; }

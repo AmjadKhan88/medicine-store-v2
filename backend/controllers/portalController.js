@@ -99,10 +99,10 @@ exports.getPortalData = async (req, res) => {
       labTests:      labTests.status      === 'fulfilled' ? labTests.value      : [],
       appointments:  appointments.status  === 'fulfilled' ? appointments.value  : [],
       store: admin ? {
-        name:  admin.storeName || admin.name || 'MediStore Pharmacy',
+        name:  admin.storeName || admin.name || 'EliteHMS Pharmacy',
         phone: admin.phone     || '',
         email: admin.email     || '',
-      } : { name: 'MediStore Pharmacy', phone: '', email: '' },
+      } : { name: 'EliteHMS Pharmacy', phone: '', email: '' },
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

@@ -53,10 +53,10 @@ function baseEmail({ title, preview, body }) {
     <!-- Footer -->
     <div style="background:#f8fafc;padding:20px 36px;border-top:1px solid #e2e8f0;text-align:center;">
       <div style="font-size:12px;color:#94a3b8;">
-        © ${new Date().getFullYear()} MediStore · Pakistan
+        © ${new Date().getFullYear()} EliteHMS · Pakistan
       </div>
       <div style="font-size:11px;color:#cbd5e1;margin-top:4px;">
-        This email was sent to you because you registered on MediStore.
+        This email was sent to you because you registered on EliteHMS.
       </div>
     </div>
   </div>
@@ -349,7 +349,7 @@ exports.sendStaffInvitationEmail = async ({ email, staffName, role, storeName, a
     <p style="color:#64748b;font-size:14px;margin:0 0 24px;">
       Hi <strong>${staffName}</strong>, <strong>${adminName}</strong> has added you
       as a <strong style="color:#0ea5e9;text-transform:capitalize;">${role}</strong>
-      on MediStore.
+      on EliteHMS.
     </p>
 
     <!-- Credentials box -->
@@ -378,7 +378,7 @@ exports.sendStaffInvitationEmail = async ({ email, staffName, role, storeName, a
 
     <div style="text-align:center;margin:28px 0;">
       <a href="${link}" style="background:${BRAND_COLOR};color:#fff;text-decoration:none;padding:13px 36px;border-radius:10px;font-weight:700;font-size:15px;display:inline-block;">
-        Log In to MediStore →
+        Log In to EliteHMS →
       </a>
     </div>
 
@@ -499,7 +499,7 @@ exports.sendExpiryDigestEmail = async ({ email, adminName, storeName, expired, e
     </p>`;
 
   await sendMail({
-    from:    `"MediStore Alerts" <${STORE_EMAIL}>`,
+    from:    `"EliteHMS Alerts" <${STORE_EMAIL}>`,
     to:      email,
     subject: `${hasUrgent ? '🚨' : '⚠️'} Weekly Pharmacy Alert — ${totalIssues} issue${totalIssues !== 1 ? 's' : ''} | ${store}`,
     html:    baseEmail({ title: 'Weekly Digest', preview: `${totalIssues} issues need attention in ${store}`, body }),

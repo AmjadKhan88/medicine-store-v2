@@ -142,7 +142,7 @@ exports.verifyEmail = async (req, res) => {
     try { await emailService.sendWelcomeEmail({ email: user.email, name: user.name }); } catch { }
 
     const jwtToken = generateToken(user._id);
-    res.json({ success: true, token: jwtToken, user, message: 'Email verified! Welcome to MediStore.' });
+    res.json({ success: true, token: jwtToken, user, message: 'Email verified! Welcome to EliteHMS.' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -467,8 +467,8 @@ exports.setup2FA = async (req, res) => {
 
     // Generate TOTP secret
     const secret = speakeasy.generateSecret({
-      name:   `MediStore (${user.email})`,
-      issuer: 'MediStore',
+      name:   `EliteHMS (${user.email})`,
+      issuer: 'EliteHMS',
       length: 32,
     });
 

@@ -15,7 +15,7 @@ export function getStoreProfile() {
 
  function generateInvoicePDF(bill) {
   const store = getStoreProfile();
-  const storeName    = store.name     || 'MediStore Pharmacy';
+  const storeName    = store.name     || 'Elitehms Pharmacy';
   const storeAddress = store.address  || 'Peshawar, KPK, Pakistan';
   const storePhone   = store.phone    || '0300-0000000';
   const storeEmail   = store.email    || '';
