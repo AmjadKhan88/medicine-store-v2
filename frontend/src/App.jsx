@@ -62,6 +62,7 @@ const PrescriptionOCR     = lazy(() => import('./Pages/PrescriptionOCR'));
 const DiagnosisAssistant  = lazy(() => import('./Pages/DiagnosisAssistant'));
 const DemandPrediction    = lazy(() => import('./Pages/DemandPrediction'));
 const DRAPCompliance      = lazy(() => import('./Pages/DRAPCompliance'));
+const Pricing             = lazy(() => import('./Pages/Pricing'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading} = useAuth();
@@ -89,6 +90,7 @@ export default function App() {
       <Route path="/opd-display/:storeId" element={<OPDDisplay         />} />
       <Route path="/login"                element={user ? <Navigate to="/app" /> : <Login    />} />
       <Route path="/register"             element={user ? <Navigate to="/app" /> : <Register />} />
+      <Route path="/pricing"              element={<Pricing  />} />
       <Route path="/verify-email"         element={<VerifyEmail        />} />
       <Route path="/forgot-password"      element={<ForgotPassword     />} />
       <Route path="/reset-password"       element={<ResetPassword      />} />

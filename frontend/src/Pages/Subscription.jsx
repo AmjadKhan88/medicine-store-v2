@@ -12,10 +12,29 @@ import {useWindowWidth} from '../hooks/useWindowWidth';
 const PKR = (n) => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;
 
 const PLAN_COLORS = {
-  trial:  { accent: '#6366f1', bg: '#ede9fe', badge: '#6366f1' },
-  free:   { accent: '#94a3b8', bg: '#f1f5f9', badge: '#64748b' },
-  basic:  { accent: '#0ea5e9', bg: '#e0f2fe', badge: '#0284c7' },
-  pro:    { accent: '#8b5cf6', bg: '#f3e8ff', badge: '#7c3aed' },
+  trial:          { accent: '#6366f1', bg: '#ede9fe', badge: '#6366f1' },
+  free:           { accent: '#94a3b8', bg: '#f1f5f9', badge: '#64748b' },
+  basic:          { accent: '#0ea5e9', bg: '#e0f2fe', badge: '#0284c7' },
+  pro:            { accent: '#8b5cf6', bg: '#f3e8ff', badge: '#7c3aed' },
+  pharmacy_basic: { accent: '#0ea5e9', bg: '#e0f2fe', badge: '#0284c7' },
+  pharmacy_pro:   { accent: '#7c3aed', bg: '#f3e8ff', badge: '#7c3aed' },
+  clinic:         { accent: '#10b981', bg: '#f3e8ff', badge: '#10b981' },
+  hospital_basic: { accent: '#f59e0b', bg: '#f3e8ff', badge: '#f59e0b' },
+  hospital_pro:   { accent: '#dc2626', bg: '#f3e8ff', badge: '#dc2626' },
+};
+
+const planColor = {
+  trial:'#6b7280', free:'#9ca3af',
+  basic:'#0ea5e9', pro:'#8b5cf6',                  // legacy
+  pharmacy_basic:'#0ea5e9', pharmacy_pro:'#8b5cf6',
+  clinic:'#10b981', hospital_basic:'#f59e0b', hospital_pro:'#dc2626',
+};
+
+const planDisplayName = {
+  trial:'Free Trial', free:'Free',
+  basic:'Pharmacy Basic', pro:'Pharmacy Pro',
+  pharmacy_basic:'Pharmacy Basic', pharmacy_pro:'Pharmacy Pro',
+  clinic:'Clinic', hospital_basic:'Hospital Basic', hospital_pro:'Hospital Pro',
 };
 
 const PAYMENT_INFO = {
