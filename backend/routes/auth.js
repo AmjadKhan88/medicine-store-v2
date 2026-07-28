@@ -33,5 +33,19 @@ router.put('/profile',            protect,     validate(updateProfileSchema),   
 router.put('/change-password',    protect,     validate(changePasswordSchema),    changePassword);
 router.patch('/onboarding',       protect,                                        updateOnboarding);
 
+/* ── Refresh & session ── */
+router.post('/refresh',      authController.refreshToken);  // no protect — uses cookie
+router.post('/logout',       protect, authController.logout);
+router.post('/logout-all',   protect, authController.logoutAll);
+router.get('/sessions',      protect, authController.getSessions);
+
+/* ── 2FA ── */
+router.post('/2fa/setup',    protect, authController.setup2FA);
+router.post('/2fa/confirm',  protect, authController.confirm2FA);
+router.post('/2fa/verify',   authController.verify2FA);        // during login — no protect
+router.post('/2fa/disable',  protect, authController.disable2FA);
+router.post('/2fa/regen',    protect, authController.regenRecoveryCodes);
+router.get('/2fa/status',    protect, authController.get2FAStatus);
+
 module.exports = router;
 

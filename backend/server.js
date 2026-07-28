@@ -2,6 +2,7 @@ const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first'); // Render has no outbound IPv6 route — prevents ENETUNREACH on SMTP/etc.
 
 const express           = require('express');
+const cookieParser      = require('cookie-parser');
 const http              = require('http');
 require('dotenv').config();
 const { initSocket }    = require('./socket');
@@ -97,6 +98,8 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
 ].filter(Boolean);
+
+app.use(cookieParser());
 
 app.use(cors({
   origin: (origin, callback) => {

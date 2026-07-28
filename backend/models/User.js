@@ -36,9 +36,25 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, trim: true },
   isActive: { type: Boolean, default: true },
 
-  // Invite system
-  inviteToken: { type: String },
-  inviteExpires: { type: Date },
+// Invite system
+  inviteToken:  { type: String },
+  inviteExpires:{ type: Date },
+
+  /* ── Refresh tokens ── */
+  refreshTokens: [{
+    token:     { type: String, required: true },   // hashed
+    expiresAt: { type: Date,   required: true },
+    device:    { type: String, default: 'unknown' }, // user-agent snippet
+    createdAt: { type: Date,   default: Date.now  },
+  }],
+
+  /* ── 2FA ── */
+  twoFactorEnabled:     { type: Boolean, default: false },
+  twoFactorSecret:      { type: String,  select: false  },  // TOTP secret (base32)
+  twoFactorSetupPending:{ type: Boolean, default: false  },  // true until first verify
+  twoFactorRecoveryCodes:[{ type: String }],                 // hashed recovery codes
+  twoFactorForced:      { type: Boolean, default: false  },  // admin forces 2FA on account
+
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {
