@@ -61,6 +61,7 @@ export default function Layout() {
     { to: '/app/prescription-ocr',icon: <MdCameraAlt />,        label: 'Rx OCR Scanner'  },
     { to: '/app/diagnosis',       icon: <MdLocalHospital />,    label: 'AI Diagnosis'    },
     { to: '/app/demand',          icon: <MdTrendingUp />,       label: 'Demand Forecast' },
+    { to: '/app/drap',            icon: <MdShield />,           label: 'DRAP Compliance' },
   ];
 
   const alertItems = [
