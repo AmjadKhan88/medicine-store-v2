@@ -18,11 +18,7 @@ export const AuthProvider = ({ children }) => {
 
     const tryRefresh = async () => {
       try {
-        const { data } = await axios.post(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
+        const {data} = await API.post('/auth/refresh',{});
         localStorage.setItem('token', data.token);
         localStorage.setItem('medistore_user', JSON.stringify(data.user));
         setUser(data.user);
