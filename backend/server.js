@@ -64,6 +64,7 @@ const upload                   =   require('./middleware/upload');
 const ocrCtrl                  =   require('./controllers/ocrController');
 const diagnosisCtrl            =   require('./controllers/diagnosisController');
 const demandRoutes             =   require('./routes/demand');
+const drapRoutes               =   require('./routes/drap');
 
 
 
@@ -212,6 +213,7 @@ app.use('/api/broadcast',         broadcastRoutes);
 app.use('/api/feedback',          feedbackRoutes);
 app.use('/api/booking',           bookingRoutes);
 app.use('/api/demand',            demandRoutes);
+app.use('/api/drap',              drapRoutes);
 
 /* ── Patient matching (inline routes — no separate file needed) ── */
 app.get('/api/patient-match',             protect, requireSubscription, matchCtrl.findDuplicates);
