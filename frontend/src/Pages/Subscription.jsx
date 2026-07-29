@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSubscription } from '../context/SubscriptionContext';
 import {
   MdStar, MdCheckCircle, MdWarning, MdPayment,
-  MdWhatsapp, MdPhone, MdAccountBalance, MdClose,
+  MdPhone, MdClose,
   MdRefresh, MdArrowUpward,
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
@@ -23,19 +23,6 @@ const PLAN_COLORS = {
   hospital_pro:   { accent: '#dc2626', bg: '#f3e8ff', badge: '#dc2626' },
 };
 
-const planColor = {
-  trial:'#6b7280', free:'#9ca3af',
-  basic:'#0ea5e9', pro:'#8b5cf6',                  // legacy
-  pharmacy_basic:'#0ea5e9', pharmacy_pro:'#8b5cf6',
-  clinic:'#10b981', hospital_basic:'#f59e0b', hospital_pro:'#dc2626',
-};
-
-const planDisplayName = {
-  trial:'Free Trial', free:'Free',
-  basic:'Pharmacy Basic', pro:'Pharmacy Pro',
-  pharmacy_basic:'Pharmacy Basic', pharmacy_pro:'Pharmacy Pro',
-  clinic:'Clinic', hospital_basic:'Hospital Basic', hospital_pro:'Hospital Pro',
-};
 
 const PAYMENT_INFO = {
   jazzcash:  { label: 'JazzCash',  number:import.meta.env.VITE_JAZZCASH_NUMBER  || '0306-9534618', color: '#E61F7F' },
@@ -67,11 +54,16 @@ function UsageBar({ label, used, limit, percent }) {
   );
 }
 
+/* ── Plan tier order (lowest → highest) ── */
+const PLAN_ORDER = ['free', 'basic', 'pharmacy_basic', 'pharmacy_pro', 'clinic', 'hospital_basic', 'hospital_pro'];
+
 /* ── Plan card ── */
 function PlanCard({ planKey, plan, currentPlan, onSelect, width }) {
-  const clr       = PLAN_COLORS[planKey];
-  const isCurrent = planKey === currentPlan;
-  const canUpgrade = ['basic', 'pro'].includes(planKey) && !isCurrent;
+  const clr         = PLAN_COLORS[planKey];
+  const isCurrent   = planKey === currentPlan;
+  const currentRank = PLAN_ORDER.indexOf(currentPlan);
+  const thisRank    = PLAN_ORDER.indexOf(planKey);
+  const canUpgrade  = !isCurrent && thisRank > currentRank && !['free'].includes(planKey);
 
   return (
     <div style={{
@@ -102,21 +94,39 @@ function PlanCard({ planKey, plan, currentPlan, onSelect, width }) {
 
       <div style={{ marginTop: 20 }}>
         {isCurrent ? (
-          <div style={{ background: clr.bg, color: clr.accent, fontWeight:width < 460 ? 600 : 700, fontSize:width < 460 ? 11 : 13, padding: '8px 16px', borderRadius: 8, textAlign: 'center', border: `1px solid ${clr.accent}` }}>
+          <div style={{
+            background: clr.bg, color: clr.accent,
+            fontWeight: width < 460 ? 600 : 700,
+            fontSize:   width < 460 ? 11 : 13,
+            padding: '8px 16px', borderRadius: 8, textAlign: 'center',
+            border: `1px solid ${clr.accent}`,
+          }}>
             ✓ Current Plan
           </div>
         ) : canUpgrade ? (
           <button
             onClick={() => onSelect(planKey)}
             style={{
-              width: '100%', padding: '10px', background: clr.accent, color: '#fff',
-              border: 'none', borderRadius: 10, fontWeight: width < 460 ? 600 : 700, fontSize:width < 460 ? 11 : 14,
+              width: '100%', padding: '10px',
+              background: clr.accent, color: '#fff',
+              border: 'none', borderRadius: 10,
+              fontWeight: width < 460 ? 600 : 700,
+              fontSize:   width < 460 ? 11 : 14,
               cursor: 'pointer', fontFamily: 'var(--font-main)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             }}
           >
-            <MdArrowUpward size={width < 460 ? 11 :14} style={{ marginRight: 4 }} />
+            <MdArrowUpward size={width < 460 ? 11 : 14} />
             Upgrade to {plan.name}
           </button>
+        ) : thisRank < currentRank && planKey !== 'free' ? (
+          /* Current plan is higher tier — show downgrade-disabled state */
+          <div style={{
+            color: 'var(--text-muted)', fontSize: 12, textAlign: 'center',
+            padding: '8px', borderRadius: 8, background: 'var(--bg-tertiary)',
+          }}>
+            Your plan includes all of this
+          </div>
         ) : null}
       </div>
     </div>
@@ -394,11 +404,35 @@ export default function SubscriptionPage() {
           <div className="card-title">Available Plans</div>
           <div className="text-muted text-sm">All prices in PKR per month</div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: width < 820 ? '1fr' : 'repeat(3, 1fr)', gap: 16 }}>
-          {Object.entries(plans).filter(([k]) => k !== 'trial').map(([key, p]) => (
-            <PlanCard key={key} planKey={key} plan={p} currentPlan={plan} onSelect={setUpgradeTarget} width={width}/>
-          ))}
-        </div>
+        {/* ── Section dividers ── */}
+        {['pharmacy', 'clinic', 'hospital'].map(tier => {
+          const tierLabels = {
+            pharmacy: { label: '💊 Pharmacy Plans', plans: ['pharmacy_basic','pharmacy_pro'] },
+            clinic:   { label: '🏥 Clinic Plan',    plans: ['clinic']                       },
+            hospital: { label: '🏨 Hospital Plans',  plans: ['hospital_basic','hospital_pro'] },
+          };
+          const info        = tierLabels[tier];
+          const tierEntries = Object.entries(plans).filter(([k]) => info.plans.includes(k));
+          if (!tierEntries.length) return null;
+
+          return (
+            <div key={tier} style={{ marginBottom: 24 }}>
+              <div style={{
+                fontSize: 11, fontWeight: 700, textTransform: 'uppercase',
+                letterSpacing: 1.5, color: 'var(--text-muted)',
+                marginBottom: 12, paddingBottom: 6,
+                borderBottom: '1px solid var(--border)',
+              }}>
+                {info.label}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: width < 820 ? '1fr' : `repeat(${tierEntries.length}, 1fr)`, gap: 14 }}>
+                {tierEntries.map(([key, p]) => (
+                  <PlanCard key={key} planKey={key} plan={p} currentPlan={plan} onSelect={setUpgradeTarget} width={width} />
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* ── Payment Modal ── */}
