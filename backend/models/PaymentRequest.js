@@ -4,7 +4,7 @@ const paymentRequestSchema = new mongoose.Schema({
   storeId:         { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   adminName:       { type: String },
   adminEmail:      { type: String },
-  plan:            { type: String, enum: ['basic', 'pro'], required: true },
+  plan:            { type: String, enum: ['basic','pro','pharmacy_basic','pharmacy_pro','clinic','hospital_basic','hospital_pro'], required: true },
   amount:          { type: Number, required: true },
   paymentMethod:   { type: String, enum: ['jazzcash', 'easypaisa', 'bank'], required: true },
   transactionId:   { type: String, required: true, trim: true },
