@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { PushNotificationToggle } from '../Components/PWAInstallBanner';
 import { usePWA } from '../hooks/usePWA';
 import { useNavVisibility } from '../context/NavVisibilityContext';
-import { ALL_NAV_ITEMS, ALL_ALERT_ITEMS } from '../Components/Layout';
+import { ALL_NAV_ITEMS, ALL_ALERT_ITEMS } from '../layouts/Layout';
 import { ALWAYS_VISIBLE_NAV } from '../context/NavVisibilityContext';
 import { MdGetApp, MdLock, MdSave, MdRefresh, MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import toast from 'react-hot-toast';
