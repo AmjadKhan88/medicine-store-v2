@@ -1,11 +1,9 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback} from 'react';
 import API from '../utils/api';
 import { useAuth } from './AuthContext';
 import { useSocket } from './SocketContext';
 
 const NotificationContext = createContext(null);
-
-const POLL_INTERVAL = 300000; // refresh every 5 mins
 
 export function NotificationProvider({ children }) {
   const { user } = useAuth();
@@ -19,7 +17,6 @@ export function NotificationProvider({ children }) {
     try { return JSON.parse(localStorage.getItem('medistore_dismissed_notifs') || '[]'); }
     catch { return []; }
   });
-  const timerRef = useRef(null);
 
   /* ── Build notifications from API data ── */
   const buildNotifications = useCallback((expiry, lowStock, balances) => {

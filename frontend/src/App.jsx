@@ -5,7 +5,6 @@ import { useAuth } from './context/AuthContext';
 import Layout    from './layouts/Layout';
 import Dashboard from './Pages/Dashboard';
 import EliteHMSLoader from './Components/EliteHMSLoader';
-// import Loader    from './Components/Loader';
 
 const Login               = lazy(() => import('./Auth/Login'));
 const Register            = lazy(() => import('./Auth/Register'));
