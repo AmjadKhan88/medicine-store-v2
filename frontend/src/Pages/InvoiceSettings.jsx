@@ -6,6 +6,7 @@ import {
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { printDetailedInvoice, printCompactInvoice, printThermal80Invoice, printThermal58Invoice } from '../utils/invoiceTemplates';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── Sample bill for preview ── */
 const SAMPLE_BILL = {
@@ -171,7 +172,7 @@ export default function InvoiceSettings() {
 
   if (!settings) return (
     <div className="flex-center" style={{ height: 300 }}>
-      <div className="text-muted">Loading invoice settings...</div>
+      <ShortLoader text="Loading invoice settings..."/>
     </div>
   );
 
