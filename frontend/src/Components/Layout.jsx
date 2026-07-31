@@ -68,6 +68,7 @@ export const ALL_ALERT_ITEMS = [
   { to: '/app/backup',           icon: '💾',  label: 'Backup & Restore',  group: 'management', permission: 'storeSettings' },
   { to: '/app/invoice-settings', icon: '🧾',  label: 'Invoice Templates', group: 'management', permission: 'settings' },
   { to: '/app/documents',        icon: '📁',  label: 'Documents',         group: 'management' },
+  { to: '/app/rag-admin',        icon: '🧠',  label: 'RAG Knowledge Base',group: 'management', superAdminOnly: true },
   { to: '/app/settings',         icon: '⚙️',  label: 'Settings',          group: 'management', alwaysShow: true, permission: 'storeSettings' },
 ];
 

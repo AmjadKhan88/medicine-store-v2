@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 
 const GEMINI_EMBED_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent';
 
 /**
  * Generate a 768-dim embedding vector using Gemini text-embedding-004
@@ -15,9 +15,10 @@ async function embedText(text, taskType = 'RETRIEVAL_DOCUMENT') {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model:    'models/text-embedding-004',
+        model:    'models/gemini-embedding-2',
         content:  { parts: [{ text: text.slice(0, 2048) }] }, // API limit
         taskType,
+        outputDimensionality: 768,
       }),
     }
   );

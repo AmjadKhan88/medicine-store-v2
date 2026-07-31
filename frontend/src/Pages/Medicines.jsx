@@ -29,6 +29,7 @@ function getExpiryBadge(med) {
 }
 
 export default function Medicines() {
+  const width = useWindowWidth();
   const [medicines, setMedicines] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -51,7 +52,18 @@ export default function Medicines() {
   const { selectedModel } = useAI();
   const [suggesting, setSuggesting] = useState(false);
 
-  const width = useWindowWidth();
+  const [ragInfo, setRagInfo] = useState(null);
+  const [ragLoading, setRagLoading] = useState(null);
+
+  const fetchRAGInfo = async (medicineName) => {
+    setRagLoading(medicineName);
+    try {
+      const { data } = await API.get(`/rag/medicine/${encodeURIComponent(medicineName)}`);
+      setRagInfo({ name: medicineName, ...data });
+    } catch { }
+    finally { setRagLoading(null); }
+  };
+
 
   const fetchMedicines = useCallback(async () => {
     setLoading(true);
@@ -241,6 +253,10 @@ export default function Medicines() {
                     <td>{getExpiryBadge(m)}</td>
                     <td>
                       <div className="table-actions">
+                        <button className="btn btn-ghost btn-sm" onClick={() => fetchRAGInfo(m.name)}
+                          title="Get AI clinical info from knowledge base">
+                          {ragLoading === m.name ? '⏳' : '🧠'}
+                        </button>
                         <button className="btn btn-secondary btn-sm btn-icon" onClick={() => openEdit(m)} title="Edit"><MdEdit /></button>
                         <button className="btn btn-secondary btn-sm btn-icon" onClick={() => openSubstitutes(m)} title="Link Substitutes">
                           <MdSwapHoriz />
@@ -425,7 +441,7 @@ export default function Medicines() {
         </div>
       )}
 
-            {/* Barcode Scanner — in Medicines page */}
+      {/* Barcode Scanner — in Medicines page */}
       {showScanner && (
         <BarcodeScanner
           title={modal ? 'Scan to fill Barcode' : 'Scan Medicine Barcode'}
@@ -455,6 +471,30 @@ export default function Medicines() {
               <button className="btn btn-secondary" onClick={() => setDeleteId(null)}>Cancel</button>
               <button className="btn btn-danger" onClick={handleDelete}>Yes, Delete</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Show modal when ragInfo is set */}
+      {ragInfo && (
+        <div className="modal-overlay" onClick={() => setRagInfo(null)}>
+          <div className="modal" style={{ maxWidth: 600 }}>
+            <div className="modal-header">
+              <div className="modal-title">🧠 {ragInfo.name} — Clinical Info</div>
+              <button className="btn btn-ghost btn-icon" onClick={() => setRagInfo(null)}>✕</button>
+            </div>
+            {ragInfo.found ? (
+              <div>
+                <div style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: 'pre-wrap', marginBottom: 14 }}>
+                  {ragInfo.answer}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                  Sources: {ragInfo.sources?.join(', ')} · {ragInfo.contextUsed} chunks retrieved
+                </div>
+              </div>
+            ) : (
+              <div className="text-muted">No knowledge base entries found for {ragInfo.name}.</div>
+            )}
           </div>
         </div>
       )}
