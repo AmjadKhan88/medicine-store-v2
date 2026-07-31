@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './EliteHMSLoader.css'
 const EliteHMSLoader = () => {
   const [percent, setPercent] = useState(0);
@@ -19,21 +19,6 @@ const EliteHMSLoader = () => {
 
   return (
     <div className="loader-wrapper" role="status" aria-label="Loading EliteHMS">
-      {/* Floating glow orbs (light theme) */}
-      <div className="glow-orbs" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </div>
-
-      {/* Medical Cross */}
-      <div className="cross-container">
-        <div className="medical-cross">
-          <div className="bar bar-v"></div>
-          <div className="bar bar-h"></div>
-          <div className="shine"></div>
-        </div>
-        <div className="cross-ring"></div>
-      </div>
-
       {/* Heartbeat line */}
       <div className="heartbeat-wrap">
         <div className="heartbeat-line">
@@ -56,14 +41,6 @@ const EliteHMSLoader = () => {
       <div className="brand">
         <h1>Elite<span className="accent">HMS</span></h1>
         <div className="tagline">Hospital &bull; Pharmacy &bull; Management</div>
-      </div>
-
-      {/* Loading Dots */}
-      <div className="dots">
-        <span className="dot"></span>
-        <span className="dot"></span>
-        <span className="dot"></span>
-        <span className="dot"></span>
       </div>
 
       {/* Progress */}

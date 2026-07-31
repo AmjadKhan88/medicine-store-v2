@@ -1,36 +1,6 @@
 
 /* ── Reset & Base (light theme) ── */
-.loader-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; max-width: 500px; padding: 2rem; margin: 0 auto; min-height: 100vh; background: linear-gradient(145deg, #ffffff 0%, #f0f4ff 100%); font-family: 'Inter', system-ui, -apple-system, sans-serif; overflow: hidden; z-index: 2;}
-/* ── Glow orbs (soft for light bg) ── */
-.glow-orbs { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 0;}
-.glow-orbs span { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; animation: orbFloat 8s ease-in-out infinite alternate;}
-.glow-orbs span:nth-child(1) { width: 300px; height: 300px; background: #2563eb; top: -80px; left: -60px; animation-delay: 0s; }
-.glow-orbs span:nth-child(2) { width: 250px; height: 250px; background: #0d9488; bottom: -60px; right: -40px; animation-delay: 2s;}
-.glow-orbs span:nth-child(3) { width: 180px; height: 180px; background: #7c3aed; top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: 4s; opacity: 0.08;}
-@keyframes orbFloat {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(30px, -30px) scale(1.1); }
-}
-
-/* ── Medical Cross ── */
-.cross-container { position: relative; z-index: 1; margin-bottom: 2rem; animation: crossPulse 2.4s ease-in-out infinite;}
-.medical-cross { position: relative; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 30px rgba(37, 99, 235, 0.15));}
-.medical-cross .bar { position: absolute; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 12px; box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);}
-.medical-cross .bar-v { width: 28px; height: 100%; left: 50%; transform: translateX(-50%); border-radius: 14px;}
-.medical-cross .bar-h { width: 100%; height: 28px; top: 50%; transform: translateY(-50%); border-radius: 14px;}
-.medical-cross .shine { position: absolute; width: 60%; height: 60%; top: 20%; left: 20%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), transparent 70%); border-radius: 50%; pointer-events: none;}
-.cross-ring { position: absolute; width: 130px; height: 130px; border-radius: 50%; border: 2px solid rgba(37, 99, 235, 0.12); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: ringSpin 12s linear infinite;}
-.cross-ring::before { content: ''; position: absolute; width: 160px; height: 160px; border-radius: 50%; border: 1.5px dashed rgba(37, 99, 235, 0.08); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: ringSpin 18s linear infinite reverse;}
-.cross-ring::after { content: ''; position: absolute; width: 190px; height: 190px; border-radius: 50%; border: 1px solid rgba(13, 148, 136, 0.06); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: ringSpin 24s linear infinite;}
-@keyframes ringSpin {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-@keyframes crossPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.04); }
-}
-
+.loader-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; max-width: 500px; padding: 2rem; margin: 0 auto; min-height: 80vh; font-family: 'Inter', system-ui, -apple-system, sans-serif; overflow: hidden; z-index: 2;}
 /* ── Heartbeat ── */
 .heartbeat-wrap {position: relative;z-index: 1;width: 200px;height: 40px;margin-bottom: 2rem;overflow: visible;}
 .heartbeat-line { width: 100%; height: 100%; position: relative;}
@@ -44,12 +14,6 @@
   75% { stroke-dashoffset: 0; }
   100% { stroke-dashoffset: 0; }
 }
-@keyframes dotPulse {
-  0%, 100% { opacity: 0.3; transform: translateY(-50%) scale(0.8); }
-  25% { opacity: 1; transform: translateY(-50%) scale(1.2); }
-  50% { opacity: 1; transform: translateY(-50%) scale(1); }
-  75% { opacity: 0.6; transform: translateY(-50%) scale(0.9); }
-}
 
 /* ── Brand Text ── */
 .brand { position: relative; z-index: 1; text-align: center; margin-bottom: 0.5rem;}
@@ -57,12 +21,7 @@
 .brand h1 .accent { background: linear-gradient(135deg, #0d9488, #0f766e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;}
 .brand .tagline { color: #64748b; font-size: 0.8rem; font-weight: 400; letter-spacing: 0.3em; text-transform: uppercase; margin-top: 0.25rem;}
 
-/* ── Loading Dots ── */
-.dots { position: relative; z-index: 1; display: flex; gap: 10px; margin-top: 2rem;}
-.dots .dot { width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; animation: dotBounce 1.6s ease-in-out infinite; box-shadow: 0 0 15px rgba(37, 99, 235, 0.15);}
-.dots .dot:nth-child(2) { animation-delay: 0.2s; background: #0d9488; box-shadow: 0 0 15px rgba(13, 148, 136, 0.15);}
-.dots .dot:nth-child(3) { animation-delay: 0.4s; background: #7c3aed; box-shadow: 0 0 15px rgba(124, 58, 237, 0.15);}
-.dots .dot:nth-child(4) { animation-delay: 0.6s; background: #ec4899; box-shadow: 0 0 15px rgba(236, 72, 153, 0.15);}
+
 @keyframes dotBounce {
   0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
   50% { transform: translateY(-16px) scale(1.1); opacity: 1; }
@@ -83,13 +42,6 @@
 /* ── Responsive ── */
 @media (max-width: 480px) {
   .brand h1 { font-size: 2.2rem; }
-  .medical-cross { width: 70px; height: 70px; }
-  .medical-cross .bar-v { width: 22px; }
-  .medical-cross .bar-h { height: 22px; }
-  .cross-ring { width: 100px; height: 100px; }
-  .cross-ring::before { width: 130px; height: 130px; }
-  .cross-ring::after { width: 160px; height: 160px; }
   .heartbeat-wrap { width: 160px; height: 32px; }
-  .dots .dot { width: 10px; height: 10px; }
   .progress-wrap { width: 180px; }
 }
