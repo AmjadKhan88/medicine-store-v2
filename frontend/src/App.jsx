@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react'
 import { useAuth } from './context/AuthContext';
 
-import Layout    from './Components/Layout';
+import Layout    from './layouts/Layout';
 import Dashboard from './Pages/Dashboard';
 import Loader    from './Components/Loader';
 

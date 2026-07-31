@@ -4,7 +4,7 @@ import { useSubscription } from '../context/SubscriptionContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../context/ThemeContext';
 import { NavVisibilityProvider, useNavVisibility } from '../context/NavVisibilityContext';
-import RealTimeIndicator from './RealTimeIndicator';
+import RealTimeIndicator from '../Components/RealTimeIndicator';
 import { useState, Suspense } from 'react';
 import {
   MdDashboard, MdReceipt, MdFolderOpen, MdTrendingUp,
@@ -17,9 +17,9 @@ import {
   MdFavorite, MdAccountBox, MdShield, MdAttachMoney,
   MdWhatsapp, MdMergeType, MdCameraAlt,
 } from 'react-icons/md';
-import NotificationCenter from './NotificationCenter';
+import NotificationCenter from '../Components/NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
-import Loader from './Loader';
+import Loader from '../Components/Loader';
 import { useWindowWidth } from '../hooks/useWindowWidth';
 
 /* ── All nav items — single source of truth ── */
