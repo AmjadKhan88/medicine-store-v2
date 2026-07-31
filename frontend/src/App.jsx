@@ -4,7 +4,8 @@ import { useAuth } from './context/AuthContext';
 
 import Layout    from './layouts/Layout';
 import Dashboard from './Pages/Dashboard';
-import Loader    from './Components/Loader';
+import EliteHMSLoader from './Components/EliteHMSLoader';
+// import Loader    from './Components/Loader';
 
 const Login               = lazy(() => import('./Auth/Login'));
 const Register            = lazy(() => import('./Auth/Register'));
@@ -68,7 +69,7 @@ const RAGAdmin            = lazy(() => import('./Pages/RAGAdmin'));
 const PrivateRoute = ({ children }) => {
   const { user, loading} = useAuth();
   if (loading) return (
-    <Loader />
+    <EliteHMSLoader />
   );
   return user ? children : <Navigate to="/login" />;
 };
@@ -78,9 +79,9 @@ export default function App() {
 
   // Don't render any routes until auth is resolved
   // Prevents flash of login page for already-logged-in users
-  if (loading) return <Loader />;
+  if (loading) return <EliteHMSLoader />;
   return (
-    <Suspense fallback={<Loader />}>
+    <Suspense fallback={<EliteHMSLoader />}>
     <Routes>
       <Route path="/" element={user ? <Navigate to="/app" /> :<Landing />} />
       <Route path="/portal/:token"                      element={<PatientPortal      />} />

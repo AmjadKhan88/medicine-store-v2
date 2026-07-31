@@ -19,8 +19,9 @@ import {
 } from 'react-icons/md';
 import NotificationCenter from '../Components/NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
-import Loader from '../Components/Loader';
+// import Loader from '../Components/Loader';
 import { useWindowWidth } from '../hooks/useWindowWidth';
+import EliteHMSLoader from '../Components/EliteHMSLoader';
 
 /* ── All nav items — single source of truth ── */
 export const ALL_NAV_ITEMS = [
@@ -278,7 +279,7 @@ function LayoutInner() {
         </header>
 
         <main className="page-content">
-          <Suspense fallback={<Loader />}>
+          <Suspense fallback={<EliteHMSLoader />}>
             <Outlet />
           </Suspense>
         </main>
