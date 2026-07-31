@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import {
   MdAdd, MdEdit, MdDelete, MdPeople,
-  MdLock, MdCheckCircle, MdCancel, MdPerson
+  MdLock, MdCheckCircle, MdCancel
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { usePermissions } from '../hooks/usePermissions';
+import ShortLoader from '../Components/ShortLoader';
 
 const ROLE_BADGE = {
   admin:       { cls: 'badge-danger',  label: 'Admin / Owner' },
@@ -133,7 +134,7 @@ export default function StaffManagement() {
       <div className="card">
         {loading ? (
           <div className="flex-center" style={{ height: 200 }}>
-            <div className="text-muted">Loading...</div>
+            <ShortLoader/>
           </div>
         ) : staff.length === 0 ? (
           <div className="empty-state">

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MdCheck, MdClose, MdStar, MdWhatsapp } from 'react-icons/md';
+import { MdWhatsapp } from 'react-icons/md';
 
 const PLANS = [
   {

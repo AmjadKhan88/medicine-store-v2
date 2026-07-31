@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  MdSearch, MdMergeType, MdRefresh, MdPerson,
-  MdWarning, MdCheck, MdClose, MdArrowForward,
+import { MdMergeType, MdRefresh,
+   MdCheck, MdClose, MdArrowForward,
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';

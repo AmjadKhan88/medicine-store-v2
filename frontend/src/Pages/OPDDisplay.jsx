@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import API from '../utils/api';
 import { io } from 'socket.io-client';
+import ShortLoader from '../Components/ShortLoader';
 
 export default function OPDDisplay() {
   const { storeId }           = useParams();
@@ -59,7 +60,7 @@ export default function OPDDisplay() {
   if (loading) {
     return (
       <div style={{ background: '#0f172a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: '#fff', fontSize: 24 }}>Loading display...</div>
+        <ShortLoader text="Loading display..."/>
       </div>
     );
   }

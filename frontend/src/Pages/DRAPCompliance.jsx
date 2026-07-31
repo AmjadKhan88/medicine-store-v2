@@ -6,6 +6,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtPKR  = n => `₨${Math.round(Number(n||0)).toLocaleString()}`;
@@ -703,7 +704,7 @@ export default function DRAPCompliance() {
           )}
 
           {loading ? (
-            <div className="flex-center" style={{ height:200 }}><div className="text-muted">Loading...</div></div>
+            <div className="flex-center" style={{ height:200 }}><ShortLoader/></div>
           ) : ctrlEntries.length === 0 ? (
             <div className="empty-state">
               <MdShield size={48} style={{ opacity:0.3, marginBottom:12 }} />

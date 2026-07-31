@@ -7,6 +7,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtDate = d => d ? new Date(d).toLocaleDateString('en-PK', { day:'2-digit', month:'short', year:'numeric' }) : '—';
@@ -377,7 +378,7 @@ function EMRDetail({ patient, onBack }) {
       </div>
 
       {loading ? (
-        <div className="flex-center" style={{ height:200 }}><div className="text-muted">Loading EMR...</div></div>
+        <div className="flex-center" style={{ height:200 }}><ShortLoader text="Loading EMR"/></div>
       ) : (
         <>
           {/* ── OVERVIEW ── */}
@@ -556,7 +557,7 @@ function EMRDetail({ patient, onBack }) {
               </div>
 
               {timelineLoad ? (
-                <div className="flex-center" style={{ height:150 }}><div className="text-muted">Loading timeline...</div></div>
+                <div className="flex-center" style={{ height:150 }}><ShortLoader text="Loading Timeline"/></div>
               ) : Object.keys(grouped).length === 0 ? (
                 <div className="empty-state">
                   <MdHistory size={48} style={{ opacity:0.3, marginBottom:12 }} />
@@ -973,7 +974,7 @@ export default function EMRPage() {
             value={search} onChange={e => setSearch(e.target.value)} autoFocus />
         </div>
 
-        {loading && <div className="text-muted text-sm" style={{ marginTop:10 }}>Searching...</div>}
+        {loading && <ShortLoader text="Searching"/>}
 
         {patients.length > 0 && (
           <div style={{ marginTop:12, display:'flex', flexDirection:'column', gap:8 }}>

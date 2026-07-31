@@ -6,6 +6,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtDate = (d) => d
@@ -766,7 +767,7 @@ export default function LabTests() {
       <div className="card">
         {loading ? (
           <div className="flex-center" style={{ height: 200 }}>
-            <div className="text-muted">Loading...</div>
+            <ShortLoader/>
           </div>
         ) : tests.length === 0 ? (
           <div className="empty-state">

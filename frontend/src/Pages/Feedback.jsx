@@ -7,6 +7,7 @@ import {
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useSocket } from '../context/SocketContext';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtDate = d => d ? new Date(d).toLocaleDateString('en-PK', { day:'2-digit', month:'short', year:'numeric' }) : '—';
@@ -563,7 +564,7 @@ export default function FeedbackManagement() {
           </div>
 
           {loading ? (
-            <div className="flex-center" style={{ height:200 }}><div className="text-muted">Loading...</div></div>
+            <div className="flex-center" style={{ height:200 }}><ShortLoader/></div>
           ) : feedback.length === 0 ? (
             <div className="empty-state">
               <MdStar size={52} style={{ opacity:0.3, marginBottom:12 }} />

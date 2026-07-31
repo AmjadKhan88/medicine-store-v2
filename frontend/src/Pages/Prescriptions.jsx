@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   MdAdd, MdSearch, MdPictureAsPdf, MdReceipt,
   MdCancel, MdVisibility, MdMedicalServices,
-  MdHistory, MdCheckCircle,
+   MdCheckCircle,
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { printPrescriptionPDF } from '../utils/prescriptionPDF';
+import ShortLoader from '../Components/ShortLoader';
 
 const STATUS_BADGE = {
   Active:    'badge-success',
@@ -151,7 +152,7 @@ export default function Prescriptions() {
       <div className="card">
         {loading ? (
           <div className="flex-center" style={{ height: 200 }}>
-            <div className="text-muted">Loading...</div>
+            <ShortLoader/>
           </div>
         ) : prescriptions.length === 0 ? (
           <div className="empty-state">

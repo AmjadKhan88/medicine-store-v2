@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  MdStore, MdPayment, MdSupportAgent, MdBarChart,
+   MdPayment, MdSupportAgent, MdBarChart,
   MdCheckCircle, MdCancel, MdBlock, MdLockOpen,
   MdRefresh, MdWarning, MdSearch, MdOpenInNew,
-  MdStar, MdReply, MdClose,
+   MdReply, MdClose,
 } from 'react-icons/md';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const PKR     = (n) => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;
@@ -405,7 +406,7 @@ export default function SuperAdminDashboard() {
 
   if (loading) return (
     <div className="flex-center" style={{ height: 300 }}>
-      <div className="text-muted">Loading super admin panel...</div>
+      <ShortLoader text="Loading super admin panel..." />
     </div>
   );
 

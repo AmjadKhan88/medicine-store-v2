@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useSocketEvent } from '../hooks/useSocketEvent';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -405,7 +406,7 @@ function ViewModal({ id, onClose, onEdit, onComplete, onCancel }) {
   if (!appt) return (
     <div className="modal-overlay">
       <div className="modal" style={{ maxWidth: 400 }}>
-        <div className="flex-center" style={{ height: 120 }}><div className="text-muted">Loading...</div></div>
+        <div className="flex-center" style={{ height: 120 }}><ShortLoader/></div>
       </div>
     </div>
   );
@@ -733,7 +734,7 @@ export default function Appointments() {
           <div className="card">
             {loading ? (
               <div className="flex-center" style={{ height: 200 }}>
-                <div className="text-muted">Loading...</div>
+                <ShortLoader/>
               </div>
             ) : appointments.length === 0 ? (
               <div className="empty-state">

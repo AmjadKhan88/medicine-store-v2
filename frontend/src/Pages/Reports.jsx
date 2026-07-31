@@ -11,6 +11,7 @@ import {
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { exportReportPDF, exportReportCSV } from '../utils/reportExport';
+import ShortLoader from '../Components/ShortLoader';
 
 const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#ec4899', '#14b8a6'];
 
@@ -128,7 +129,7 @@ export default function Reports() {
   };
 
   if (loading && !reportData) {
-    return <div className="flex-center" style={{ height: 300 }}><div className="text-muted">Loading report...</div></div>;
+    return <div className="flex-center" style={{ height: 300 }}><ShortLoader text="Loading report..."/></div>;
   }
   if (!reportData) return null;
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { MdCheckCircle, MdCancel, MdStore, MdPayment, MdRefresh } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 const PKR    = (n)    => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;
 const fmtDate = (d)   => d ? new Date(d).toLocaleDateString('en-PK') : '—';
@@ -94,7 +95,7 @@ export default function SuperAdmin() {
         ))}
       </div>
 
-      {loading ? <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading...</div></div> : (
+      {loading ? <div className="flex-center" style={{ height: 200 }}><ShortLoader/></div> : (
 
         <>
           {/* Payment Requests */}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { MdLock, MdCheckCircle } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';

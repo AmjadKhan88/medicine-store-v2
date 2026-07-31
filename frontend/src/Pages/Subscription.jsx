@@ -142,7 +142,6 @@ function PaymentModal({ plan, planData, onClose, onSubmitted }) {
   const [step, setStep]          = useState(1); // 1=pay, 2=confirm
   const [submitting, setSubmitting] = useState(false);
 
-  const payInfo = PAYMENT_INFO[method];
 
   const handleSubmit = async () => {
     if (!txnId.trim()) { toast.error('Enter your transaction ID'); return; }

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   MdMedicalServices, MdReceipt, MdScience,
-  MdCalendarToday, MdAccountBalance, MdPictureAsPdf,
+  MdCalendarToday, MdPictureAsPdf,
   MdCheckCircle, MdWarning, MdPhone, MdEmail,
   MdExpandMore, MdExpandLess,
 } from 'react-icons/md';

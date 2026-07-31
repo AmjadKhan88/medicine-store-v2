@@ -16,10 +16,10 @@ import {
   MdLocalHotel, MdLocalHospital, MdBloodtype, MdImage,
   MdFavorite, MdAccountBox, MdShield, MdAttachMoney,
   MdWhatsapp, MdMergeType, MdCameraAlt,
+  MdBrandingWatermark,
 } from 'react-icons/md';
 import NotificationCenter from '../Components/NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
-// import Loader from '../Components/Loader';
 import { useWindowWidth } from '../hooks/useWindowWidth';
 import EliteHMSLoader from '../Components/EliteHMSLoader';
 
@@ -116,6 +116,7 @@ const ICON_MAP = {
   '/app/backup':          <MdBackup />,
   '/app/invoice-settings':<MdReceipt />,
   '/app/documents':       <MdFolderOpen />,
+  '/app/rag-admin':       <MdBrandingWatermark />,
   '/app/settings':        <MdSettings />,
 };
 

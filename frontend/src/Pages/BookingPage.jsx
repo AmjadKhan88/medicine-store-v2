@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const DAY_NAMES   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -55,7 +56,7 @@ function CancelPage({ slug, cancelToken }) {
 
   if (loading) return (
     <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#f8fafc' }}>
-      <div style={{ color:'#6b7280' }}>Loading...</div>
+      <ShortLoader/>
     </div>
   );
 

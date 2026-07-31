@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 const fmtDate = d => d ? new Date(d).toLocaleDateString('en-PK', { day:'2-digit', month:'long', year:'numeric' }) : '—';
 
@@ -20,7 +21,7 @@ export default function RadiologyViewer() {
 
   if (loading) return (
     <div style={{ background:'#0f172a', minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center' }}>
-      <div style={{ color:'#fff', fontSize:18 }}>Loading report...</div>
+      <ShortLoader text="Loading report..."/>
     </div>
   );
 

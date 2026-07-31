@@ -11,6 +11,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtPKR   = n => `₨${Math.round(Number(n||0)).toLocaleString()}`;
@@ -388,7 +389,7 @@ export default function DemandPredictionPage() {
           </div>
 
           {loading ? (
-            <div className="flex-center" style={{ height:200 }}><div className="text-muted">Loading predictions...</div></div>
+            <div className="flex-center" style={{ height:200 }}><ShortLoader/></div>
           ) : predictions.length === 0 ? (
             <div className="empty-state">
               <MdAutoGraph size={56} style={{ opacity:0.3, marginBottom:16 }} />

@@ -5,6 +5,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 const STATUS_BADGE = {
   Open:        'badge-danger',
@@ -231,7 +232,7 @@ export default function SupportCenter() {
       )}
 
       {loading ? (
-        <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading...</div></div>
+        <div className="flex-center" style={{ height: 200 }}><ShortLoader/></div>
       ) : tickets.length === 0 && (
         <div className="empty-state">
           <MdSupportAgent size={52} style={{ opacity: 0.3, marginBottom: 16 }} />

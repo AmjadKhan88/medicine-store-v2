@@ -2,12 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   MdAdd, MdClose, MdSearch, MdEdit, MdDelete,
   MdCheck, MdPerson, MdRefresh, MdBarChart,
-  MdCalendarToday, MdArrowBack, MdWarning,
+  MdCalendarToday, MdArrowBack,
   MdLocalHospital,
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useSocket } from '../context/SocketContext';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtDate  = d => d ? new Date(d).toLocaleDateString('en-PK', { weekday:'short', day:'2-digit', month:'short', year:'numeric' }) : '—';
@@ -365,7 +366,7 @@ function ScheduleDetail({ scheduleId, onBack, onRefresh }) {
     } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
   };
 
-  if (loading) return <div className="flex-center" style={{ height:300 }}><div className="text-muted">Loading...</div></div>;
+  if (loading) return <div className="flex-center" style={{ height:300 }}><ShortLoader/></div>;
   if (!schedule) return null;
 
   const sc   = STATUS_CFG[schedule.status]  || STATUS_CFG.Scheduled;
@@ -686,7 +687,7 @@ function ReportModal({ onClose }) {
         </div>
 
         {loading ? (
-          <div className="flex-center" style={{ height:200 }}><div className="text-muted">Loading...</div></div>
+          <div className="flex-center" style={{ height:200 }}><ShortLoader/></div>
         ) : report && (
           <>
             {/* Totals */}
@@ -886,7 +887,7 @@ export default function OTScheduling() {
 
       {/* List */}
       {loading ? (
-        <div className="flex-center" style={{ height:200 }}><div className="text-muted">Loading...</div></div>
+        <div className="flex-center" style={{ height:200 }}><ShortLoader/></div>
       ) : schedules.length === 0 ? (
         <div className="empty-state">
           <MdLocalHospital size={52} style={{ opacity:0.3, marginBottom:16 }} />

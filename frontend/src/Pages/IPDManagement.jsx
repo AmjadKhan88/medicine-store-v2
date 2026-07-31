@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  MdAdd, MdClose, MdSearch, MdPerson, MdMedicalServices,
-  MdReceipt, MdLocalHotel, MdCheck, MdDelete,
-  MdRefresh, MdArrowBack, MdWarning, MdHistory,
+  MdAdd, MdClose, MdSearch, MdMedicalServices,
+   MdLocalHotel, MdCheck, MdDelete,
+  MdRefresh, MdArrowBack, MdHistory,
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtDate  = d => d ? new Date(d).toLocaleDateString('en-PK', { day:'2-digit', month:'short', year:'numeric' }) : '—';
@@ -484,7 +485,7 @@ function AdmissionDetail({ admissionId, onBack, onRefresh }) {
     } catch(err){toast.error(err.response?.data?.message||'Failed');}
   };
 
-  if(loading) return <div className="flex-center" style={{height:300}}><div className="text-muted">Loading...</div></div>;
+  if(loading) return <div className="flex-center" style={{height:300}}><ShortLoader/></div>;
   if(!admission) return <div className="text-muted">Admission not found</div>;
 
   const p       = admission.patient;
@@ -992,7 +993,7 @@ export default function IPDManagement() {
 
       {/* Table */}
       {loading ? (
-        <div className="flex-center" style={{height:200}}><div className="text-muted">Loading...</div></div>
+        <div className="flex-center" style={{height:200}}><ShortLoader/></div>
       ) : admissions.length===0 ? (
         <div className="empty-state">
           <MdLocalHotel size={52} style={{opacity:0.3,marginBottom:16}}/>

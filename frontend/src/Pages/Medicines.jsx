@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useSocketEvent } from '../hooks/useSocketEvent';
 import { useWindowWidth } from '../hooks/useWindowWidth';
+import ShortLoader from '../Components/ShortLoader';
 
 
 const CATEGORIES = ['All', 'Antibiotic', 'Analgesic', 'Antiviral', 'Antifungal', 'Cardiovascular', 'Diabetes', 'Respiratory', 'Gastrointestinal', 'Neurological', 'Vitamin & Supplement', 'Dermatological', 'Other'];
@@ -222,7 +223,7 @@ export default function Medicines() {
 
       <div className="card" style={{ padding: width < 460 ? 10 : 24 }}>
         {loading ? (
-          <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading...</div></div>
+          <div className="flex-center" style={{ height: 200 }}><ShortLoader/></div>
         ) : medicines.length === 0 ? (
           <div className="empty-state"><MdMedicalServices size={52} style={{ opacity: 0.3 }} /><h3>No medicines found</h3><p>Add your first medicine or adjust filters</p></div>
         ) : (

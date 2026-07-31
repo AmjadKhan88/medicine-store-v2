@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { usePermissions } from '../hooks/usePermissions';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtDate = (d) =>
@@ -285,7 +286,7 @@ export default function Backup() {
           <span className="badge badge-accent">Live</span>
         </div>
         {loading ? (
-          <div className="text-muted text-sm">Loading...</div>
+          <ShortLoader/>
         ) : (
           <div className="stat-grid" style={{ marginBottom: 0 }}>
             {statCards.map((s, i) => (

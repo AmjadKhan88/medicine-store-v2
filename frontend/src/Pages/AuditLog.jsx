@@ -7,6 +7,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── Config ── */
 const CATEGORY_CONFIG = {
@@ -407,7 +408,7 @@ export default function AuditLog() {
 
         {loading ? (
           <div className="flex-center" style={{ height: 200 }}>
-            <div className="text-muted">Loading logs...</div>
+            <ShortLoader/>
           </div>
         ) : logs.length === 0 ? (
           <div className="empty-state">

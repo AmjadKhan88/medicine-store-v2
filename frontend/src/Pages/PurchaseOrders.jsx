@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   MdAdd, MdSearch, MdInventory, MdCheckCircle,
   MdLocalShipping, MdPayment, MdDelete, MdVisibility,
-  MdWarning, MdArrowDropDown
+  MdWarning,
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const PKR     = (n) => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;
@@ -208,7 +209,7 @@ export default function PurchaseOrders() {
       <div className="card">
         {loading ? (
           <div className="flex-center" style={{ height: 200 }}>
-            <div className="text-muted">Loading...</div>
+            <ShortLoader/>
           </div>
         ) : orders.length === 0 ? (
           <div className="empty-state">

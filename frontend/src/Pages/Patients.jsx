@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useSocketEvent } from '../hooks/useSocketEvent';
 import PatientDocuments from '../Components/PatientDocuments';
+import ShortLoader from '../Components/ShortLoader';
 
 const BLOOD = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'];
 const empty = { name: '', age: '', gender: 'Male', phone: '', email: '', address: '', city: '', bloodGroup: 'Unknown', medicalHistory: '', allergies: '', doctor: '' };
@@ -127,7 +128,7 @@ export default function Patients() {
 
       <div className="card">
         {loading ? (
-          <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading...</div></div>
+          <div className="flex-center" style={{ height: 200 }}><ShortLoader/></div>
         ) : patients.length === 0 ? (
           <div className="empty-state"><MdPeople size={52} style={{ opacity: 0.3 }} /><h3>No patients found</h3><p>Register your first patient</p></div>
         ) : (

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { MdAccountBalance, MdSearch, MdPayment, MdWhatsapp } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 
 function buildWhatsAppURL(phone, message) {
@@ -214,7 +215,7 @@ export default function PatientBalance() {
       </div>
 
       <div className="card">
-        {loading ? <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading...</div></div>
+        {loading ? <div className="flex-center" style={{ height: 200 }}><ShortLoader/></div>
           : filtered.length === 0 ? <div className="empty-state"><MdAccountBalance size={52} style={{ opacity: 0.3 }} /><h3>No outstanding balances</h3><p>All patients are fully paid up!</p></div>
             : (
               <div className="table-container">

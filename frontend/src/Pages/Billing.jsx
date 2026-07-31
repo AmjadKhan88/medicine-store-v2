@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { generateInvoicePDF } from '../utils/invoicePDF';
 import { useSocketEvent } from '../hooks/useSocketEvent';
+import ShortLoader from '../Components/ShortLoader';
 
 const STATUS_COLORS = {
   Paid: 'badge-success',
@@ -196,7 +197,7 @@ export default function Billing() {
       <div className="card">
         {loading ? (
           <div className="flex-center" style={{ height: 200 }}>
-            <div className="text-muted">Loading...</div>
+            <ShortLoader/>
           </div>
         ) : bills.length === 0 ? (
           <div className="empty-state">

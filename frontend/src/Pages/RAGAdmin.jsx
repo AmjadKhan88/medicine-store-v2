@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   MdUpload, MdDelete, MdSearch, MdRefresh,
-  MdAdd, MdClose, MdInfo, MdCheck,
+  MdAdd, MdClose
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 const fmtDate   = d => d ? new Date(d).toLocaleDateString('en-PK', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
 const fmtSize   = b => b > 1024*1024 ? `${(b/1024/1024).toFixed(1)} MB` : `${Math.round(b/1024)} KB`;
@@ -458,7 +459,7 @@ export default function RAGAdmin() {
           </div>
 
           {loading ? (
-            <div className="flex-center" style={{ height:200 }}><div className="text-muted">Loading...</div></div>
+            <div className="flex-center" style={{ height:200 }}><ShortLoader/></div>
           ) : documents.length === 0 ? (
             <div className="empty-state">
               <span style={{ fontSize:56, opacity:0.3 }}>🧠</span>

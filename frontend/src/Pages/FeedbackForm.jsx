@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 const fmtDate = d => d ? new Date(d).toLocaleDateString('en-PK', { day:'2-digit', month:'long', year:'numeric' }) : '—';
 
@@ -85,7 +86,7 @@ export default function FeedbackForm() {
   /* ── Loading ── */
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ fontSize: 18, color: '#6b7280' }}>Loading feedback form...</div>
+      <ShortLoader text="Loading feedback form..."/>
     </div>
   );
 

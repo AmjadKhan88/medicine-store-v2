@@ -3,11 +3,12 @@ import {
   MdAdd, MdClose, MdSearch, MdRefresh,
   MdShare, MdDelete, MdUpload, MdCheck,
   MdArrowBack, MdWarning, MdImage,
-  MdZoomIn, MdBarChart,
+  MdZoomIn
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useSocket } from '../context/SocketContext';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtDate  = d => d ? new Date(d).toLocaleDateString('en-PK', { day:'2-digit', month:'short', year:'numeric' }) : '—';
@@ -663,7 +664,7 @@ function StudyDetail({ studyId, onBack, onRefresh }) {
     } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
   };
 
-  if (loading) return <div className="flex-center" style={{ height: 300 }}><div className="text-muted">Loading...</div></div>;
+  if (loading) return <div className="flex-center" style={{ height: 300 }}><ShortLoader/></div>;
   if (!study)  return null;
 
   const sc     = STATUS_CFG[study.status] || STATUS_CFG.Ordered;
@@ -1116,7 +1117,7 @@ export default function Radiology() {
 
       {/* Studies list */}
       {loading ? (
-        <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading...</div></div>
+        <div className="flex-center" style={{ height: 200 }}><ShortLoader/></div>
       ) : studies.length === 0 ? (
         <div className="empty-state">
           <MdImage size={52} style={{ opacity: 0.3, marginBottom: 16 }} />

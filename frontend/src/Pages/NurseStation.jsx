@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  MdPerson, MdMedicalServices, MdWarning, MdCheck,
+  MdPerson, MdCheck,
   MdRefresh, MdAdd, MdClose, MdSearch, MdTimer,
   MdFavorite, MdLocalPharmacy, MdNotifications,
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useSocket } from '../context/SocketContext';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -301,7 +302,7 @@ function PatientPanel({ admissionId, onClose }) {
   if (loading) {
     return (
       <div style={{ padding: 24 }} className="flex-center">
-        <div className="text-muted">Loading patient...</div>
+        <ShortLoader text="Loading patient..."/>
       </div>
     );
   }
@@ -783,7 +784,7 @@ export default function NurseStation() {
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {loading ? (
             <div className="flex-center" style={{ height: 200 }}>
-              <div className="text-muted text-sm">Loading...</div>
+              <ShortLoader/>
             </div>
           ) : filteredPatients.length === 0 ? (
             <div className="text-muted text-sm" style={{ textAlign: 'center', padding: 24 }}>

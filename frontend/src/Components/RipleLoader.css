@@ -1,0 +1,58 @@
+ /* ── 6. Ripple dots ── */
+ .loader-card {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     gap: 1.2rem;
+ }
+
+ .loader-card span {
+     color: #5d677a;
+     font-size: 0.75rem;
+     letter-spacing: 0.04em;
+     text-transform: uppercase;
+     font-weight: 500;
+ }
+
+ .ripple {
+     display: flex;
+     gap: 10px;
+ }
+
+ .ripple .r-dot {
+     width: 12px;
+     height: 12px;
+     background: #6c8cff;
+     border-radius: 50%;
+     animation: ripple 1.4s ease-in-out infinite;
+ }
+
+ .ripple .r-dot:nth-child(2) {
+     animation-delay: 0.2s;
+ }
+
+ .ripple .r-dot:nth-child(3) {
+     animation-delay: 0.4s;
+ }
+
+ .ripple .r-dot:nth-child(4) {
+     animation-delay: 0.6s;
+ }
+
+ .ripple .r-dot:nth-child(5) {
+     animation-delay: 0.8s;
+ }
+
+ @keyframes ripple {
+
+     0%,
+     100% {
+         transform: translateY(0) scale(0.6);
+         opacity: 0.3;
+     }
+
+     50% {
+         transform: translateY(-16px) scale(1);
+         opacity: 1;
+     }
+ }

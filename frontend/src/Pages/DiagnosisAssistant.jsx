@@ -8,6 +8,7 @@ import {
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import {useWindowWidth} from '../hooks/useWindowWidth';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtDT = d => d ? new Date(d).toLocaleString('en-PK', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
@@ -995,7 +996,7 @@ function HistoryPanel({ onLoad }) {
     } catch { }
   };
 
-  if (loading) return <div className="text-muted text-sm">Loading history...</div>;
+  if (loading) return <ShortLoader/>;
 
   return (
     <div>

@@ -8,6 +8,7 @@ import API from '../utils/api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import SubstitutesPanel from '../Components/SubstitutesPanel';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ─────────────────────────────────────────
    PDF helpers
@@ -368,7 +369,7 @@ export default function ExpiryAlerts() {
       <div className="card">
         {loading ? (
           <div className="flex-center" style={{ height: 200 }}>
-            <div className="text-muted">Loading...</div>
+            <ShortLoader/>
           </div>
         ) : current.length === 0 ? (
           <div className="empty-state">

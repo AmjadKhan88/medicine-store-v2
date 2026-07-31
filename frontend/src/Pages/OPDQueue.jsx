@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   MdAdd, MdClose, MdSearch, MdSkipNext, MdCheck,
   MdRefresh, MdPeople,
@@ -7,8 +7,8 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
-// import { useSocket } from '../context/SocketContext';
 import { useSocketEvent } from '../hooks/useSocketEvent';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const todayStr  = () => new Date().toISOString().slice(0, 10);
@@ -431,7 +431,7 @@ useSocketEvent('opd:called', (data) => {
     }
   };
 
-  if (loading) return <div className="flex-center" style={{ height: 300 }}><div className="text-muted">Loading queue...</div></div>;
+  if (loading) return <div className="flex-center" style={{ height: 300 }}><ShortLoader text="Loading queue..."/></div>;
 
   const q = queue;
   const qStats = q?.stats || {};

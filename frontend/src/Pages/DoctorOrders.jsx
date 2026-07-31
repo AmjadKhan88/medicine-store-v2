@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  MdAdd, MdClose, MdCheck, MdEdit, MdDelete,
+  MdAdd, MdClose, MdCheck,
   MdRefresh, MdSearch, MdPerson, MdArrowBack,
-  MdWarning, MdMedicalServices, MdAssignment,
+  MdWarning, MdAssignment,
   MdNotes, MdSwapHoriz,
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useSocket } from '../context/SocketContext';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtDate = d => d ? new Date(d).toLocaleDateString('en-PK', { day:'2-digit', month:'short', year:'numeric' }) : '—';
@@ -700,7 +701,7 @@ function AdmissionOrdersView({ admissionId, patientName, onBack }) {
           </div>
 
           {loading ? (
-            <div className="flex-center" style={{ height:200 }}><div className="text-muted">Loading...</div></div>
+            <div className="flex-center" style={{ height:200 }}><ShortLoader/></div>
           ) : filteredOrders.length === 0 ? (
             <div className="empty-state">
               <MdAssignment size={48} style={{ opacity:0.3, marginBottom:12 }} />
@@ -1019,7 +1020,7 @@ export default function DoctorOrders() {
           </div>
 
           {loading ? (
-            <div className="flex-center" style={{ height:200 }}><div className="text-muted">Loading...</div></div>
+            <div className="flex-center" style={{ height:200 }}><ShortLoader/></div>
           ) : filtered.length === 0 ? (
             <div className="empty-state">
               <MdPerson size={48} style={{ opacity:0.3, marginBottom:12 }} />

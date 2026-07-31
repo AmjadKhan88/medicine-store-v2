@@ -6,6 +6,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtPKR  = n => `₨${Math.round(Number(n||0)).toLocaleString()}`;
@@ -265,7 +266,7 @@ export default function BookingConfig() {
     { id:'stats',   label:'Stats'    },
   ];
 
-  if (loading) return <div className="flex-center" style={{ height:300 }}><div className="text-muted">Loading...</div></div>;
+  if (loading) return <div className="flex-center" style={{ height:300 }}><ShortLoader/></div>;
 
   return (
     <div>

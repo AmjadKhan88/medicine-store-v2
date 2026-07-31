@@ -8,6 +8,7 @@ import {
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { usePermissions } from '../hooks/usePermissions';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const PKR     = (n) => `₨ ${Number(n || 0).toLocaleString('en-PK')}`;
@@ -240,7 +241,7 @@ function SupplierDetailModal({ id, onClose, onEdit, onSaved }) {
   if (!supplier) return (
     <div className="modal-overlay">
       <div className="modal" style={{ maxWidth: 420 }}>
-        <div className="flex-center" style={{ height: 120 }}><div className="text-muted">Loading...</div></div>
+        <div className="flex-center" style={{ height: 120 }}><ShortLoader/></div>
       </div>
     </div>
   );
@@ -396,7 +397,7 @@ function SupplierDetailModal({ id, onClose, onEdit, onSaved }) {
               </div>
             )}
             {!history ? (
-              <div className="flex-center" style={{ height: 100 }}><div className="text-muted">Loading...</div></div>
+              <div className="flex-center" style={{ height: 100 }}><ShortLoader/></div>
             ) : history.orders.length === 0 ? (
               <div className="empty-state"><MdHistory size={48} style={{ opacity: 0.3 }} /><h3>No purchase history</h3></div>
             ) : (
@@ -684,7 +685,7 @@ function OutstandingTab({ onPaySaved }) {
 
       <div className="card">
         {loading ? (
-          <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading...</div></div>
+          <div className="flex-center" style={{ height: 200 }}><ShortLoader/></div>
         ) : data.suppliers.length === 0 ? (
           <div className="empty-state"><MdCheckCircle size={52} style={{ opacity: 0.3 }} /><h3>No outstanding balances!</h3><p>All supplier payments are cleared.</p></div>
         ) : (
@@ -827,7 +828,7 @@ export default function Suppliers() {
 
           <div className="card">
             {loading ? (
-              <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading...</div></div>
+              <div className="flex-center" style={{ height: 200 }}><ShortLoader/></div>
             ) : suppliers.length === 0 ? (
               <div className="empty-state">
                 <MdLocalShipping size={52} style={{ opacity: 0.3, marginBottom: 16 }} />

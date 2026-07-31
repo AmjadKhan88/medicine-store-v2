@@ -7,6 +7,7 @@ import {
 import toast from 'react-hot-toast';
 import API from '../utils/api';
 import { useSocket } from '../context/SocketContext';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtDate  = d => d ? new Date(d).toLocaleDateString('en-PK', { day:'2-digit', month:'short', year:'numeric' }) : '—';
@@ -675,7 +676,7 @@ export default function BloodBank() {
       {activeTab === 'inventory' && (
         <div>
           {loading ? (
-            <div className="flex-center" style={{ height:200 }}><div className="text-muted">Loading...</div></div>
+            <div className="flex-center" style={{ height:200 }}><ShortLoader/></div>
           ) : (
             <>
               {/* Blood group grid */}

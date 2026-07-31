@@ -11,6 +11,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtPKR  = n => `₨${Math.round(Number(n||0)).toLocaleString()}`;
@@ -301,7 +302,7 @@ function PnLSection({ period }) {
     toast.success('Excel exported!');
   };
 
-  if (loading) return <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading P&L...</div></div>;
+  if (loading) return <div className="flex-center" style={{ height: 200 }}><ShortLoader/></div>;
   if (!pnl)    return null;
 
   const rows = [
@@ -508,7 +509,7 @@ function FBRSection({ period }) {
     toast.success('FBR summary exported!');
   };
 
-  if (loading) return <div className="flex-center" style={{ height: 150 }}><div className="text-muted">Loading...</div></div>;
+  if (loading) return <div className="flex-center" style={{ height: 150 }}><ShortLoader/></div>;
   if (!fbr)    return null;
 
   return (
@@ -779,7 +780,7 @@ export default function Accounting() {
           </div>
 
           {expLoading ? (
-            <div className="flex-center" style={{ height: 150 }}><div className="text-muted">Loading...</div></div>
+            <div className="flex-center" style={{ height: 150 }}><ShortLoader/></div>
           ) : expenses.length === 0 ? (
             <div className="empty-state">
               <MdReceipt size={48} style={{ opacity: 0.3, marginBottom: 12 }} />

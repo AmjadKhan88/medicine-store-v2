@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import {
-  MdUpload, MdRefresh, MdCheck, MdClose,
+  MdUpload, MdClose,
   MdAdd, MdCameraAlt, MdContentCopy,
 } from 'react-icons/md';
 import toast from 'react-hot-toast';

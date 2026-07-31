@@ -6,6 +6,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtDate = d => d ? new Date(d).toLocaleDateString('en-PK', { day:'2-digit', month:'short', year:'numeric' }) : '—';
@@ -540,7 +541,7 @@ function SenderView({ broadcastId, onBack }) {
     window.open(`sms:${recipient.phone}?body=${msg}`, '_blank');
   };
 
-  if (loading) return <div className="flex-center" style={{ height: 300 }}><div className="text-muted">Loading...</div></div>;
+  if (loading) return <div className="flex-center" style={{ height: 300 }}><ShortLoader/></div>;
   if (!broadcast) return null;
 
   const recipients   = broadcast.recipients || [];
@@ -845,7 +846,7 @@ export default function BroadcastPage() {
 
       {/* Broadcasts list */}
       {loading ? (
-        <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading...</div></div>
+        <div className="flex-center" style={{ height: 200 }}><ShortLoader/></div>
       ) : broadcasts.length === 0 ? (
         <div className="empty-state">
           <MdWhatsapp size={56} style={{ opacity: 0.3, marginBottom: 16, color: '#25d366' }} />

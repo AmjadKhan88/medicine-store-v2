@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  MdAdd, MdClose, MdSearch, MdRefresh,
-  MdEdit, MdDelete, MdCheck, MdPerson,
-  MdArrowBack, MdBarChart, MdShield,
-  MdAttachMoney, MdWarning,
+  MdAdd, MdClose, MdSearch,
+  MdEdit, MdDelete, MdPerson,
+   MdShield,
+  MdAttachMoney
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtPKR  = n => `₨${Math.round(Number(n||0)).toLocaleString()}`;
@@ -795,7 +796,7 @@ export default function Insurance() {
       {activeTab === 'panels' && (
         <div>
           {loading ? (
-            <div className="flex-center" style={{ height:200 }}><div className="text-muted">Loading...</div></div>
+            <div className="flex-center" style={{ height:200 }}><ShortLoader/></div>
           ) : panels.length === 0 ? (
             <div className="empty-state">
               <MdShield size={52} style={{ opacity:0.3, marginBottom:16 }} />

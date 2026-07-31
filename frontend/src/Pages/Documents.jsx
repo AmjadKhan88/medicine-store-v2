@@ -7,6 +7,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+import ShortLoader from '../Components/ShortLoader';
 
 /* ── helpers ── */
 const fmtDate  = (d) => d ? new Date(d).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
@@ -422,7 +423,7 @@ export default function Documents() {
 
       {/* Documents grid */}
       {loading ? (
-        <div className="flex-center" style={{ height: 200 }}><div className="text-muted">Loading...</div></div>
+        <div className="flex-center" style={{ height: 200 }}><ShortLoader/></div>
       ) : docs.length === 0 ? (
         <div className="empty-state">
           <MdFolderOpen size={52} style={{ opacity: 0.3, marginBottom: 16 }} />
