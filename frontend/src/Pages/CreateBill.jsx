@@ -99,7 +99,7 @@ export default function CreateBill() {
     <div>
       <div className="page-header">
         <div className="page-header-left">
-          <button className="btn btn-ghost btn-sm" onClick={() => navigate('/billing')} style={{ marginBottom: 6 }}><MdArrowBack /> Back</button>
+          <button className="btn btn-ghost btn-sm" onClick={() => navigate('/app/billing')} style={{ marginBottom: 6 }}><MdArrowBack /> Back</button>
           <h1>Create Invoice</h1>
           <p>Generate a new patient invoice</p>
         </div>

@@ -62,9 +62,12 @@ const ocrCtrl                  =   require('./controllers/ocrController');
 const diagnosisCtrl            =   require('./controllers/diagnosisController');
 const demandRoutes             =   require('./routes/demand');
 const drapRoutes               =   require('./routes/drap');
+const ragRoutes                =   require('./routes/rag');
 const { protect }              =   require('./middleware/auth');
 const { startExpiryDigestJob }              =   require('./jobs/expiryDigest');
 const { requireSubscription,checkFeature }  =   require('./middleware/checkSubscription');
+const { ensureCollection }                  =   require('./services/qdrantService');
+
 
 
 
@@ -230,6 +233,9 @@ app.post('/api/diagnosis/analyze',  protect, requireSubscription, checkFeature('
 app.post('/api/diagnosis/followup', protect, requireSubscription, aiLimiter, diagnosisCtrl.followUp);
 app.delete('/api/diagnosis/:id',    protect, requireSubscription, diagnosisCtrl.deleteSession);
 
+/* ── RAG Knowledge Base ── */
+app.use('/api/rag', ragRoutes);
+
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER
 ════════════════════════════════ */
@@ -307,6 +313,13 @@ const start = async () => {
   });
 
   initSocket(httpServer);
+
+      // Initialize Qdrant collection
+    try {
+      await ensureCollection();
+    } catch (err) {
+      console.warn('[Qdrant] Collection init warning:', err.message);
+    }
 
   httpServer.listen(PORT, () => {
     logger.info(`✅ Worker ${process.pid} listening on port ${PORT}`);
