@@ -96,9 +96,9 @@ function SetupModal({ onClose, onEnabled }) {
             <input
               className="form-control"
               value={code}
-              onChange={e => setCode(e.target.value.replace(' ','').slice(0,6))}
+              onChange={e => setCode(e.target.value.replace(' ','').slice(0,8))}
               onKeyDown={e => e.key === 'Enter' && handleVerify()}
-              placeholder="000 000"
+              placeholder="0000 0000"
               maxLength={6}
               autoFocus
               style={{ fontSize:28, textAlign:'center', letterSpacing:10, fontWeight:700, marginBottom:16 }}
@@ -197,8 +197,8 @@ function DisableModal({ onClose, onDisabled }) {
         </div>
         <div className="form-group">
           <label className="form-label required">Current 2FA Code</label>
-          <input className="form-control" value={code} onChange={e => setCode(e.target.value.replace(' ','').slice(0,6))}
-            placeholder="000000" style={{ fontFamily:'monospace', fontSize:18, letterSpacing:6, textAlign:'center' }} />
+          <input className="form-control" value={code} onChange={e => setCode(e.target.value.replace(' ','').slice(0,8))}
+            placeholder="00000000" style={{ fontFamily:'monospace', fontSize:18, letterSpacing:6, textAlign:'center' }} />
         </div>
 
         <div className="modal-footer">
@@ -249,8 +249,8 @@ function RegenModal({ onClose }) {
             </div>
             <div className="form-group">
               <label className="form-label required">Current 2FA Code</label>
-              <input className="form-control" value={code} onChange={e => setCode(e.target.value.replace(/\D/g,'').slice(0,6))}
-                placeholder="000000" autoFocus style={{ fontFamily:'monospace', fontSize:20, textAlign:'center', letterSpacing:8 }} />
+              <input className="form-control" value={code} onChange={e => setCode(e.target.value.replace(' ','').slice(0,8))}
+                placeholder="00000000" autoFocus style={{ fontFamily:'monospace', fontSize:20, textAlign:'center', letterSpacing:8 }} />
             </div>
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
