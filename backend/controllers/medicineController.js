@@ -46,7 +46,7 @@ exports.getAllMedicines = async (req, res) => {
 
 exports.getMedicine = async (req, res) => {
   try {
-    const medicine = await Medicine.findById(req.params.id).populate('addedBy', 'name email').populate('substitutes', 'name genericName stock salePrice unit dosageForm');
+    const medicine = await Medicine.findOne({_id:req.params.id, storeId: req.storeId}).populate('addedBy', 'name email').populate('substitutes', 'name genericName stock salePrice unit dosageForm');
 
     if (!medicine) return res.status(404).json({ success: false, message: 'Medicine not found' });
     res.json({ success: true, medicine });
@@ -92,9 +92,9 @@ exports.createMedicine = async (req, res) => {
 
 exports.updateMedicine = async (req, res) => {
   try {
-    const old = await Medicine.findById(req.params.id);
-    const medicine = await Medicine.findByIdAndUpdate(
-      req.params.id, req.body, { new: true, runValidators: true }
+    const old = await Medicine.findOne({_id:req.params.id, storeId: req.storeId});
+    const medicine = await Medicine.findOneAndUpdate(
+      {_id:req.params.id, storeId: req.storeId}, req.body, { new: true, runValidators: true }
     );
     if (!medicine)
       return res.status(404).json({ success: false, message: 'Medicine not found' });
@@ -128,8 +128,8 @@ exports.updateMedicine = async (req, res) => {
 
 exports.deleteMedicine = async (req, res) => {
   try {
-    const medicine = await Medicine.findByIdAndUpdate(
-      req.params.id, { isActive: false }, { new: true }
+    const medicine = await Medicine.findOneAndUpdate(
+      {_id:req.params.id, storeId: req.storeId}, { isActive: false }, { new: true }
     );
     if (!medicine)
       return res.status(404).json({ success: false, message: 'Medicine not found' });
@@ -159,9 +159,9 @@ exports.getExpiryAlert = async (req, res) => {
     const sixtyDays = new Date(); sixtyDays.setDate(sixtyDays.getDate() + 60);
 
     const [expired, expiringSoon, expiringIn60] = await Promise.all([
-      Medicine.find({ isActive: true, expiryDate: { $lt: now } }),
-      Medicine.find({ isActive: true, expiryDate: { $gte: now, $lte: thirtyDays } }),
-      Medicine.find({ isActive: true, expiryDate: { $gt: thirtyDays, $lte: sixtyDays } }),
+      Medicine.find({ storeId: req.storeId, isActive: true, expiryDate: { $lt: now } }),
+      Medicine.find({ storeId: req.storeId, isActive: true, expiryDate: { $gte: now, $lte: thirtyDays } }),
+      Medicine.find({ storeId: req.storeId, isActive: true, expiryDate: { $gt: thirtyDays, $lte: sixtyDays } }),
     ]);
 
     res.json({ success: true, expired, expiringSoon, expiringIn60 });
@@ -172,7 +172,7 @@ exports.getExpiryAlert = async (req, res) => {
 
 exports.getLowStock = async (req, res) => {
   try {
-    const medicines = await Medicine.find({ isActive: true, $expr: { $lte: ['$stock', '$minStock'] } });
+    const medicines = await Medicine.find({ storeId: req.storeId, isActive: true, $expr: { $lte: ['$stock', '$minStock'] } });
     res.json({ success: true, medicines });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -182,7 +182,7 @@ exports.getLowStock = async (req, res) => {
 exports.updateStock = async (req, res) => {
   try {
     const { quantity, type } = req.body;
-    const medicine = await Medicine.findById(req.params.id);
+    const medicine = await Medicine.findOne({_id:req.params.id, storeId: req.storeId});
     if (!medicine)
       return res.status(404).json({ success: false, message: 'Medicine not found' });
 
@@ -217,7 +217,7 @@ exports.updateStock = async (req, res) => {
 /* ── Get substitutes for a medicine (manual + auto-matched) ── */
 exports.getSubstitutes = async (req, res) => {
   try {
-    const medicine = await Medicine.findById(req.params.id);
+    const medicine = await Medicine.findOne({_id:req.params.id, storeId: req.storeId});
     if (!medicine)
       return res.status(404).json({ success: false, message: 'Medicine not found' });
 
@@ -272,8 +272,8 @@ exports.getSubstitutes = async (req, res) => {
 exports.updateSubstitutes = async (req, res) => {
   try {
     const { substitutes } = req.body; // array of medicine IDs
-    const medicine = await Medicine.findByIdAndUpdate(
-      req.params.id,
+    const medicine = await Medicine.findOneAndUpdate(
+      {_id:req.params.id, storeId : req.storeId},
       { substitutes },
       { new: true }
     ).populate('substitutes', 'name genericName stock salePrice unit');
