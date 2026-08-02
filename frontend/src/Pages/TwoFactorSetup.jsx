@@ -96,7 +96,7 @@ function SetupModal({ onClose, onEnabled }) {
             <input
               className="form-control"
               value={code}
-              onChange={e => setCode(e.target.value.replace(/\D/g,'').slice(0,6))}
+              onChange={e => setCode(e.target.value.replace(' ','').slice(0,6))}
               onKeyDown={e => e.key === 'Enter' && handleVerify()}
               placeholder="000 000"
               maxLength={6}
@@ -197,7 +197,7 @@ function DisableModal({ onClose, onDisabled }) {
         </div>
         <div className="form-group">
           <label className="form-label required">Current 2FA Code</label>
-          <input className="form-control" value={code} onChange={e => setCode(e.target.value.replace(/\D/g,'').slice(0,6))}
+          <input className="form-control" value={code} onChange={e => setCode(e.target.value.replace(' ','').slice(0,6))}
             placeholder="000000" style={{ fontFamily:'monospace', fontSize:18, letterSpacing:6, textAlign:'center' }} />
         </div>
 
