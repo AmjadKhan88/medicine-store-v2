@@ -22,6 +22,7 @@ import NotificationCenter from '../Components/NotificationCenter';
 import { useNotifications } from '../context/NotificationContext';
 import { useWindowWidth } from '../hooks/useWindowWidth';
 import EliteHMSLoader from '../Components/EliteHMSLoader';
+import { FaBrain } from 'react-icons/fa6';
 
 /* ── All nav items — single source of truth ── */
 export const ALL_NAV_ITEMS = [
@@ -118,6 +119,7 @@ const ICON_MAP = {
   '/app/invoice-settings':<MdReceipt />,
   '/app/documents':       <MdFolderOpen />,
   '/app/rag-admin':       <MdBrandingWatermark />,
+  '/app/store-knowledge': <FaBrain/>,
   '/app/settings':        <MdSettings />,
 };
 
