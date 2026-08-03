@@ -130,6 +130,8 @@ async function ingestDocument({
   medicineName = '',
   source = '',
   tags = [],
+  storeId = 'superadmin',
+  scope = 'global',
 }) {
   // 1. Extract text
   const rawText = await extractText(buffer, mimeType, originalName);
@@ -155,6 +157,8 @@ async function ingestDocument({
       medicineName:  medicineName?.toLowerCase() || '',
       source,
       tags,
+      storeId,
+      scope,
       chunkIndex:    i,
       totalChunks:   chunks.length,
       charCount:     text.length,
@@ -311,10 +315,153 @@ async function getMedicineRAGInfo(medicineName, additionalQuery = '') {
   };
 }
 
+/* ════════════════════════════════
+   3-TIER RETRIEVAL
+   1. Store's own docs
+   2. Super admin global docs
+   3. AI own knowledge (no context)
+════════════════════════════════ */
+
+async function retrieveWithFallback(query, storeId, options = {}) {
+  const {
+    limit         = 5,
+    category      = null,
+    medicineName  = null,
+    scoreThreshold = 0.60,
+  } = options;
+
+  const queryVector = await embedText(query, 'RETRIEVAL_QUERY');
+
+  /* ── Tier 1: Store's own knowledge ── */
+  let storeResults = await qdrant.searchByStore(queryVector, storeId, {
+    limit, scoreThreshold, category,
+  });
+
+  const storeChunks = storeResults.map(r => ({
+    text:         r.payload.text,
+    score:        r.score,
+    documentName: r.payload.documentName,
+    category:     r.payload.category,
+    medicineName: r.payload.medicineName,
+    source:       r.payload.source,
+    tier:         'store',  // mark which tier it came from
+  }));
+
+  /* ── Tier 2: Super admin global docs ── */
+  let globalChunks = [];
+  const neededMore = limit - storeChunks.length;
+
+  if (neededMore > 0) {
+    const globalResults = await qdrant.searchGlobal(queryVector, {
+      limit:          neededMore + 2,
+      scoreThreshold,
+      category,
+      medicineName,
+    });
+
+    globalChunks = globalResults.map(r => ({
+      text:         r.payload.text,
+      score:        r.score,
+      documentName: r.payload.documentName,
+      category:     r.payload.category,
+      medicineName: r.payload.medicineName,
+      source:       r.payload.source,
+      tier:         'global',
+    }));
+  }
+
+  /* ── Merge, deduplicate by text ── */
+  const seen    = new Set(storeChunks.map(c => c.text));
+  const merged  = [...storeChunks];
+  globalChunks.forEach(c => {
+    if (!seen.has(c.text)) { merged.push(c); seen.add(c.text); }
+  });
+
+  // Sort by score descending
+  merged.sort((a, b) => b.score - a.score);
+
+  return {
+    chunks:      merged.slice(0, limit),
+    storeTier:   storeChunks.length,
+    globalTier:  globalChunks.length,
+    hasContext:  merged.length > 0,
+  };
+}
+
+/* ════════════════════════════════
+   STORE-AWARE QUERY (main entry point)
+════════════════════════════════ */
+
+async function storeQuery(query, storeId, options = {}) {
+  const {
+    medicineName = '',
+    category     = null,
+    limit        = 5,
+    model        = 'llama-3.1-8b-instant',
+    maxTokens    = 800,
+  } = options;
+
+  const { chunks, storeTier, globalTier, hasContext } = await retrieveWithFallback(
+    query, storeId,
+    { limit, category, medicineName, scoreThreshold: 0.58 }
+  );
+
+  /* ── Build context text ── */
+  const contextText = hasContext
+    ? chunks.map((c, i) => {
+        const tierLabel = c.tier === 'store' ? '📋 Store Knowledge' : '🌐 Clinical Database';
+        return `[${tierLabel} — ${c.documentName}]\n${c.text}`;
+      }).join('\n\n---\n\n')
+    : null;
+
+  /* ── System prompt ── */
+  const systemPrompt = `You are a clinical AI assistant embedded in EliteHMS, a pharmacy & hospital management system used in Pakistan.
+You help doctors and pharmacists with medicine information, clinic-specific protocols and clinical guidelines.
+
+BEHAVIOUR:
+1. Use provided context as primary source — cite the document name
+2. If context is from "Store Knowledge" — this is clinic-specific info (protocols, patient policies, service pricing)
+3. If context is from "Clinical Database" — this is general clinical/drug information
+4. If NO context provided — respond from your clinical training knowledge
+5. Always include Pakistan-specific notes (generic names, local brands, DRAP status, availability)
+6. For medicines: include uses, dosage, side effects, contraindications, interactions
+7. Be concise, clinically accurate and professional
+8. End medicine responses with: "⚠️ Consult a qualified pharmacist or physician before dispensing."
+9. If truly unknown — say "I don't have specific information on this. Please consult clinical references."`;
+
+  const userMessage = contextText
+    ? `Question: "${query}"\n\nContext from knowledge base:\n${contextText}\n\nAnswer using the above context. Add any relevant clinical knowledge not covered in the context.`
+    : `Question: "${query}"\n\nNo relevant documents found in the knowledge base. Answer from your clinical training knowledge.`;
+
+  const completion = await groq.chat.completions.create({
+    model,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user',   content: userMessage  },
+    ],
+    temperature: 0.2,
+    max_tokens:  maxTokens,
+  });
+
+  return {
+    answer:       completion.choices[0]?.message?.content || 'No response generated',
+    model:        completion.model,
+    usage:        completion.usage,
+    contextUsed:  chunks.length,
+    storeTier,
+    globalTier,
+    noContext:    !hasContext,
+    sources:      [...new Set(chunks.map(c => c.documentName))],
+    retrievedChunks: chunks,
+  };
+}
+
 module.exports = {
   ingestDocument,
   retrieveContext,
   generateRAGResponse,
   getMedicineRAGInfo,
   chunkText,
+  retrieveWithFallback,
+  storeQuery,
 };

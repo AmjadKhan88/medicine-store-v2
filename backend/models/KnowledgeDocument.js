@@ -7,6 +7,18 @@ const knowledgeDocumentSchema = new mongoose.Schema({
   fileSize:     { type: Number },
   mimeType:     { type: String },
 
+    /* ── Scope ── */
+  storeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,           // null = super admin global document
+  },
+  scope: {
+    type: String,
+    enum: ['global', 'store'],
+    default: 'global',
+  },
+
   category: {
     type: String,
     enum: ['medicine', 'service', 'protocol', 'guideline', 'formulary', 'general'],

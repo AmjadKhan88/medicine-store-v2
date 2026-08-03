@@ -8,7 +8,7 @@ let _client = null;
 function getClient() {
   if (!_client) {
     _client = new QdrantClient({
-      url:    process.env.QDRANT_URL,
+      url: process.env.QDRANT_URL,
       apiKey: process.env.QDRANT_API_KEY,
     });
   }
@@ -25,7 +25,7 @@ async function ensureCollection() {
     // Collection doesn't exist — create it
     await client.createCollection(COLLECTION, {
       vectors: {
-        size:     VECTOR_SIZE,
+        size: VECTOR_SIZE,
         distance: 'Cosine',
       },
       optimizers_config: {
@@ -47,6 +47,14 @@ async function ensureCollection() {
       field_name: 'medicineName',
       field_schema: 'keyword',
     });
+    await client.createPayloadIndex(COLLECTION, {
+      field_name: 'storeId',
+      field_schema: 'keyword',
+    });
+    await client.createPayloadIndex(COLLECTION, {
+      field_name: 'scope',
+      field_schema: 'keyword',
+    });
 
     console.log(`[Qdrant] Collection "${COLLECTION}" created`);
   }
@@ -56,7 +64,7 @@ async function ensureCollection() {
 async function upsertPoints(points) {
   const client = getClient();
   await client.upsert(COLLECTION, {
-    wait:   true,
+    wait: true,
     points, // [{ id, vector, payload }]
   });
 }
@@ -65,7 +73,7 @@ async function upsertPoints(points) {
 async function search(queryVector, { limit = 5, scoreThreshold = 0.65, filter = null } = {}) {
   const client = getClient();
   const params = {
-    vector:       queryVector,
+    vector: queryVector,
     limit,
     with_payload: true,
     with_vectors: false,
@@ -101,6 +109,83 @@ async function getCollectionInfo() {
   return client.getCollection(COLLECTION);
 }
 
+/* ── Store-scoped search (only this store's vectors) ── */
+async function searchByStore(queryVector, storeId, {
+  limit = 5,
+  scoreThreshold = 0.60,
+  category = null,
+} = {}) {
+  const client = getClient();
+  const must = [
+    { key: 'storeId', match: { value: storeId } },
+    { key: 'scope', match: { value: 'store' } },
+  ];
+  if (category) must.push({ key: 'category', match: { value: category } });
+
+  const results = await client.search(COLLECTION, {
+    vector: queryVector,
+    limit,
+    with_payload: true,
+    with_vectors: false,
+    score_threshold: scoreThreshold,
+    filter: { must },
+  });
+  return results;
+}
+
+/* ── Global search (only super admin docs) ── */
+async function searchGlobal(queryVector, {
+  limit = 5,
+  scoreThreshold = 0.60,
+  category = null,
+  medicineName = null,
+} = {}) {
+  const client = getClient();
+  const must = [{ key: 'scope', match: { value: 'global' } }];
+  if (category) must.push({ key: 'category', match: { value: category } });
+  if (medicineName) must.push({ key: 'medicineName', match: { value: medicineName.toLowerCase() } });
+
+  const results = await client.search(COLLECTION, {
+    vector: queryVector,
+    limit,
+    with_payload: true,
+    with_vectors: false,
+    score_threshold: scoreThreshold,
+    filter: { must },
+  });
+  return results;
+}
+
+/* ── Count vectors for a specific store ── */
+async function countStoreVectors(storeId) {
+  const client = getClient();
+  try {
+    const result = await client.count(COLLECTION, {
+      filter: {
+        must: [
+          { key: 'storeId', match: { value: storeId } },
+          { key: 'scope', match: { value: 'store' } },
+        ],
+      },
+    });
+    return result.count || 0;
+  } catch { return 0; }
+}
+
+/* ── Delete store vectors by documentId ── */
+async function deleteStoreDocument(documentId, storeId) {
+  const client = getClient();
+  await client.delete(COLLECTION, {
+    wait: true,
+    filter: {
+      must: [
+        { key: 'documentId', match: { value: documentId } },
+        { key: 'storeId', match: { value: storeId } },
+      ],
+    },
+  });
+}
+
 module.exports = {
   ensureCollection,
   upsertPoints,
@@ -108,4 +193,8 @@ module.exports = {
   deleteByDocumentId,
   countPoints,
   getCollectionInfo,
+  searchByStore,
+  searchGlobal,
+  countStoreVectors,
+  deleteStoreDocument,
 };

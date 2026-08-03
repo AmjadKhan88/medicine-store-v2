@@ -67,6 +67,7 @@ const { protect }              =   require('./middleware/auth');
 const { startExpiryDigestJob }              =   require('./jobs/expiryDigest');
 const { requireSubscription,checkFeature }  =   require('./middleware/checkSubscription');
 const { ensureCollection }                  =   require('./services/qdrantService');
+const storeRagRoutes                        = require('./routes/storeRag');
 
 
 
@@ -234,7 +235,8 @@ app.post('/api/diagnosis/followup', protect, requireSubscription, aiLimiter, dia
 app.delete('/api/diagnosis/:id',    protect, requireSubscription, diagnosisCtrl.deleteSession);
 
 /* ── RAG Knowledge Base ── */
-app.use('/api/rag', ragRoutes);
+app.use('/api/rag',      ragRoutes);
+app.use('/api/store-rag',storeRagRoutes);
 
 /* ════════════════════════════════
    GLOBAL ERROR HANDLER
