@@ -64,6 +64,7 @@ const DemandPrediction    = lazy(() => import('./Pages/DemandPrediction'));
 const DRAPCompliance      = lazy(() => import('./Pages/DRAPCompliance'));
 const Pricing             = lazy(() => import('./Pages/Pricing'));
 const RAGAdmin            = lazy(() => import('./Pages/RAGAdmin'));
+const StoreKnowledge      = lazy(() => import('./Pages/StoreKnowledge'));
 
 const PrivateRoute = ({ children }) => {
   const { user, loading} = useAuth();
@@ -141,6 +142,7 @@ export default function App() {
         <Route path="ai-assistant"         element={<AIAssistant         />} />
         <Route path="invoice-settings"     element={<InvoiceSettings     />} />
         <Route path="super-admin"          element={<SuperAdminDashboard />} />
+        <Route path="store-knowledge"      element={<StoreKnowledge      />} />
         <Route path="rag-admin"            element={<RAGAdmin            />} />
         <Route path="support"              element={<SupportCenter       />} />
         <Route path="settings"             element={<Settings            />} />
