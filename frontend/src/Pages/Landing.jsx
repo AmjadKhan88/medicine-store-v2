@@ -21,46 +21,176 @@ function useWidth() {
 }
 
 /* ── Data ── */
-const FEATURES = [
-  { icon: <MdMedicalServices size={26} />, title: 'Medicine Inventory', desc: 'Track stock, batch numbers, expiry dates and get instant low-stock alerts.', color: '#0ea5e9' },
-  { icon: <MdPeople size={26} />, title: 'Patient Records', desc: 'Complete profiles with allergies, blood group, medical history and portal links.', color: '#10b981' },
-  { icon: <MdReceipt size={26} />, title: 'Billing & Invoices', desc: 'Fast invoicing with A4 and thermal templates. JazzCash, EasyPaisa, Cash.', color: '#f59e0b' },
-  { icon: <MdWarning size={26} />, title: 'Expiry Alerts', desc: 'Weekly email + push digest every Monday. Export PDF or Excel report.', color: '#ef4444' },
-  { icon: <MdBarChart size={26} />, title: 'Reports & Analytics', desc: 'Revenue trends, top medicines, patient spending. Export CSV or PDF.', color: '#8b5cf6' },
-  { icon: <MdSecurity size={26} />, title: 'Role Management', desc: 'Admin, Doctor and Pharmacist roles with separate permissions.', color: '#ec4899' },
-  { icon: <MdSmartphone size={26} />, title: 'PWA — Works Offline', desc: 'Install on Android or iPhone. Works even without internet.', color: '#06b6d4' },
-  { icon: <MdChat size={26} />, title: 'AI Medicine Assistant', desc: 'Gemini + Groq powered. Check drug interactions, get dosage info instantly.', color: '#f97316' },
+const FEATURE_GROUPS = [
+  {
+    group: '💊 Pharmacy Core',
+    color: '#0ea5e9',
+    features: [
+      { icon: '💊', title: 'Medicine Inventory', desc: 'Barcode/QR scanner, batch tracking, expiry dates, low-stock alerts. Manage 500+ medicines effortlessly.' },
+      { icon: '👥', title: 'Patient Management', desc: 'Auto Patient ID, allergy banner (never missed), blood group, full financial history per patient.' },
+      { icon: '🧾', title: 'Billing & Invoices', desc: 'One-click billing with JazzCash, EasyPaisa, cash or insurance. Stock auto-deducted. WhatsApp invoice sharing.' },
+      { icon: '📋', title: 'Prescriptions', desc: 'Digital prescriptions with repeat refills. Full prescription history per patient linked to bills.' },
+      { icon: '📅', title: 'Appointments', desc: 'Doctor schedule management. Status flow: Scheduled → Confirmed → Completed. Visit notes attached.' },
+      { icon: '🔬', title: 'Lab Tests', desc: 'Lab order management with critical value alerts. Auto-appear in patient EMR timeline.' },
+    ],
+  },
+  {
+    group: '🏥 Hospital Modules',
+    color: '#10b981',
+    features: [
+      { icon: '🛏', title: 'Ward & Bed Management', desc: 'Color-coded bed map. Real-time occupancy. Status: Available → Occupied → Cleaning → Maintenance.' },
+      { icon: '🏥', title: 'IPD Management', desc: 'Full admission-to-discharge workflow. Medicine orders, MAR sheets, charges, final bill generation.' },
+      { icon: '🩺', title: 'OPD Queue (TV Display)', desc: 'Token system with priority: Urgent > VIP > Normal. Voice announcements. Any TV works as display.' },
+      { icon: '👩‍⚕️', title: 'Nurse Station', desc: 'MAR sheet with Given/Skipped/Refused tracking. Critical vital alerts. Medicine requests to pharmacy.' },
+      { icon: '🫀', title: 'OT Scheduling', desc: 'Conflict-detection booking. 12-item pre-op checklist. Team assignments. Post-op notes.' },
+      { icon: '🩸', title: 'Blood Bank', desc: '56-day donor eligibility tracking. Critical stock alerts. Auto-charge to IPD bill on issue.' },
+      { icon: '🖼', title: 'Radiology Module', desc: 'Image uploads via Cloudinary. PACS-lite viewer. Public share link for specialist referrals.' },
+      { icon: '❤️', title: 'Vital Signs', desc: '12 parameters tracked. Critical threshold auto-alerts. Recharts trend graphs. Print-ready charts.' },
+    ],
+  },
+  {
+    group: '🤖 AI-Powered Features',
+    color: '#8b5cf6',
+    features: [
+      { icon: '🧠', title: 'AI Diagnosis Assistant', desc: 'Gemini + Groq powered. 3-tier differential diagnoses with probability. Pakistan-specific clinical protocols. Red flag detection.' },
+      { icon: '📸', title: 'Prescription OCR', desc: 'Scan handwritten prescriptions with your phone camera. Gemini Vision extracts medicines and matches inventory.' },
+      { icon: '📈', title: 'Demand Forecasting', desc: 'AI predicts next month demand per medicine. Pakistan seasonality factors. One-click purchase order from predictions.' },
+      { icon: '🔍', title: 'Patient Deduplication', desc: 'Levenshtein + CNIC + phone matching. Auto-detects duplicate patient records. Merge with full data re-pointing.' },
+      { icon: '🧠', title: 'RAG Knowledge Base', desc: 'Upload medicine monographs, protocols, service info. AI retrieves relevant context for every staff query. 3-tier search.' },
+    ],
+  },
+  {
+    group: '💰 Finance & Compliance',
+    color: '#f59e0b',
+    features: [
+      { icon: '💰', title: 'Accounting (P&L)', desc: 'Revenue vs COGS vs expenses. Gross and net margins. FBR/GST tax summary. Excel export for FBR IRIS.' },
+      { icon: '🛡', title: 'Insurance Panels', desc: 'Jubilee, EFU, EOBI, PESSI. Coverage calculator. Claim status: Draft → Submitted → Approved → Paid.' },
+      { icon: '💳', title: 'Payroll & Salaries', desc: 'Pakistan income tax slabs. EOBI auto-deduction (₨570). Advance management. Payslip PDF + WhatsApp.' },
+      { icon: '📜', title: 'DRAP Compliance', desc: 'Controlled medicines register. Batch tracking. Expiry destruction records. One-click inspection-ready PDF report.' },
+    ],
+  },
+  {
+    group: '📲 Communication & Growth',
+    color: '#ec4899',
+    features: [
+      { icon: '📲', title: 'WhatsApp Broadcast', desc: '8 audience filters: by condition, city, blood group, balance. Personalized messages. Built-in templates for Eid, health tips.' },
+      { icon: '⭐', title: 'Patient Feedback', desc: '5-category star ratings via WhatsApp link. Negative feedback fires instant alert. Doctor leaderboard by rating.' },
+      { icon: '📅', title: 'Online Booking', desc: 'Public booking page for your clinic (no login needed). Real-time slot availability. Instant WhatsApp confirmation.' },
+      { icon: '📂', title: 'Electronic Medical Records', desc: 'Unified timeline: bills + prescriptions + labs + admissions + vitals in one chronological view.' },
+    ],
+  },
 ];
 
-const PLANS = [
-  {
-    name: 'Free Trial',
-    price: 'Free',
-    period: '14 days',
-    desc: 'Try every feature free. No credit card needed.',
-    features: ['50 medicines', '20 patients', '50 bills/month', '1 user account', 'All features unlocked'],
-    cta: 'Start Free Trial',
-    highlight: false,
-  },
-  {
-    name: 'Basic',
-    price: '₨2,999',
-    period: 'per month',
-    desc: 'For growing pharmacies with a small team.',
-    features: ['500 medicines', '200 patients', '3 staff members', 'Unlimited bills', 'PDF invoices & reports', 'WhatsApp reminders', 'Expiry alerts'],
-    cta: 'Get Started',
-    highlight: true,
-  },
-  {
-    name: 'Pro',
-    price: '₨5,999',
-    period: 'per month',
-    desc: 'For busy pharmacies needing unlimited everything.',
-    features: ['Unlimited medicines', 'Unlimited patients', 'Unlimited staff', 'Unlimited bills', 'AI medicine assistant', 'Audit log & backup', 'Priority support'],
-    cta: 'Go Pro',
-    highlight: false,
-  },
-];
+const plans = [
+    {
+      key: 'trial',
+      name: 'Free Trial',
+      price: 0,
+      period: '14 days',
+      badge: 'No Card Needed',
+      color: '#6366f1',
+      icon: '🎯',
+      ideal: 'Try everything free',
+      features: [
+        '100 medicines · 50 patients',
+        '3 staff members',
+        '100 bills/month',
+        'All Hospital Pro features unlocked',
+        'No credit card required',
+      ],
+    },
+    {
+      key: 'pharmacy_basic',
+      name: 'Pharmacy Basic',
+      price: 1999,
+      period: '/month',
+      badge: null,
+      color: '#0ea5e9',
+      icon: '💊',
+      ideal: 'Small pharmacies & medical stores',
+      features: [
+        '500 medicines · 300 patients',
+        '3 staff members · Unlimited bills',
+        'Barcode scanner & expiry alerts',
+        'Prescriptions & purchase orders',
+        'Basic reports & PDF invoices',
+      ],
+    },
+    {
+      key: 'pharmacy_pro',
+      name: 'Pharmacy Pro',
+      price: 3999,
+      period: '/month',
+      badge: '🔥 Popular',
+      color: '#8b5cf6',
+      icon: '🏪',
+      ideal: 'Established pharmacies',
+      features: [
+        'Unlimited medicines & patients',
+        '5 staff members',
+        'Everything in Pharmacy Basic',
+        'Lab tests & appointments',
+        'AI Prescription OCR & Demand AI',
+        'Advanced accounting (P&L)',
+      ],
+    },
+    {
+      key: 'clinic',
+      name: 'Clinic',
+      price: 5999,
+      period: '/month',
+      badge: 'For Clinics',
+      color: '#10b981',
+      icon: '🏥',
+      ideal: 'OPD clinics & diagnostic centers',
+      features: [
+        'Unlimited everything · 10 staff',
+        'Everything in Pharmacy Pro',
+        'OPD Queue + TV Display',
+        'EMR & Vital Signs monitoring',
+        'Online appointment booking',
+        'WhatsApp broadcast campaigns',
+      ],
+    },
+    {
+      key: 'hospital_basic',
+      name: 'Hospital Basic',
+      price: 10999,
+      period: '/month',
+      badge: 'For Hospitals',
+      color: '#f59e0b',
+      icon: '🏨',
+      ideal: 'Small & medium hospitals',
+      features: [
+        'Unlimited everything · 20 staff',
+        'Everything in Clinic',
+        'IPD management (admit → discharge)',
+        'Ward & bed management',
+        'Nurse station + MAR sheets',
+        'OT scheduling · Blood bank · Radiology',
+      ],
+    },
+    {
+      key: 'hospital_pro',
+      name: 'Hospital Pro',
+      price: 20999,
+      period: '/month',
+      badge: '🏆 Full Suite',
+      color: '#dc2626',
+      icon: '🏦',
+      ideal: 'Full-service hospitals',
+      features: [
+        'Unlimited staff & everything',
+        'Everything in Hospital Basic',
+        'Insurance panels (EOBI, EFU, Jubilee)',
+        'Payroll + Pakistan tax slabs',
+        'DRAP compliance reports',
+        'AI Diagnosis Assistant (Gemini)',
+      ],
+    },
+  ];
+
+
 
 const TESTIMONIALS = [
   { name: 'Dr. Tariq Mehmood', role: 'Pharmacy Owner, Peshawar', rating: 5, text: 'MediStore completely replaced our paper system. Expiry alerts save us thousands every month. The thermal invoice printing works perfectly.' },
@@ -69,19 +199,95 @@ const TESTIMONIALS = [
 ];
 
 const STATS = [
-  { value: '500+', label: 'Pharmacies' },
-  { value: '50K+', label: 'Medicines Tracked' },
-  { value: '200K+', label: 'Invoices Generated' },
-  { value: '99.9%', label: 'Uptime' },
+  { value: '500+', label: 'Pharmacies & Hospitals' },
+  { value: '30+',  label: 'Modules Built'          },
+  { value: '200K+',label: 'Invoices Generated'     },
+  { value: '99.9%',label: 'Uptime'                 },
 ];
+
+/* ── Plan Card Component ── */
+function PlanCard({ plan: p, billingAnnual, annualPrice, navigate }) {
+  const isHighlighted = p.key === 'pharmacy_pro';
+  const displayPrice  = billingAnnual && p.price > 0 ? annualPrice(p.price) : p.price;
+
+  return (
+    <div style={{
+      background:    isHighlighted ? p.color : '#fff',
+      color:         isHighlighted ? '#fff'  : '#0f172a',
+      borderRadius:  18,
+      padding:       28,
+      border:        `2px solid ${isHighlighted ? p.color : '#e2e8f0'}`,
+      position:      'relative',
+      boxShadow:     isHighlighted ? `0 20px 50px ${p.color}35` : 'none',
+      display:       'flex',
+      flexDirection: 'column',
+    }}>
+      {/* Badge */}
+      {p.badge && (
+        <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: isHighlighted ? '#0f172a' : p.color, color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 14px', borderRadius: 99, whiteSpace: 'nowrap' }}>
+          {p.badge}
+        </div>
+      )}
+
+      {/* Plan header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+        <span style={{ fontSize: 26 }}>{p.icon}</span>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 17 }}>{p.name}</div>
+          <div style={{ fontSize: 12, opacity: 0.7, marginTop: 1 }}>{p.ideal}</div>
+        </div>
+      </div>
+
+      {/* Price */}
+      <div style={{ marginBottom: 20 }}>
+        {p.price === 0 ? (
+          <div style={{ fontSize: 32, fontWeight: 900 }}>Free<span style={{ fontSize: 14, fontWeight: 400, opacity: 0.7 }}> · {p.period}</span></div>
+        ) : (
+          <>
+            <div style={{ fontSize: 32, fontWeight: 900 }}>
+              ₨{displayPrice.toLocaleString()}
+              <span style={{ fontSize: 13, fontWeight: 400, opacity: 0.7 }}>/month</span>
+            </div>
+            {billingAnnual && (
+              <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>
+                ₨{(displayPrice * 12).toLocaleString()}/year · Save ₨{((p.price - displayPrice) * 12).toLocaleString()}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Features */}
+      <div style={{ flex: 1 }}>
+        {p.features.map((f, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, marginBottom: 8 }}>
+            <MdCheckCircle size={15} style={{ color: isHighlighted ? '#fff' : p.color, flexShrink: 0, marginTop: 1 }} />
+            <span style={{ opacity: 0.9 }}>{f}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <button onClick={() => navigate('/register')}
+        style={{ marginTop: 24, width: '100%', padding: '12px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, fontFamily: 'inherit', background: isHighlighted ? '#fff' : p.color, color: isHighlighted ? p.color : '#fff', transition: 'opacity 0.2s' }}
+        onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+        onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+        {p.price === 0 ? 'Start Free Trial — No Card Needed' : `Get ${p.name}`}
+      </button>
+    </div>
+  );
+}
 
 export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [billingAnnual, setBillingAnnual] = useState(false);
   const navigate = useNavigate();
   const width = useWidth();
   const isMobile = width < 768;
   const isTablet = width < 1024;
+
+  const annualPrice = (p) => Math.round(p * 0.83); // 2 months free
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -321,23 +527,6 @@ export default function Landing() {
     </div>
   );
 
-    const plans = [
-    {
-      key: 'free', name: 'Free Trial', price: 0, badge: '14 Days',
-      color: '#6366f1',
-      features: ['50 medicines', '20 patients', '1 user', '50 bills/month', 'All features unlocked'],
-    },
-    {
-      key: 'basic', name: 'Basic', price: 2999, badge: '🔥 Most Popular',
-      color: '#0ea5e9',
-      features: ['500 medicines', '200 patients', '3 staff members', 'Unlimited bills', 'PDF invoices & reports', 'WhatsApp reminders'],
-    },
-    {
-      key: 'pro', name: 'Pro', price: 5999, badge: 'Best Value',
-      color: '#8b5cf6',
-      features: ['Unlimited everything', 'Unlimited staff', 'Advanced analytics', 'Audit log', 'Data backup & restore', 'Priority support'],
-    },
-  ];
 
   return (
     <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
@@ -389,12 +578,13 @@ export default function Landing() {
               Free 14-day trial — No credit card required
             </div>
             <h1 style={s.heroTitle}>
-              Complete Pharmacy Management{' '}
-              <span style={{ color: '#0ea5e9' }}>for Pakistan</span>
+              Hospital & Pharmacy Management{' '}
+              <span style={{ color: '#0ea5e9' }}>Built for Pakistan</span>
             </h1>
             <p style={s.heroSub}>
-              Manage medicines, patients, billing and staff in one cloud-based platform.
-              Built for Pakistani pharmacies with JazzCash, EasyPaisa and Urdu-friendly support.
+              From a single pharmacy to a multi-department hospital — one platform covers
+              medicine inventory, IPD/OPD, nurses, billing, AI diagnosis and DRAP compliance.
+              Built for Pakistan with JazzCash & EasyPaisa support.
             </p>
             <div style={s.heroBtns}>
               <Link to="/register" style={s.btnPrimary}>
@@ -406,8 +596,14 @@ export default function Landing() {
             </div>
 
             {/* Trust badges */}
-            <div style={{ display: 'flex', gap: 24, marginTop: 40, flexWrap: 'wrap' }}>
-              {['✓ JazzCash & EasyPaisa', '✓ Works Offline (PWA)', '✓ AI Drug Interaction Check'].map(t => (
+            <div style={{ display: 'flex', gap: 20, marginTop: 40, flexWrap: 'wrap' }}>
+              {[
+                '✓ JazzCash & EasyPaisa',
+                '✓ IPD + OPD + Nurse Station',
+                '✓ AI Diagnosis (Gemini)',
+                '✓ DRAP Compliance Reports',
+                '✓ Works Offline (PWA)',
+              ].map(t => (
                 <span key={t} style={{ fontSize: 13, color: 'rgba(32, 31, 31, 0.55)', fontWeight: 500 }}>{t}</span>
               ))}
             </div>
@@ -432,35 +628,60 @@ export default function Landing() {
       </div>
 
       {/* ── Features ── */}
-      <section id="features" style={s.featuresSection}>
+      <section id="features" style={{ background: '#f8fafc', padding: isMobile ? '60px 0' : '90px 0' }}>
         <div style={s.container}>
-          <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
-            <span style={s.sectionBadge}>Features</span>
-            <h2 style={s.sectionTitle}>Everything your pharmacy needs</h2>
-            <p style={s.sectionSub}>
-              From medicine inventory to AI-powered drug interaction checking —
-              MediStore covers every aspect of running a modern pharmacy.
+          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+            <span style={s.sectionBadge}>30+ Features</span>
+            <h2 style={s.sectionTitle}>Everything from a pharmacy to a full hospital</h2>
+            <p style={{ ...s.sectionSub, margin: '0 auto' }}>
+              One platform covers your entire healthcare operation — from dispensing medicines
+              to managing IPD patients, nurses, OT scheduling and AI-powered diagnostics.
             </p>
           </div>
-          <div style={s.featuresGrid}>
-            {FEATURES.map(f => (
-              <div key={f.title} style={s.featureCard}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = '0 12px 28px rgba(0,0,0,0.1)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <div style={{ ...s.featureIcon, background: f.color + '15', color: f.color }}>
-                  {f.icon}
-                </div>
-                <div style={s.featureTitle}>{f.title}</div>
-                <div style={s.featureDesc}>{f.desc}</div>
+
+          {FEATURE_GROUPS.map(group => (
+            <div key={group.group} style={{ marginBottom: 52 }}>
+              {/* Group header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                <div style={{ fontWeight: 800, fontSize: 18, color: '#0f172a' }}>{group.group}</div>
+                <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
               </div>
-            ))}
+
+              {/* Feature cards grid */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 1fr' : 'repeat(3, 1fr)',
+                gap: 16,
+              }}>
+                {group.features.map(f => (
+                  <div key={f.title}
+                    style={{ background: '#fff', borderRadius: 14, padding: '18px 20px', border: '1px solid #e2e8f0', display: 'flex', gap: 14, alignItems: 'flex-start', transition: 'all 0.2s' }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${group.color}18`; e.currentTarget.style.borderColor = group.color + '50'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+                  >
+                    <div style={{ width: 42, height: 42, borderRadius: 10, background: group.color + '15', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+                      {f.icon}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: '#0f172a', marginBottom: 4 }}>{f.title}</div>
+                      <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>{f.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Feature count badge */}
+          <div style={{ textAlign: 'center', marginTop: 16 }}>
+            <div style={{ display: 'inline-flex', gap: 24, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '16px 32px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              {[['30+', 'Features'], ['5', 'Plan Tiers'], ['99.9%', 'Uptime'], ['24hr', 'Activation']].map(([val, label]) => (
+                <div key={label} style={{ textAlign: 'center' }}>
+                  <div style={{ fontWeight: 900, fontSize: 22, color: '#0ea5e9' }}>{val}</div>
+                  <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>{label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -502,46 +723,65 @@ export default function Landing() {
 
  
             {/* ── Pricing ── */}
-      <section id="pricing" style={{ padding: '90px 5%', background: '#f8fafc' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 60 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#0ea5e9', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Pricing</div>
-            <h2 style={{ fontSize: 38, fontWeight: 800, margin: 0 }}>Simple, transparent pricing</h2>
-            <p style={{ color: '#64748b', fontSize: 16, marginTop: 12 }}>
-              Pay via JazzCash, EasyPaisa or Bank Transfer · Activate within 24 hours
+      <section id="pricing" style={{ padding: isMobile ? '60px 0' : '90px 0', background: '#fff' }}>
+        <div style={s.container}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <span style={s.sectionBadge}>Pricing</span>
+            <h2 style={s.sectionTitle}>Plans for every size — from pharmacy to hospital</h2>
+            <p style={{ ...s.sectionSub, margin: '0 auto 28px' }}>
+              Pay via JazzCash, EasyPaisa or Bank Transfer. Activate within 24 hours.
             </p>
-          </div>
-          <div style={s.pricingGrade} >
-            {plans.map((p, i) => (
-              <div key={i} style={{
-                background: p.key === 'basic' ? p.color : '#fff',
-                color:      p.key === 'basic' ? '#fff'   : '#0f172a',
-                borderRadius: 20, padding: 32,
-                border: `2px solid ${p.key === 'basic' ? p.color : '#e2e8f0'}`,
-                position: 'relative',
-                transform: p.key === 'basic' ? 'scale(1.05)' : 'none',
-                boxShadow: p.key === 'basic' ? `0 20px 50px ${p.color}40` : 'none',
-              }}>
-                {p.badge && (
-                  <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: p.key === 'basic' ? '#0f172a' : p.color, color: '#fff', fontSize: 11, fontWeight: 700, padding: '4px 14px', borderRadius: 99, whiteSpace: 'nowrap' }}>
-                    {p.badge}
-                  </div>
-                )}
-                <div style={{ fontWeight: 800, fontSize: 20, marginBottom: 6 }}>{p.name}</div>
-                <div style={{ fontSize: 34, fontWeight: 800, marginBottom: 20 }}>
-                  {p.price === 0 ? 'Free' : PKR(p.price)}<span style={{ fontSize: 14, fontWeight: 400, opacity: 0.7 }}>{p.price > 0 ? '/month' : ''}</span>
-                </div>
-                {p.features.map((f, fi) => (
-                  <div key={fi} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, marginBottom: 8, opacity: 0.9 }}>
-                    <MdCheckCircle size={16} style={{ color: p.key === 'basic' ? '#fff' : p.color, flexShrink: 0 }} /> {f}
-                  </div>
-                ))}
-                <button onClick={() => navigate('/register')}
-                  style={{ marginTop: 28, width: '100%', padding: '12px', borderRadius: 12, border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 15, background: p.key === 'basic' ? '#fff' : p.color, color: p.key === 'basic' ? p.color : '#fff', fontFamily: 'inherit' }}>
-                  {p.price === 0 ? 'Start Free Trial' : `Get ${p.name}`}
+
+            {/* Annual / Monthly toggle */}
+            <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: 99, padding: 4, gap: 4 }}>
+              {[['Monthly', false], ['Annual (Save 17%)', true]].map(([label, val]) => (
+                <button key={String(val)} onClick={() => setBillingAnnual(val)}
+                  style={{ padding: '8px 20px', borderRadius: 99, border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', background: billingAnnual === val ? '#0ea5e9' : 'transparent', color: billingAnnual === val ? '#fff' : '#64748b', transition: 'all 0.2s' }}>
+                  {label}
+                  {val && !billingAnnual && <span style={{ marginLeft: 6, background: '#10b981', color: '#fff', fontSize: 10, padding: '1px 6px', borderRadius: 99 }}>2 months free</span>}
                 </button>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          {/* Plans — first row: Trial + Pharmacy plans */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 }}>
+              💊 Pharmacy Plans
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 16 }}>
+              {plans.filter(p => ['trial','pharmacy_basic','pharmacy_pro'].includes(p.key)).map(p => (
+                <PlanCard key={p.key} plan={p} billingAnnual={billingAnnual} annualPrice={annualPrice} navigate={navigate} />
+              ))}
+            </div>
+          </div>
+
+          {/* Plans — second row: Clinic + Hospital plans */}
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 }}>
+              🏥 Clinic & Hospital Plans
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 16 }}>
+              {plans.filter(p => ['clinic','hospital_basic','hospital_pro'].includes(p.key)).map(p => (
+                <PlanCard key={p.key} plan={p} billingAnnual={billingAnnual} annualPrice={annualPrice} navigate={navigate} />
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom note */}
+          <div style={{ textAlign: 'center', marginTop: 36, padding: '16px 24px', background: '#f8fafc', borderRadius: 14, border: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: 14, color: '#64748b', lineHeight: 1.8 }}>
+              ✅ All plans include 14-day free trial &nbsp;·&nbsp;
+              ✅ No contracts — cancel anytime &nbsp;·&nbsp;
+              ✅ JazzCash · EasyPaisa · Bank Transfer &nbsp;·&nbsp;
+              ✅ Activation within 24 hours &nbsp;·&nbsp;
+              📞 Need help choosing?{' '}
+              <a href="https://wa.me/923069534618" target="_blank" rel="noopener noreferrer"
+                style={{ color: '#0ea5e9', fontWeight: 700, textDecoration: 'none' }}>
+                Chat on WhatsApp
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -616,11 +856,11 @@ export default function Landing() {
             <div>
               <div style={{ ...s.logo, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <MdMedicalServices size={20} style={{ color: '#0ea5e9' }} />
-                Medi<span style={s.logoAccent}>Store</span>
+                Elite<span style={s.logoAccent}>HMS</span>
               </div>
               <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', lineHeight: 1.7, maxWidth: 280 }}>
-                Professional pharmacy management software built for the Pakistani market.
-                Trusted by 500+ pharmacies nationwide.
+                Complete hospital & pharmacy management system built for Pakistan.
+                From small pharmacies to multi-department hospitals — one platform.
               </p>
               <div style={{ display: 'flex', gap: 16, marginTop: 20 }}>
                 <a href="mailto:amjadfast87@gmail.com" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>
