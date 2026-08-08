@@ -35,7 +35,7 @@ const setRefreshCookie = (res, token) => {
     secure:   process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge:   30 * 24 * 60 * 60 * 1000,
-    path:     '/',   // send on ALL requests — more compatible with proxies
+    path:     '/api/auth',   // original — works with Vercel rewrite
   });
 };
 
@@ -387,7 +387,7 @@ exports.refreshToken = async (req, res) => {
     try {
       decoded = jwt.verify(rawToken, REFRESH_SECRET);
     } catch (err) {
-      res.clearCookie('refreshToken', { path: '/' });
+      res.clearCookie('refreshToken', { path: '/api/auth' });
       return res.status(401).json({ success: false, message: 'Refresh token expired. Please login again.', code: 'REFRESH_EXPIRED' });
     }
 
@@ -400,7 +400,7 @@ exports.refreshToken = async (req, res) => {
 
     const stored = user.refreshTokens.find(t => t.token === hashed && t.expiresAt > new Date());
     if (!stored) {
-      res.clearCookie('refreshToken', { path: '/' });
+      res.clearCookie('refreshToken', { path: '/api/auth' });
       return res.status(401).json({ success: false, message: 'Session expired. Please login again.', code: 'SESSION_REVOKED' });
     }
 
@@ -425,7 +425,7 @@ exports.logout = async (req, res) => {
         $pull: { refreshTokens: { token: hashed } },
       });
     }
-    res.clearCookie('refreshToken', { path: '/' });
+    res.clearCookie('refreshToken', { path: '/api/auth' });
     res.json({ success: true, message: 'Logged out successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -436,7 +436,7 @@ exports.logout = async (req, res) => {
 exports.logoutAll = async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.user._id, { $set: { refreshTokens: [] } });
-    res.clearCookie('refreshToken', { path: '/' });
+    res.clearCookie('refreshToken', { path: '/api/auth' });
     res.json({ success: true, message: 'Logged out from all devices' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
