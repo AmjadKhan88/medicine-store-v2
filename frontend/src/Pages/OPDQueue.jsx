@@ -328,34 +328,6 @@ export default function OPDQueue() {
 
   useEffect(() => { fetchQueue(); fetchStats(); }, [fetchQueue, fetchStats]);
 
-  // Real-time socket updates
-  // useEffect(() => {
-  //   if (!socket) return;
-  //   const handleUpdate = (data) => {
-  //     setQueue(prev => prev ? { ...prev, ...data } : data);
-  //   };
-  //   const handleCalled = (data) => {
-  //     toast(`📢 Calling ${data.displayToken} — ${data.patientName}`, { duration: 4000 });
-  //     // Play beep
-  //     try {
-  //       const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  //       [600, 800].forEach((freq, i) => {
-  //         const o = ctx.createOscillator();
-  //         o.connect(ctx.destination);
-  //         o.frequency.value = freq;
-  //         o.start(ctx.currentTime + i * 0.15);
-  //         o.stop(ctx.currentTime + i * 0.15 + 0.1);
-  //       });
-  //     } catch {}
-  //   };
-  //   socket.on('opd:update', handleUpdate);
-  //   socket.on('opd:called', handleCalled);
-  //   return () => {
-  //     socket.off('opd:update', handleUpdate);
-  //     socket.off('opd:called', handleCalled);
-  //   };
-  // }, [socket]);
-
 
 // Real-time socket updates using the safe hook
 useSocketEvent('opd:update', (data) => {

@@ -67,10 +67,8 @@ const RAGAdmin            = lazy(() => import('./Pages/RAGAdmin'));
 const StoreKnowledge      = lazy(() => import('./Pages/StoreKnowledge'));
 
 const PrivateRoute = ({ children }) => {
-  const { user, loading} = useAuth();
-  if (loading) return (
-    <EliteHMSLoader />
-  );
+  const { user} = useAuth();
+
   return user ? children : <Navigate to="/login" />;
 };
 
