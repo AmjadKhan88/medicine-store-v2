@@ -9,13 +9,16 @@ const bcrypt    = require('bcryptjs');
 
 /* ── Token generators ── */
 const generateAccessToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
 /* ── Keep old name as alias so nothing else breaks ── */
 const generateToken = generateAccessToken;
 
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET
+  || (process.env.JWT_SECRET + '_refresh_fallback');
+
 const generateRefreshToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '30d' });
+  jwt.sign({ id }, REFRESH_SECRET, { expiresIn: '30d' });
 
 const generateRandomToken = () => crypto.randomBytes(32).toString('hex');
 
@@ -31,8 +34,8 @@ const setRefreshCookie = (res, token) => {
     httpOnly: true,
     secure:   process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge:   30 * 24 * 60 * 60 * 1000,  // 30 days
-    path:     '/api/auth',                 // only sent to auth routes
+    maxAge:   30 * 24 * 60 * 60 * 1000,
+    path:     '/',   // send on ALL requests — more compatible with proxies
   });
 };
 
@@ -141,8 +144,9 @@ exports.verifyEmail = async (req, res) => {
     // Send welcome email
     try { await emailService.sendWelcomeEmail({ email: user.email, name: user.name }); } catch { }
 
-    const jwtToken = generateToken(user._id);
-    res.json({ success: true, token: jwtToken, user, message: 'Email verified! Welcome to EliteHMS.' });
+    /* Issue full token pair (access + refresh cookie) same as normal login */
+    const { accessToken } = await issueTokens(res, user, req.headers['user-agent']?.slice(0, 60) || 'email-verify');
+    res.json({ success: true, token: accessToken, user, message: 'Email verified! Welcome to EliteHMS.' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -381,9 +385,9 @@ exports.refreshToken = async (req, res) => {
     /* ── Verify JWT ── */
     let decoded;
     try {
-      decoded = jwt.verify(rawToken, process.env.JWT_REFRESH_SECRET);
+      decoded = jwt.verify(rawToken, REFRESH_SECRET);
     } catch (err) {
-      res.clearCookie('refreshToken', { path: '/api/auth' });
+      res.clearCookie('refreshToken', { path: '/' });
       return res.status(401).json({ success: false, message: 'Refresh token expired. Please login again.', code: 'REFRESH_EXPIRED' });
     }
 
@@ -396,7 +400,7 @@ exports.refreshToken = async (req, res) => {
 
     const stored = user.refreshTokens.find(t => t.token === hashed && t.expiresAt > new Date());
     if (!stored) {
-      res.clearCookie('refreshToken', { path: '/api/auth' });
+      res.clearCookie('refreshToken', { path: '/' });
       return res.status(401).json({ success: false, message: 'Session expired. Please login again.', code: 'SESSION_REVOKED' });
     }
 
@@ -421,7 +425,7 @@ exports.logout = async (req, res) => {
         $pull: { refreshTokens: { token: hashed } },
       });
     }
-    res.clearCookie('refreshToken', { path: '/api/auth' });
+    res.clearCookie('refreshToken', { path: '/' });
     res.json({ success: true, message: 'Logged out successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -432,7 +436,7 @@ exports.logout = async (req, res) => {
 exports.logoutAll = async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.user._id, { $set: { refreshTokens: [] } });
-    res.clearCookie('refreshToken', { path: '/api/auth' });
+    res.clearCookie('refreshToken', { path: '/' });
     res.json({ success: true, message: 'Logged out from all devices' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

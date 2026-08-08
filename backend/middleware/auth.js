@@ -19,8 +19,17 @@ const protect = async (req, res, next) => {
     // Attach storeId to every request for tenant filtering
     req.storeId = req.user.storeId;
     next();
-  } catch {
-    res.status(401).json({ success: false, message: 'Token invalid' });
+  } catch (err) {
+    /* JWT errors (TokenExpiredError, JsonWebTokenError) → 401 */
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ success: false, message: 'Token expired', code: 'TOKEN_EXPIRED' });
+    }
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ success: false, message: 'Token invalid', code: 'TOKEN_INVALID' });
+    }
+    /* Other errors (DB error etc.) → 500, NOT 401 so interceptor doesn't log user out */
+    console.error('[Auth middleware] Unexpected error:', err.message);
+    res.status(500).json({ success: false, message: 'Server error during authentication' });
   }
 };
 
