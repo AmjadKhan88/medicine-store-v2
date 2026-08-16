@@ -5,25 +5,38 @@ import API from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
 export default function VerifyEmail() {
-  const [params]   = useSearchParams();
-  const navigate   = useNavigate();
-  const token      = params.get('token');
-  const { login }  = useAuth();
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const token = params.get('token');
+  const { login } = useAuth();
 
-  const [status, setStatus]   = useState('verifying'); // verifying | success | error
+  const [status, setStatus] = useState('verifying'); // verifying | success | error
   const [message, setMessage] = useState('');
   const [resendEmail, setResendEmail] = useState('');
-  const [resending, setResending]     = useState(false);
-  const [resent, setResent]           = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   useEffect(() => {
     if (!token) { setStatus('error'); setMessage('No verification token found in link.'); return; }
 
     API.post('/auth/verify-email', { token })
       .then(({ data }) => {
-        login(data.token, data.user); // sets localStorage + React state in one call
+        // Safety check: prevent crash if user object is missing
+        if (!data?.user) {
+          setStatus('error');
+          setMessage('Invalid server response.');
+          return;
+        }
+
+        login(data.token, data.user);
         setStatus('success');
-        setTimeout(() => navigate('/onboarding'), 2500); // new users go to onboarding
+
+        // Only Admins go to onboarding to configure hospital/store settings.
+        // All other staff members go directly to the dashboard.
+        const destination = data.user.role === 'admin' ? '/onboarding' : '/dashboard';
+
+        setTimeout(() => navigate(destination), 2500);
+
       })
       .catch(err => {
         setStatus('error');

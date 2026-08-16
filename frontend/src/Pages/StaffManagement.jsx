@@ -9,27 +9,27 @@ import { usePermissions } from '../hooks/usePermissions';
 import ShortLoader from '../Components/ShortLoader';
 
 const ROLE_BADGE = {
-  admin:       { cls: 'badge-danger',  label: 'Admin / Owner' },
-  doctor:      { cls: 'badge-accent',  label: 'Doctor'        },
-  pharmacist:  { cls: 'badge-success', label: 'Pharmacist'    },
+  admin: { cls: 'badge-danger', label: 'Admin / Owner' },
+  doctor: { cls: 'badge-accent', label: 'Doctor' },
+  pharmacist: { cls: 'badge-success', label: 'Pharmacist' },
 };
 
 const ROLE_PERMS = {
-  admin:      ['Full access', 'Manage staff', 'Delete records', 'View reports', 'Store settings'],
-  doctor:     ['Add/edit medicines', 'Add/edit patients', 'Create bills', 'View reports'],
+  admin: ['Full access', 'Manage staff', 'Delete records', 'View reports', 'Store settings'],
+  doctor: ['Add/edit medicines', 'Add/edit patients', 'Create bills', 'View reports'],
   pharmacist: ['Create bills only', 'View medicines', 'View patients'],
 };
 
 export default function StaffManagement() {
   const { isAdmin } = usePermissions();
-  const [staff, setStaff]           = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [addModal, setAddModal]     = useState(false);
-  const [editModal, setEditModal]   = useState(null);
-  const [pwModal, setPwModal]       = useState(null);
-  const [newPw, setNewPw]           = useState('');
-  const [saving, setSaving]         = useState(false);
-  const [form, setForm]             = useState({ name: '', email: '', password: '', role: 'doctor', phone: '' });
+  const [staff, setStaff] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [addModal, setAddModal] = useState(false);
+  const [editModal, setEditModal] = useState(null);
+  const [pwModal, setPwModal] = useState(null);
+  const [newPw, setNewPw] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'doctor', phone: '' });
 
   if (!isAdmin) return (
     <div className="empty-state" style={{ paddingTop: 80 }}>
@@ -45,7 +45,7 @@ export default function StaffManagement() {
       const { data } = await API.get('/staff');
       setStaff(data.staff);
     } catch (error) {
-       toast.error(error?.response?.data?.message || 'Failed to load staff'); 
+      toast.error(error?.response?.data?.message || 'Failed to load staff');
     } finally { setLoading(false); }
   };
 
@@ -134,7 +134,7 @@ export default function StaffManagement() {
       <div className="card">
         {loading ? (
           <div className="flex-center" style={{ height: 200 }}>
-            <ShortLoader/>
+            <ShortLoader />
           </div>
         ) : staff.length === 0 ? (
           <div className="empty-state">
@@ -237,8 +237,16 @@ export default function StaffManagement() {
                 <div className="form-group">
                   <label className="form-label required">Role</label>
                   <select className="form-control" value={form.role} onChange={fld('role')}>
-                    <option value="doctor">Doctor</option>
-                    <option value="pharmacist">Pharmacist</option>
+                    <option value="">Select Role</option>
+                    <optgroup label="Clinical">
+                      <option value="doctor">🩺 Doctor</option>
+                      <option value="nurse">👩‍⚕️ Nurse</option>
+                      <option value="lab_technician">🔬 Lab Technician</option>
+                    </optgroup>
+                    <optgroup label="Administrative">
+                      <option value="pharmacist">💊 Pharmacist</option>
+                      <option value="receptionist">🎧 Receptionist</option>
+                    </optgroup>
                   </select>
                 </div>
               </div>

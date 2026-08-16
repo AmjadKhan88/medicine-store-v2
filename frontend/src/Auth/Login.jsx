@@ -31,6 +31,9 @@ export default function Login() {
         navigate('/app/dashboard');
       }
     } catch (err) {
+      if (err?.response?.data?.code === "EMAIL_NOT_VERIFIED"){
+        setUnverified(err?.response?.data?.email)
+      }
       setErrors({ general: err.response?.data?.message || 'Login failed' });
     } finally { setLoading(false); }
   };

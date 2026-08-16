@@ -142,7 +142,7 @@ exports.verifyEmail = async (req, res) => {
     await user.save();
 
     // Send welcome email
-    try { await emailService.sendWelcomeEmail({ email: user.email, name: user.name }); } catch { }
+    try { await emailService.sendWelcomeEmail({ email: user.email, name: user.name,role:user.role }); } catch { }
 
     /* Issue full token pair (access + refresh cookie) same as normal login */
     const { accessToken } = await issueTokens(res, user, req.headers['user-agent']?.slice(0, 60) || 'email-verify');
@@ -167,7 +167,7 @@ exports.resendVerification = async (req, res) => {
     user.emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await user.save();
 
-    await emailService.sendVerificationEmail({ email, name: user.name, token });
+    await emailService.sendVerificationEmail({ email, name: user.name, token, role:user.role });
     res.json({ success: true, message: 'Verification email sent' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

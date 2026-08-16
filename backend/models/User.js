@@ -9,8 +9,15 @@ const userSchema = new mongoose.Schema({
   // Role within their store
   role: {
     type: String,
-    enum: ['admin', 'doctor', 'pharmacist'],
-    default: 'admin', // first user who registers is always admin/owner
+    enum: [
+      'admin',           // store owner — full access
+      'doctor',          // clinical access — EMR, orders, IPD, diagnosis
+      'pharmacist',      // pharmacy access — medicines, billing, prescriptions
+      'nurse',           // nursing access — MAR, vitals, nurse station, orders
+      'receptionist',    // front desk — patients, appointments, billing view
+      'lab_technician',  // lab only — lab tests
+    ],
+    default: 'admin',
   },
 
   // Every user belongs to exactly one store (tenant)
@@ -36,24 +43,24 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, trim: true },
   isActive: { type: Boolean, default: true },
 
-// Invite system
-  inviteToken:  { type: String },
-  inviteExpires:{ type: Date },
+  // Invite system
+  inviteToken: { type: String },
+  inviteExpires: { type: Date },
 
   /* ── Refresh tokens ── */
   refreshTokens: [{
-    token:     { type: String, required: true },   // hashed
-    expiresAt: { type: Date,   required: true },
-    device:    { type: String, default: 'unknown' }, // user-agent snippet
-    createdAt: { type: Date,   default: Date.now  },
+    token: { type: String, required: true },   // hashed
+    expiresAt: { type: Date, required: true },
+    device: { type: String, default: 'unknown' }, // user-agent snippet
+    createdAt: { type: Date, default: Date.now },
   }],
 
   /* ── 2FA ── */
-  twoFactorEnabled:     { type: Boolean, default: false },
-  twoFactorSecret:      { type: String,  select: false  },  // TOTP secret (base32)
-  twoFactorSetupPending:{ type: Boolean, default: false  },  // true until first verify
-  twoFactorRecoveryCodes:[{ type: String }],                 // hashed recovery codes
-  twoFactorForced:      { type: Boolean, default: false  },  // admin forces 2FA on account
+  twoFactorEnabled: { type: Boolean, default: false },
+  twoFactorSecret: { type: String, select: false },  // TOTP secret (base32)
+  twoFactorSetupPending: { type: Boolean, default: false },  // true until first verify
+  twoFactorRecoveryCodes: [{ type: String }],                 // hashed recovery codes
+  twoFactorForced: { type: Boolean, default: false },  // admin forces 2FA on account
 
 }, { timestamps: true });
 

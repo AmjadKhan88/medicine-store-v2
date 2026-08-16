@@ -65,7 +65,7 @@ function baseEmail({ title, preview, body }) {
 }
 
 /* ── Send verification email ── */
-exports.sendVerificationEmail = async ({ email, name, token }) => {
+exports.sendVerificationEmail = async ({ email, name, token, role="admin" }) => {
   const link = `${BASE_URL}/verify-email?token=${token}`;
 
   const body = `
@@ -74,7 +74,7 @@ exports.sendVerificationEmail = async ({ email, name, token }) => {
     </h2>
     <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 24px;">
       You're almost ready to start managing your pharmacy professionally.
-      Please verify your email address to activate your account and start your <strong>14-day free trial</strong>.
+      Please verify your email address to activate your account ${role === "admin" ? "and start your <strong>14-day free trial</strong>" : ""}.
     </p>
 
     <div style="text-align:center;margin:32px 0;">
@@ -110,13 +110,13 @@ exports.sendVerificationEmail = async ({ email, name, token }) => {
 };
 
 /* ── Resend verification ── */
-exports.sendWelcomeEmail = async ({ email, name }) => {
+exports.sendWelcomeEmail = async ({ email, name,role="admin" }) => {
   const body = `
     <h2 style="font-size:22px;font-weight:800;color:#0f172a;margin:0 0 8px;">
       Your account is verified! 🎉
     </h2>
     <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 16px;">
-      Welcome aboard, <strong>${name}</strong>. Your 14-day free trial has started.
+      Welcome aboard, <strong>${name}</strong>. ${role === "admin" ? "Your 14-day free trial has started":""}.
     </p>
     <div style="text-align:center;margin:28px 0;">
       <a href="${BASE_URL}" style="background:${BRAND_COLOR};color:#fff;text-decoration:none;padding:13px 32px;border-radius:10px;font-weight:700;font-size:15px;display:inline-block;">

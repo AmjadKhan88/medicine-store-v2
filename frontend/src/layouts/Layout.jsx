@@ -128,7 +128,7 @@ const ICON_MAP = {
 ══════════════════════════════════════════ */
 function LayoutInner() {
   const { user, logout } = useAuth();
-  const { can } = usePermissions();
+  // const { can } = usePermissions();
   const { isTrial, daysLeft } = useSubscription();
   const { counts } = useNotifications();
   const { theme, setSpecificTheme } = useTheme();
@@ -147,13 +147,121 @@ function LayoutInner() {
   ];
 
   /* ── Filter nav items: permission + user visibility preference ── */
-  const visibleNavItems = ALL_NAV_ITEMS.filter(item => isVisible(item.to));
+  // const visibleNavItems = ALL_NAV_ITEMS.filter(item => isVisible(item.to));
+ const { can } = usePermissions();
+
+const visibleNavItems = ALL_NAV_ITEMS.filter(item => {
+  // Check user's manual toggle preference first
+  if (!isVisible(item.to)) return false;
+
+  // Then check role-based permission
+  switch (item.to) {
+
+    /* ── Always visible to all logged-in roles ── */
+    case '/app':
+    case '/app/subscription':
+    case '/app/patients':
+      return true;
+
+    /* ── Pharmacy ── */
+    case '/app/medicines':
+    case '/app/suppliers':
+      return can.manageInventory;
+
+    case '/app/purchase-orders':
+      return can.purchaseOrders || can.manageInventory;
+
+    case '/app/billing':
+      return can.bill;
+
+    case '/app/prescriptions':
+      return can.bill || can.viewClinical; // pharmacist + doctor + admin
+
+    case '/app/appointments':
+      return can.manageOPD || can.viewClinical; // receptionist + doctor + admin
+
+    /* ── Lab ── */
+    case '/app/lab-tests':
+      return can.labTests;
+
+    /* ── Hospital clinical ── */
+    case '/app/nurse':
+      return can.nurseStation;
+
+    case '/app/opd':
+      return can.manageOPD;
+
+    case '/app/ipd':
+    case '/app/wards':
+    case '/app/ot':
+    case '/app/blood-bank':
+      return can.manageIPD;
+
+    case '/app/radiology':
+    case '/app/doctor-orders':
+    case '/app/emr':
+    case '/app/vitals':
+      return can.viewClinical;
+
+    /* ── Finance ── */
+    case '/app/accounting':
+    case '/app/payroll':
+    case '/app/insurance':
+      return can.viewFinance;
+
+    /* ── Communication ── */
+    case '/app/broadcast':
+      return can.broadcast;
+
+    case '/app/feedback':
+    case '/app/booking':
+      return can.manageOPD || can.viewFinance; // admin + receptionist
+
+    /* ── AI & Tools ── */
+    case '/app/ai-assistant':
+      return can.accessAI || can.rag; // doctor + admin (+ store knowledge users)
+
+    case '/app/diagnosis':
+    case '/app/demand':
+    case '/app/prescription-ocr':
+      return can.accessAI;
+
+    case '/app/patient-matching':
+      return can.manageStaff; // admin only
+
+    case '/app/store-knowledge':
+      return can.rag;
+
+    case '/app/drap':
+      return can.drap;
+
+    /* ── Management ── */
+    case '/app/staff':
+      return can.manageStaff;
+
+    case '/app/reports':
+      return can.viewReports;
+
+    case '/app/audit-log':
+      return can.viewAuditLog;
+
+    case '/app/settings':
+    case '/app/backup':
+    case '/app/invoice-settings':
+      return can.settings; // only admin has settings:true
+
+    /* ── Default: hide unknown routes from non-admins ── */
+    default:
+      return can.manageStaff; // admin sees unknown routes, others don't
+  }
+});
 
   const visibleAlertItems = ALL_ALERT_ITEMS.filter(item => {
     // Check permission
     if (item.permission && !can[item.permission]) return false;
     // Super admin only
     if (item.to === '/app/super-admin' && user?.email !== import.meta.env.VITE_SUPER_ADMIN_EMAIL) return false;
+    if (item.to === '/app/rag-admin' && user?.email !== import.meta.env.VITE_SUPER_ADMIN_EMAIL) return false;
     // Check user visibility preference
     return isVisible(item.to);
   });

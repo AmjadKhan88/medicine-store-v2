@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+    // const API = await import('../utils/api');
 
 const AuthContext = createContext(null);
 
@@ -142,8 +143,7 @@ export const AuthProvider = ({ children }) => {
 
   /* ── Auth methods ── */
   const login = async (email, password) => {
-    const { default: API } = await import('../utils/api');
-    const { data } = await API.post('/auth/login', { email, password });
+    const { data } = await axios.post(BACKEND+'/api/auth/login', { email, password });
     if (data.requires2FA) return data;
     localStorage.setItem('token', data.token);
     localStorage.setItem('medistore_user', JSON.stringify(data.user));
@@ -174,8 +174,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (form) => {
-    const { default: API } = await import('../utils/api');
-    const { data } = await API.post('/auth/register', form);
+    const { data } = await axios.post(BACKEND+'/api/auth/register', form);
     return data;
   };
 

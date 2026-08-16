@@ -80,6 +80,6 @@ export default defineConfig({
     }),
   ],
   server: {
-    proxy: { '/api': { target: 'http://localhost:5000', changeOrigin: true } },
+    proxy: { '/api': { target: 'https://medicine-store-v2-server.onrender.com', changeOrigin: true } },
   },
 });
